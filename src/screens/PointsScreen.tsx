@@ -451,8 +451,7 @@ export default function PointsScreen() {
         {/* Header */}
         <div className="bg-[#0d6e5a] dark:bg-[#0a5747] px-5 pt-14 pb-12">
           <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Singapore Airlines</p>
-          <h1 className="text-white text-2xl font-bold mb-0.5">KrisFlyer Miles</h1>
-          <p className="text-white/60 text-sm">Based on your monthly spend</p>
+          <h1 className="text-white text-2xl font-bold">KrisFlyer Miles</h1>
         </div>
 
         <div className="px-4 space-y-5 -mt-6">
