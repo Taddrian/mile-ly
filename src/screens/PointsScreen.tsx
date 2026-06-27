@@ -1,6 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+
+const CURRENCIES = [
+  { code: 'USD', flag: '🇺🇸' },
+  { code: 'MYR', flag: '🇲🇾' },
+  { code: 'JPY', flag: '🇯🇵' },
+  { code: 'AUD', flag: '🇦🇺' },
+  { code: 'GBP', flag: '🇬🇧' },
+];
 import { useApp } from '@/context/AppContext';
 import { CreditCard, MilesProgram } from '@/types';
 
@@ -102,6 +110,25 @@ function RedemptionRow({ destination, flag, miles, cash, totalMiles }: { destina
 export default function PointsScreen() {
   const { cards } = useApp();
   const [cpp, setCpp] = useState(1.5); // cents per mile (SGD)
+  const [rates, setRates] = useState<Record<string, number> | null>(null);
+  const [ratesLoading, setRatesLoading] = useState(true);
+  const [ratesError, setRatesError] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
+  const fetchRates = useCallback(() => {
+    setRatesLoading(true);
+    setRatesError(false);
+    fetch('https://open.er-api.com/v6/latest/SGD')
+      .then(r => r.json())
+      .then(data => {
+        setRates(data.rates);
+        setLastUpdated(new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' }));
+      })
+      .catch(() => setRatesError(true))
+      .finally(() => setRatesLoading(false));
+  }, []);
+
+  useEffect(() => { fetchRates(); }, [fetchRates]);
 
   const { totalMiles, byProgram } = useMemo(() => {
     let total = 0;
@@ -174,6 +201,65 @@ export default function PointsScreen() {
             <p className="text-center text-[10px] text-zinc-300 dark:text-zinc-600 mt-1">
               KrisFlyer economy ≈ 1.5¢ · Business ≈ 3.0¢
             </p>
+
+            {/* Live exchange rates */}
+            <div className="mt-4 border-t border-zinc-200 dark:border-zinc-700 pt-4">
+              <div className="flex justify-between items-center mb-3">
+                <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Live Conversion</p>
+                {lastUpdated && !ratesError && (
+                  <p className="text-[10px] text-zinc-300 dark:text-zinc-600">Updated {lastUpdated}</p>
+                )}
+              </div>
+
+              {ratesLoading && (
+                <div className="space-y-2">
+                  {CURRENCIES.map(c => (
+                    <div key={c.code} className="flex justify-between items-center animate-pulse">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{c.flag}</span>
+                        <div className="h-3 w-8 bg-zinc-200 dark:bg-zinc-700 rounded" />
+                      </div>
+                      <div className="h-3 w-16 bg-zinc-200 dark:bg-zinc-700 rounded" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {ratesError && (
+                <div className="text-center py-2">
+                  <p className="text-xs text-zinc-400">Could not load live rates</p>
+                  <button
+                    onClick={fetchRates}
+                    className="text-xs font-semibold text-[#0d6e5a] mt-1"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {!ratesLoading && !ratesError && rates && (
+                <div className="space-y-2.5">
+                  {CURRENCIES.map(({ code, flag }) => {
+                    const rate = rates[code];
+                    const converted = estimatedValue * (rate ?? 1);
+                    const isJpy = code === 'JPY';
+                    return (
+                      <div key={code} className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{flag}</span>
+                          <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{code}</span>
+                        </div>
+                        <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                          {isJpy
+                            ? `¥${Math.round(converted).toLocaleString()}`
+                            : converted.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
