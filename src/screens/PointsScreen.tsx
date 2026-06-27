@@ -110,6 +110,7 @@ function RedemptionRow({ destination, flag, miles, cash, totalMiles }: { destina
 export default function PointsScreen() {
   const { cards } = useApp();
   const [cpp, setCpp] = useState(1.5); // cents per mile (SGD)
+  const [manualMiles, setManualMiles] = useState('');
   const [rates, setRates] = useState<Record<string, number> | null>(null);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(false);
@@ -142,7 +143,8 @@ export default function PointsScreen() {
     return { totalMiles: total, byProgram: prog };
   }, [cards]);
 
-  const estimatedValue = (totalMiles * cpp) / 100;
+  const displayMiles = manualMiles !== '' ? parseInt(manualMiles) || 0 : totalMiles;
+  const estimatedValue = (displayMiles * cpp) / 100;
 
   const milesCards = cards.filter(c => c.milesProgram === 'KrisFlyer');
 
@@ -158,21 +160,16 @@ export default function PointsScreen() {
       <div className="px-4 space-y-5 -mt-6">
         {/* Total miles card */}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
-          <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Total Miles Earned</p>
-          <p className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-1">{fmt(totalMiles)}</p>
-          <p className="text-sm text-zinc-400 mb-4">KrisFlyer miles this month</p>
-
-          {/* By program */}
-          {Object.entries(byProgram).length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-5">
-              {Object.entries(byProgram).map(([prog, miles]) => (
-                <div key={prog} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${PROGRAM_LOGO_BG[prog as MilesProgram]}`}>
-                  <span className="text-white text-xs font-bold">{prog}</span>
-                  <span className="text-white/80 text-xs">{fmt(miles)} mi</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">KrisFlyer Miles Balance</p>
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder={fmt(totalMiles)}
+            value={manualMiles}
+            onChange={(e) => setManualMiles(e.target.value)}
+            className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 bg-transparent w-full outline-none border-b-2 border-zinc-200 dark:border-zinc-700 focus:border-[#0d6e5a] pb-1 mb-1 transition-colors"
+          />
+          <p className="text-sm text-zinc-400 mb-5">Enter your actual KrisFlyer balance</p>
 
           {/* Value estimator */}
           <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4">
@@ -280,13 +277,13 @@ export default function PointsScreen() {
             <p className="text-xs text-zinc-400 mt-0.5">KrisFlyer Economy Saver · one-way from SIN</p>
           </div>
           {REDEMPTIONS.map((r) => (
-            <RedemptionRow key={r.destination} {...r} totalMiles={totalMiles} />
+            <RedemptionRow key={r.destination} {...r} totalMiles={displayMiles} />
           ))}
         </div>
 
         <div className="text-center pb-4">
           <p className="text-[10px] text-zinc-300 dark:text-zinc-600">
-            Miles calculated on current month spend · Rates are approximate
+            Award rates are approximate · Exchange rates updated live
           </p>
         </div>
       </div>
