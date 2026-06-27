@@ -26,16 +26,63 @@ const PROGRAM_LOGO_BG: Record<MilesProgram, string> = {
   Other: 'bg-zinc-500',
 };
 
-// KrisFlyer Saver award chart (one-way Economy, approximate)
-const REDEMPTIONS = [
-  { destination: 'Kuala Lumpur', flag: '🇲🇾', miles: 3750, cash: 120 },
-  { destination: 'Bangkok', flag: '🇹🇭', miles: 8750, cash: 280 },
-  { destination: 'Hong Kong', flag: '🇭🇰', miles: 10000, cash: 350 },
-  { destination: 'Tokyo', flag: '🇯🇵', miles: 17500, cash: 600 },
-  { destination: 'Sydney', flag: '🇦🇺', miles: 22500, cash: 750 },
-  { destination: 'London', flag: '🇬🇧', miles: 67500, cash: 1800 },
-  { destination: 'New York', flag: '🇺🇸', miles: 77500, cash: 2200 },
+// KrisFlyer award chart — one-way from SIN, approximate
+// null = not available on this route
+type AwardRates = { saver: number; advantage: number; cash: number } | null;
+interface Redemption {
+  destination: string;
+  flag: string;
+  economy: AwardRates;
+  business: AwardRates;
+  first: AwardRates;
+}
+
+const REDEMPTIONS: Redemption[] = [
+  {
+    destination: 'Kuala Lumpur', flag: '🇲🇾',
+    economy:  { saver: 3750,   advantage: 5500,   cash: 120 },
+    business: { saver: 12500,  advantage: 18750,  cash: 450 },
+    first:    null,
+  },
+  {
+    destination: 'Bangkok', flag: '🇹🇭',
+    economy:  { saver: 8750,   advantage: 13125,  cash: 280 },
+    business: { saver: 19000,  advantage: 28500,  cash: 850 },
+    first:    null,
+  },
+  {
+    destination: 'Hong Kong', flag: '🇭🇰',
+    economy:  { saver: 10000,  advantage: 15000,  cash: 350 },
+    business: { saver: 30000,  advantage: 45000,  cash: 1200 },
+    first:    null,
+  },
+  {
+    destination: 'Tokyo', flag: '🇯🇵',
+    economy:  { saver: 17500,  advantage: 26250,  cash: 600 },
+    business: { saver: 51000,  advantage: 76500,  cash: 2200 },
+    first:    { saver: 85500,  advantage: 128250, cash: 4500 },
+  },
+  {
+    destination: 'Sydney', flag: '🇦🇺',
+    economy:  { saver: 22500,  advantage: 33750,  cash: 750 },
+    business: { saver: 67500,  advantage: 101250, cash: 3000 },
+    first:    null,
+  },
+  {
+    destination: 'London', flag: '🇬🇧',
+    economy:  { saver: 67500,  advantage: 101250, cash: 1800 },
+    business: { saver: 132750, advantage: 199125, cash: 5500 },
+    first:    { saver: 204750, advantage: 307125, cash: 11000 },
+  },
+  {
+    destination: 'New York', flag: '🇺🇸',
+    economy:  { saver: 77500,  advantage: 116250, cash: 2200 },
+    business: { saver: 152500, advantage: 228750, cash: 6500 },
+    first:    { saver: 228750, advantage: 343125, cash: 13000 },
+  },
 ];
+
+type CabinClass = 'economy' | 'business' | 'first';
 
 function fmt(n: number) {
   return Math.round(n).toLocaleString('en-SG');
@@ -73,36 +120,48 @@ function CardMilesRow({ card }: { card: CreditCard }) {
   );
 }
 
-function RedemptionRow({ destination, flag, miles, cash, totalMiles }: { destination: string; flag: string; miles: number; cash: number; totalMiles: number }) {
-  const canAfford = totalMiles >= miles;
-  const pct = Math.min((totalMiles / miles) * 100, 100);
+function RedemptionRow({ destination, flag, rates, cabin, totalMiles }: {
+  destination: string; flag: string;
+  rates: NonNullable<AwardRates>;
+  cabin: CabinClass;
+  totalMiles: number;
+}) {
+  const cabinLabel = cabin === 'economy' ? 'Economy' : cabin === 'business' ? 'Business' : 'First';
 
   return (
-    <div className={`py-3.5 border-b border-zinc-100 dark:border-zinc-800 last:border-0 ${!canAfford ? 'opacity-60' : ''}`}>
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{flag}</span>
-          <div>
-            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{destination}</p>
-            <p className="text-xs text-zinc-400">Economy · SQ Saver award</p>
+    <div className="py-3.5 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+      <div className="flex items-center gap-2 mb-2.5">
+        <span className="text-xl">{flag}</span>
+        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{destination}</p>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 ml-auto">{cabinLabel}</span>
+      </div>
+      {(['saver', 'advantage'] as const).map(type => {
+        const miles = rates[type];
+        const canAfford = totalMiles >= miles;
+        const pct = Math.min((totalMiles / miles) * 100, 100);
+        return (
+          <div key={type} className={`mb-2 ${!canAfford ? 'opacity-55' : ''}`}>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 capitalize">{type}</span>
+              <div className="flex items-center gap-2">
+                {!canAfford && (
+                  <span className="text-[10px] text-zinc-400">{fmt(miles - Math.floor(totalMiles))} to go</span>
+                )}
+                <span className={`text-xs font-bold ${canAfford ? 'text-[#0d6e5a]' : 'text-zinc-400'}`}>
+                  {fmt(miles)} mi
+                </span>
+              </div>
+            </div>
+            <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${canAfford ? 'bg-[#0d6e5a]' : 'bg-zinc-300 dark:bg-zinc-600'}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
           </div>
-        </div>
-        <div className="text-right shrink-0">
-          <p className={`text-sm font-bold ${canAfford ? 'text-[#0d6e5a]' : 'text-zinc-500 dark:text-zinc-400'}`}>
-            {fmt(miles)} mi
-          </p>
-          <p className="text-xs text-zinc-400">≈ SGD {cash}</p>
-        </div>
-      </div>
-      <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${canAfford ? 'bg-[#0d6e5a]' : 'bg-zinc-300 dark:bg-zinc-600'}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      {!canAfford && (
-        <p className="text-xs text-zinc-400 mt-1">{fmt(miles - Math.floor(totalMiles))} miles to go</p>
-      )}
+        );
+      })}
+      <p className="text-[10px] text-zinc-400 mt-1">≈ SGD {rates.cash} cash fare</p>
     </div>
   );
 }
@@ -111,6 +170,7 @@ export default function PointsScreen() {
   const { cards } = useApp();
   const [cpp, setCpp] = useState(1.5); // cents per mile (SGD)
   const [manualMiles, setManualMiles] = useState('');
+  const [selectedCabin, setSelectedCabin] = useState<CabinClass>('economy');
   const [rates, setRates] = useState<Record<string, number> | null>(null);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(false);
@@ -272,12 +332,35 @@ export default function PointsScreen() {
 
         {/* Redemption ideas */}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
-          <div className="pt-4 pb-1">
-            <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">What Can You Redeem?</p>
-            <p className="text-xs text-zinc-400 mt-0.5">KrisFlyer Economy Saver · one-way from SIN</p>
+          <div className="pt-4 pb-3">
+            <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">What Can You Redeem?</p>
+            <p className="text-[10px] text-zinc-400 mb-3">One-way from SIN · Saver &amp; Advantage awards</p>
+            {/* Cabin class selector */}
+            <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-xl p-1 gap-1">
+              {(['economy', 'business', 'first'] as CabinClass[]).map(cabin => (
+                <button
+                  key={cabin}
+                  onClick={() => setSelectedCabin(cabin)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
+                    selectedCabin === cabin
+                      ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                      : 'text-zinc-400 dark:text-zinc-500'
+                  }`}
+                >
+                  {cabin}
+                </button>
+              ))}
+            </div>
           </div>
-          {REDEMPTIONS.map((r) => (
-            <RedemptionRow key={r.destination} {...r} totalMiles={displayMiles} />
+          {REDEMPTIONS.filter(r => r[selectedCabin] !== null).map((r) => (
+            <RedemptionRow
+              key={r.destination}
+              destination={r.destination}
+              flag={r.flag}
+              rates={r[selectedCabin]!}
+              cabin={selectedCabin}
+              totalMiles={displayMiles}
+            />
           ))}
         </div>
 
