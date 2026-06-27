@@ -97,6 +97,65 @@ const DEFAULT_PICKS = ['Bangkok', 'Tokyo', 'Sydney', 'London', 'New York'];
 const MAX_PICKS = 5;
 const STORAGE_KEY = 'milely_destinations';
 
+const DEST_COORDS: Record<string, { lat: number; lng: number }> = {
+  'Kuala Lumpur':  { lat: 3.139,   lng: 101.687  },
+  'Kota Kinabalu': { lat: 5.979,   lng: 116.073  },
+  'Penang':        { lat: 5.413,   lng: 100.329  },
+  'Brunei':        { lat: 4.903,   lng: 114.940  },
+  'Bangkok':       { lat: 13.756,  lng: 100.502  },
+  'Jakarta':       { lat: -6.208,  lng: 106.846  },
+  'Bali':          { lat: -8.409,  lng: 115.189  },
+  'Manila':        { lat: 14.599,  lng: 120.984  },
+  'Ho Chi Minh':   { lat: 10.823,  lng: 106.630  },
+  'Hanoi':         { lat: 21.028,  lng: 105.804  },
+  'Yangon':        { lat: 16.871,  lng: 96.198   },
+  'Phnom Penh':    { lat: 11.563,  lng: 104.916  },
+  'Hong Kong':     { lat: 22.319,  lng: 114.170  },
+  'Taipei':        { lat: 25.033,  lng: 121.565  },
+  'Tokyo':         { lat: 35.689,  lng: 139.692  },
+  'Osaka':         { lat: 34.694,  lng: 135.502  },
+  'Seoul':         { lat: 37.566,  lng: 126.978  },
+  'Beijing':       { lat: 39.904,  lng: 116.407  },
+  'Shanghai':      { lat: 31.230,  lng: 121.474  },
+  'Mumbai':        { lat: 19.076,  lng: 72.878   },
+  'Delhi':         { lat: 28.614,  lng: 77.209   },
+  'Chennai':       { lat: 13.083,  lng: 80.270   },
+  'Colombo':       { lat: 6.927,   lng: 79.862   },
+  'Sydney':        { lat: -33.869, lng: 151.209  },
+  'Melbourne':     { lat: -37.814, lng: 144.963  },
+  'Brisbane':      { lat: -27.468, lng: 153.028  },
+  'Perth':         { lat: -31.951, lng: 115.861  },
+  'Auckland':      { lat: -36.848, lng: 174.763  },
+  'London':        { lat: 51.507,  lng: -0.128   },
+  'Paris':         { lat: 48.857,  lng: 2.347    },
+  'Amsterdam':     { lat: 52.374,  lng: 4.890    },
+  'Frankfurt':     { lat: 50.111,  lng: 8.682    },
+  'Zurich':        { lat: 47.376,  lng: 8.541    },
+  'Milan':         { lat: 45.465,  lng: 9.186    },
+  'Copenhagen':    { lat: 55.676,  lng: 12.568   },
+  'Manchester':    { lat: 53.479,  lng: -2.245   },
+  'Barcelona':     { lat: 41.385,  lng: 2.173    },
+  'Dubai':         { lat: 25.205,  lng: 55.271   },
+  'Johannesburg':  { lat: -26.205, lng: 28.050   },
+  'New York':      { lat: 40.713,  lng: -74.006  },
+  'Los Angeles':   { lat: 34.052,  lng: -118.244 },
+  'San Francisco': { lat: 37.775,  lng: -122.419 },
+  'Houston':       { lat: 29.760,  lng: -95.370  },
+};
+
+function weatherEmoji(code: number): string {
+  if (code === 0) return '☀️';
+  if (code <= 3) return '🌤️';
+  if (code <= 48) return '🌫️';
+  if (code <= 55) return '🌦️';
+  if (code <= 65) return '🌧️';
+  if (code <= 77) return '❄️';
+  if (code <= 82) return '🌧️';
+  return '⛈️';
+}
+
+interface WeatherData { temp: number; code: number }
+
 interface Escape {
   id: string;
   destination: string;
@@ -192,11 +251,12 @@ function CardMilesRow({ card }: { card: CreditCard }) {
   );
 }
 
-function RedemptionRow({ destination, flag, rates, cabin, totalMiles }: {
+function RedemptionRow({ destination, flag, rates, cabin, totalMiles, weather }: {
   destination: string; flag: string;
   rates: NonNullable<AwardRates>;
   cabin: CabinClass;
   totalMiles: number;
+  weather?: WeatherData | null;
 }) {
   const cabinLabel = cabin === 'economy' ? 'Economy' : cabin === 'business' ? 'Business' : 'First';
   return (
@@ -204,6 +264,11 @@ function RedemptionRow({ destination, flag, rates, cabin, totalMiles }: {
       <div className="flex items-center gap-2 mb-2.5">
         <span className="text-xl">{flag}</span>
         <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{destination}</p>
+        {weather && (
+          <span className="text-[10px] text-zinc-400 ml-1">
+            {weatherEmoji(weather.code)} {Math.round(weather.temp)}°C
+          </span>
+        )}
         <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 ml-auto">{cabinLabel}</span>
       </div>
       {(['saver', 'advantage'] as const).map(type => {
@@ -391,6 +456,9 @@ export default function PointsScreen() {
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [weatherMap, setWeatherMap] = useState<Record<string, WeatherData>>({});
+  const [news, setNews] = useState<{ title: string; link: string; pubDate: string; description: string }[]>([]);
+  const [newsLoading, setNewsLoading] = useState(true);
 
   // Load saved destinations from localStorage
   useEffect(() => {
@@ -419,6 +487,38 @@ export default function PointsScreen() {
   }, []);
 
   useEffect(() => { fetchRates(); }, [fetchRates]);
+
+  // Fetch weather for picked destinations
+  useEffect(() => {
+    const dests = pickedDestinations.filter(d => DEST_COORDS[d]);
+    if (dests.length === 0) return;
+    Promise.all(
+      dests.map(dest => {
+        const { lat, lng } = DEST_COORDS[dest];
+        return fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&temperature_unit=celsius`
+        )
+          .then(r => r.json())
+          .then(data => ({ dest, temp: data.current_weather.temperature as number, code: data.current_weather.weathercode as number }))
+          .catch(() => null);
+      })
+    ).then(results => {
+      const map: Record<string, WeatherData> = {};
+      for (const r of results) {
+        if (r) map[r.dest] = { temp: r.temp, code: r.code };
+      }
+      setWeatherMap(map);
+    });
+  }, [pickedDestinations]);
+
+  // Fetch KrisFlyer news
+  useEffect(() => {
+    fetch('/api/news')
+      .then(r => r.json())
+      .then(data => setNews(data.items ?? []))
+      .catch(() => {})
+      .finally(() => setNewsLoading(false));
+  }, []);
 
   const { totalMiles } = useMemo(() => {
     let total = 0;
@@ -593,8 +693,50 @@ export default function PointsScreen() {
                   rates={r[selectedCabin]!}
                   cabin={selectedCabin}
                   totalMiles={displayMiles}
+                  weather={weatherMap[r.destination] ?? null}
                 />
               ))
+            )}
+          </div>
+
+          {/* KrisFlyer News */}
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
+            <div className="pt-4 pb-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">KrisFlyer News</p>
+                <p className="text-[10px] text-zinc-400 mt-0.5">via MileLion · live</p>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            </div>
+            {newsLoading ? (
+              <div className="space-y-3 pb-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="animate-pulse space-y-1.5">
+                    <div className="h-3 bg-zinc-100 dark:bg-zinc-800 rounded w-3/4" />
+                    <div className="h-2.5 bg-zinc-100 dark:bg-zinc-800 rounded w-full" />
+                  </div>
+                ))}
+              </div>
+            ) : news.length === 0 ? (
+              <p className="text-sm text-zinc-400 text-center py-6">Could not load news</p>
+            ) : (
+              <div className="overflow-y-auto max-h-[260px] pb-3">
+                {news.map((item, i) => (
+                  <a
+                    key={i}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-5 px-5 transition-colors"
+                  >
+                    <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 leading-snug mb-1">{item.title}</p>
+                    <p className="text-[10px] text-zinc-400 leading-snug">{item.description}</p>
+                    <p className="text-[10px] text-zinc-300 dark:text-zinc-600 mt-1">
+                      {new Date(item.pubDate).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  </a>
+                ))}
+              </div>
             )}
           </div>
 
