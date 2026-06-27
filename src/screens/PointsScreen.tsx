@@ -556,19 +556,33 @@ export default function PointsScreen() {
 
         <div className="px-4 space-y-5 -mt-6">
           {/* Total miles card */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
-            <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">KrisFlyer Miles Balance</p>
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder={fmt(totalMiles)}
-              value={manualMiles}
-              onChange={(e) => setManualMiles(e.target.value)}
-              className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 bg-transparent w-full outline-none border-b-2 border-zinc-200 dark:border-zinc-700 focus:border-[#0d6e5a] pb-1 mb-1 transition-colors"
-            />
-            <p className="text-sm text-zinc-400 mb-5">Enter your actual KrisFlyer balance</p>
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+            {/* Card top — green band */}
+            <div className="bg-[#0d6e5a]/8 dark:bg-[#0d6e5a]/20 px-5 pt-4 pb-4">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] font-bold text-[#0d6e5a] uppercase tracking-widest">KrisFlyer Miles Balance</p>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d6e5a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.6">
+                  <path d="M22 16.5a2.5 2.5 0 0 1-2.5 2.5H4a2 2 0 0 1-2-2v-1l2-6h14l2 4.5" />
+                  <path d="M12 7V4" /><path d="M8 7l-2-3" /><path d="M16 7l2-3" />
+                  <circle cx="19" cy="17" r="1" />
+                </svg>
+              </div>
+              <div className="flex items-end gap-2">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder={String(totalMiles)}
+                  value={manualMiles}
+                  onChange={(e) => setManualMiles(e.target.value)}
+                  className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 bg-transparent w-full outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="text-sm font-semibold text-zinc-400 mb-1.5 shrink-0">miles</span>
+              </div>
+              <p className="text-[10px] text-zinc-400 mt-1">Tap to enter your actual balance</p>
+            </div>
 
             {/* Value estimator */}
+            <div className="px-5 py-4">
             <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4">
               <div className="flex justify-between items-center mb-3">
                 <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Value Estimate</p>
@@ -639,6 +653,7 @@ export default function PointsScreen() {
                   </div>
                 )}
               </div>
+            </div>
             </div>
           </div>
 
