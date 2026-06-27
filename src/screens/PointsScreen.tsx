@@ -96,7 +96,6 @@ const ALL_DESTINATIONS: Redemption[] = [
 const DEFAULT_PICKS = ['Bangkok', 'Tokyo', 'Sydney', 'London', 'New York'];
 const MAX_PICKS = 5;
 const STORAGE_KEY = 'milely_destinations';
-const ESCAPES_KEY = 'milely_escapes';
 
 interface Escape {
   id: string;
@@ -315,131 +314,69 @@ function DestinationPicker({ selected, onSave, onClose }: {
   );
 }
 
-function EscapeMilesBar({ label, miles, totalMiles }: { label: string; miles: number; totalMiles: number }) {
-  const canAfford = totalMiles >= miles;
-  const pct = Math.min((totalMiles / miles) * 100, 100);
-  return (
-    <div className={`mb-1.5 ${!canAfford ? 'opacity-55' : ''}`}>
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{label}</span>
-        <div className="flex items-center gap-1.5">
-          {!canAfford && <span className="text-[10px] text-zinc-400">{fmt(miles - Math.floor(totalMiles))} to go</span>}
-          {canAfford && <span className="text-[10px] font-semibold text-[#0d6e5a]">✓</span>}
-          <span className={`text-xs font-bold ${canAfford ? 'text-[#0d6e5a]' : 'text-zinc-500'}`}>{fmt(miles)} mi</span>
-        </div>
-      </div>
-      <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all duration-500 ${canAfford ? 'bg-[#0d6e5a]' : 'bg-zinc-300 dark:bg-zinc-600'}`} style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-}
+function EscapeRow({ escape, totalMiles, isReturn }: { escape: Escape; totalMiles: number; isReturn: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const multiplier = isReturn ? 2 : 1;
+  const ecoMiles = escape.ecoMiles ? escape.ecoMiles * multiplier : null;
+  const bizMiles = escape.bizMiles ? escape.bizMiles * multiplier : null;
+  const cheapest = ecoMiles ?? bizMiles ?? 0;
+  const canAffordEco = ecoMiles ? totalMiles >= ecoMiles : false;
+  const canAffordBiz = bizMiles ? totalMiles >= bizMiles : false;
+  const canAffordAny = canAffordEco || canAffordBiz;
 
-function EscapeRow({ escape, totalMiles, onDelete }: { escape: Escape; totalMiles: number; onDelete: () => void }) {
   return (
-    <div className="py-3.5 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
-      <div className="flex items-start gap-3">
-        <span className="text-xl mt-0.5">{escape.flag}</span>
+    <div className="border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+      {/* Compact row */}
+      <button
+        onClick={() => setExpanded(e => !e)}
+        className="w-full flex items-center gap-3 py-3 text-left"
+      >
+        <span className="text-lg shrink-0">{escape.flag}</span>
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div>
-              <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{escape.destination}</p>
-              <p className="text-[10px] text-zinc-400">{escape.travelWindow} · Book by {escape.bookBy}</p>
-            </div>
-            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded-lg shrink-0">{escape.discount}</span>
-          </div>
-          {escape.ecoMiles && <EscapeMilesBar label="Economy" miles={escape.ecoMiles} totalMiles={totalMiles} />}
-          {escape.bizMiles && <EscapeMilesBar label="Business" miles={escape.bizMiles} totalMiles={totalMiles} />}
+          <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{escape.destination}</p>
+          <p className="text-[10px] text-zinc-400">{ecoMiles ? `Eco ${fmt(ecoMiles)} mi` : ''}{ecoMiles && bizMiles ? ' · ' : ''}{bizMiles ? `Biz ${fmt(bizMiles)} mi` : ''}</p>
         </div>
-        <button onClick={onDelete} className="text-zinc-300 dark:text-zinc-600 hover:text-red-400 transition-colors mt-1 shrink-0">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+        <div className="flex items-center gap-2 shrink-0">
+          {canAffordAny
+            ? <span className="w-2 h-2 rounded-full bg-[#0d6e5a]" />
+            : <span className="text-[10px] text-zinc-400">{fmt(cheapest - Math.floor(totalMiles))} to go</span>
+          }
+          <svg
+            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            className={`text-zinc-300 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+          >
+            <path d="m6 9 6 6 6-6" />
           </svg>
-        </button>
-      </div>
+        </div>
+      </button>
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div className="pb-3 pl-9 space-y-1.5">
+          {ecoMiles && (
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Economy</span>
+              <span className={`text-xs font-bold ${canAffordEco ? 'text-[#0d6e5a]' : 'text-zinc-500'}`}>
+                {canAffordEco ? '✓ ' : ''}{fmt(ecoMiles)} mi
+              </span>
+            </div>
+          )}
+          {bizMiles && (
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Business</span>
+              <span className={`text-xs font-bold ${canAffordBiz ? 'text-[#0d6e5a]' : 'text-zinc-500'}`}>
+                {canAffordBiz ? '✓ ' : ''}{fmt(bizMiles)} mi
+              </span>
+            </div>
+          )}
+          <p className="text-[10px] text-zinc-400 pt-0.5">{escape.travelWindow} · Book by {escape.bookBy}</p>
+        </div>
+      )}
     </div>
   );
 }
 
-function AddEscapeForm({ onAdd, onClose }: { onAdd: (e: Escape) => void; onClose: () => void }) {
-  const [destination, setDestination] = useState('');
-  const [flag, setFlag] = useState('');
-  const [ecoMiles, setEcoMiles] = useState('');
-  const [bizMiles, setBizMiles] = useState('');
-  const [travelWindow, setTravelWindow] = useState('');
-  const [bookBy, setBookBy] = useState('');
-  const [discount, setDiscount] = useState('30% off');
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!destination || (!ecoMiles && !bizMiles)) return;
-    onAdd({
-      id: Date.now().toString(),
-      destination: destination.trim(),
-      flag: flag.trim() || '✈️',
-      region: '',
-      ecoMiles: ecoMiles ? parseInt(ecoMiles) : null,
-      bizMiles: bizMiles ? parseInt(bizMiles) : null,
-      travelWindow: travelWindow.trim(),
-      bookBy: bookBy.trim(),
-      discount: discount.trim(),
-    });
-    onClose();
-  }
-
-  const inputCls = 'w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0d6e5a] transition-shadow';
-  const labelCls = 'block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1';
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end max-w-md mx-auto">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative w-full bg-white dark:bg-zinc-900 rounded-t-3xl px-5 pt-5 pb-10 shadow-xl">
-        <div className="w-10 h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto mb-5" />
-        <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 mb-4">Add Spontaneous Escape</h3>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-3 gap-2">
-            <div className="col-span-2">
-              <label className={labelCls}>Destination</label>
-              <input type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g. Tokyo" required className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>Flag</label>
-              <input type="text" value={flag} onChange={e => setFlag(e.target.value)} placeholder="🇯🇵" className={inputCls} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className={labelCls}>Eco Miles</label>
-              <input type="number" value={ecoMiles} onChange={e => setEcoMiles(e.target.value)} placeholder="9100" className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>Biz Miles</label>
-              <input type="number" value={bizMiles} onChange={e => setBizMiles(e.target.value)} placeholder="17500" className={inputCls} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className={labelCls}>Travel Window</label>
-              <input type="text" value={travelWindow} onChange={e => setTravelWindow(e.target.value)} placeholder="1–31 Jul 2026" className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>Book By</label>
-              <input type="text" value={bookBy} onChange={e => setBookBy(e.target.value)} placeholder="30 Jun 2026" className={inputCls} />
-            </div>
-          </div>
-          <div>
-            <label className={labelCls}>Discount</label>
-            <input type="text" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="30% off" className={inputCls} />
-          </div>
-          <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-semibold text-zinc-500">Cancel</button>
-            <button type="submit" className="flex-1 py-3 rounded-xl bg-[#0d6e5a] text-white text-sm font-semibold">Add Deal</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
 
 export default function PointsScreen() {
   const { cards } = useApp();
@@ -448,38 +385,26 @@ export default function PointsScreen() {
   const [selectedCabin, setSelectedCabin] = useState<CabinClass>('economy');
   const [showPicker, setShowPicker] = useState(false);
   const [pickedDestinations, setPickedDestinations] = useState<string[]>(DEFAULT_PICKS);
-  const [escapes, setEscapes] = useState<Escape[]>(SAMPLE_ESCAPES);
-  const [showAddEscape, setShowAddEscape] = useState(false);
+  const [escapes] = useState<Escape[]>(SAMPLE_ESCAPES);
+  const [escapeSearch, setEscapeSearch] = useState('');
+  const [escapeRegion, setEscapeRegion] = useState('All');
+  const [isReturn, setIsReturn] = useState(false);
   const [rates, setRates] = useState<Record<string, number> | null>(null);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
-  // Load saved destinations and escapes from localStorage
+  // Load saved destinations from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) setPickedDestinations(JSON.parse(saved));
-      const savedEscapes = localStorage.getItem(ESCAPES_KEY);
-      if (savedEscapes) setEscapes(JSON.parse(savedEscapes));
     } catch {}
   }, []);
 
   function savePicks(picks: string[]) {
     setPickedDestinations(picks);
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(picks)); } catch {}
-  }
-
-  function addEscape(escape: Escape) {
-    const updated = [...escapes, escape];
-    setEscapes(updated);
-    try { localStorage.setItem(ESCAPES_KEY, JSON.stringify(updated)); } catch {}
-  }
-
-  function deleteEscape(id: string) {
-    const updated = escapes.filter(e => e.id !== id);
-    setEscapes(updated);
-    try { localStorage.setItem(ESCAPES_KEY, JSON.stringify(updated)); } catch {}
   }
 
   const fetchRates = useCallback(() => {
@@ -685,39 +610,76 @@ export default function PointsScreen() {
           </div>
 
           {/* Spontaneous Escapes */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
-            <div className="pt-4 pb-3">
-              <div className="flex items-center justify-between">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800">
+            <div className="px-5 pt-4 pb-3">
+              <div className="flex items-center justify-between mb-3">
                 <div>
                   <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Spontaneous Escapes</p>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">SQ flash deals · update monthly</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">30% off Saver · updated monthly from SQ</p>
                 </div>
-                <button
-                  onClick={() => setShowAddEscape(true)}
-                  className="flex items-center gap-1 bg-[#0d6e5a] text-white text-xs font-semibold px-3 py-1.5 rounded-xl"
-                >
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  Add
-                </button>
+                {/* One-way / Return toggle */}
+                <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-xl p-0.5">
+                  {(['One-way', 'Return'] as const).map(opt => (
+                    <button
+                      key={opt}
+                      onClick={() => setIsReturn(opt === 'Return')}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                        (opt === 'Return') === isReturn
+                          ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                          : 'text-zinc-400'
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Search */}
+              <div className="relative mb-3">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search destination…"
+                  value={escapeSearch}
+                  onChange={e => setEscapeSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#0d6e5a] transition-shadow"
+                />
+              </div>
+
+              {/* Region filter chips */}
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                {['All', ...Array.from(new Set(escapes.map(e => e.region)))].map(region => (
+                  <button
+                    key={region}
+                    onClick={() => setEscapeRegion(region)}
+                    className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-bold transition-all border ${
+                      escapeRegion === region
+                        ? 'bg-[#0d6e5a] text-white border-[#0d6e5a]'
+                        : 'bg-transparent text-zinc-500 border-zinc-200 dark:border-zinc-700'
+                    }`}
+                  >
+                    {region}
+                  </button>
+                ))}
               </div>
             </div>
-            {escapes.length === 0 ? (
-              <div className="py-8 text-center">
-                <p className="text-sm text-zinc-400">No deals added yet</p>
-                <p className="text-xs text-zinc-300 dark:text-zinc-600 mt-1">Tap Add when SQ releases monthly escapes</p>
-              </div>
-            ) : (
-              escapes.map(escape => (
-                <EscapeRow
-                  key={escape.id}
-                  escape={escape}
-                  totalMiles={displayMiles}
-                  onDelete={() => deleteEscape(escape.id)}
-                />
-              ))
-            )}
+
+            <div className="overflow-y-auto max-h-[520px] px-5">
+              {(() => {
+                const filtered = escapes.filter(e =>
+                  (escapeRegion === 'All' || e.region === escapeRegion) &&
+                  e.destination.toLowerCase().includes(escapeSearch.toLowerCase())
+                );
+                return filtered.length === 0
+                  ? <p className="text-sm text-zinc-400 text-center py-8">No destinations match</p>
+                  : filtered.map(escape => (
+                      <EscapeRow key={escape.id} escape={escape} totalMiles={displayMiles} isReturn={isReturn} />
+                    ));
+              })()}
+            </div>
           </div>
 
           <div className="text-center pb-4">
@@ -727,10 +689,6 @@ export default function PointsScreen() {
           </div>
         </div>
       </div>
-
-      {showAddEscape && (
-        <AddEscapeForm onAdd={addEscape} onClose={() => setShowAddEscape(false)} />
-      )}
     </>
   );
 }
