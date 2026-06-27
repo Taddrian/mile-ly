@@ -326,38 +326,36 @@ function EscapeRow({ escape, totalMiles, isReturn }: { escape: Escape; totalMile
 
   return (
     <div className="border-b border-zinc-100 dark:border-zinc-800 last:border-0">
-      {/* Compact row */}
       <button
         onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center gap-3 py-3 text-left"
+        className="w-full flex items-center gap-2.5 py-2.5 text-left"
       >
-        <span className="text-lg shrink-0">{escape.flag}</span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{escape.destination}</p>
-          <p className="text-[10px] text-zinc-400">{ecoMiles ? `Eco ${fmt(ecoMiles)} mi` : ''}{ecoMiles && bizMiles ? ' · ' : ''}{bizMiles ? `Biz ${fmt(bizMiles)} mi` : ''}</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <span className="text-base shrink-0">{escape.flag}</span>
+        <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 truncate flex-1">{escape.destination}</p>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[10px] text-zinc-400">
+            {ecoMiles ? `Eco ${fmt(ecoMiles)}` : ''}{ecoMiles && bizMiles ? ' · ' : ''}{bizMiles ? `Biz ${fmt(bizMiles)}` : ''}
+          </span>
           {canAffordAny
-            ? <span className="w-2 h-2 rounded-full bg-[#0d6e5a]" />
-            : <span className="text-[10px] text-zinc-400">{fmt(cheapest - Math.floor(totalMiles))} to go</span>
+            ? <span className="w-1.5 h-1.5 rounded-full bg-[#0d6e5a] shrink-0" />
+            : <span className="text-[10px] text-zinc-300 shrink-0">·</span>
           }
           <svg
-            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            className={`text-zinc-300 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+            className={`text-zinc-300 transition-transform duration-200 shrink-0 ${expanded ? 'rotate-180' : ''}`}
           >
             <path d="m6 9 6 6 6-6" />
           </svg>
         </div>
       </button>
 
-      {/* Expanded detail */}
       {expanded && (
-        <div className="pb-3 pl-9 space-y-1.5">
+        <div className="pb-2.5 pl-8 space-y-1">
           {ecoMiles && (
             <div className="flex justify-between items-center">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Economy</span>
-              <span className={`text-xs font-bold ${canAffordEco ? 'text-[#0d6e5a]' : 'text-zinc-500'}`}>
+              <span className={`text-[10px] font-bold ${canAffordEco ? 'text-[#0d6e5a]' : 'text-zinc-400'}`}>
                 {canAffordEco ? '✓ ' : ''}{fmt(ecoMiles)} mi
               </span>
             </div>
@@ -365,12 +363,12 @@ function EscapeRow({ escape, totalMiles, isReturn }: { escape: Escape; totalMile
           {bizMiles && (
             <div className="flex justify-between items-center">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Business</span>
-              <span className={`text-xs font-bold ${canAffordBiz ? 'text-[#0d6e5a]' : 'text-zinc-500'}`}>
+              <span className={`text-[10px] font-bold ${canAffordBiz ? 'text-[#0d6e5a]' : 'text-zinc-400'}`}>
                 {canAffordBiz ? '✓ ' : ''}{fmt(bizMiles)} mi
               </span>
             </div>
           )}
-          <p className="text-[10px] text-zinc-400 pt-0.5">{escape.travelWindow} · Book by {escape.bookBy}</p>
+          <p className="text-[10px] text-zinc-400">{escape.travelWindow} · Book by {escape.bookBy}</p>
         </div>
       )}
     </div>
