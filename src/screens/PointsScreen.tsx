@@ -134,7 +134,7 @@ export default function PointsScreen() {
     let total = 0;
     const prog: Record<string, number> = {};
     for (const card of cards) {
-      if (card.milesProgram === 'Cashback') continue;
+      if (card.milesProgram !== 'KrisFlyer') continue;
       const earned = Math.floor(card.currentSpent * card.milesRate);
       total += earned;
       prog[card.milesProgram] = (prog[card.milesProgram] ?? 0) + earned;
@@ -144,14 +144,14 @@ export default function PointsScreen() {
 
   const estimatedValue = (totalMiles * cpp) / 100;
 
-  const milesCards = cards.filter(c => c.milesProgram !== 'Cashback');
+  const milesCards = cards.filter(c => c.milesProgram === 'KrisFlyer');
 
   return (
     <div className="min-h-screen">
       {/* Header */}
       <div className="bg-[#0d6e5a] dark:bg-[#0a5747] px-5 pt-14 pb-12">
-        <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Air Miles</p>
-        <h1 className="text-white text-2xl font-bold mb-0.5">Points Tracker</h1>
+        <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Singapore Airlines</p>
+        <h1 className="text-white text-2xl font-bold mb-0.5">KrisFlyer Miles</h1>
         <p className="text-white/60 text-sm">Based on your monthly spend</p>
       </div>
 
@@ -160,7 +160,7 @@ export default function PointsScreen() {
         <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
           <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Total Miles Earned</p>
           <p className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-1">{fmt(totalMiles)}</p>
-          <p className="text-sm text-zinc-400 mb-4">miles this month across all cards</p>
+          <p className="text-sm text-zinc-400 mb-4">KrisFlyer miles this month</p>
 
           {/* By program */}
           {Object.entries(byProgram).length > 0 && (
