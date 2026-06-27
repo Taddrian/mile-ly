@@ -542,15 +542,7 @@ export default function PointsScreen() {
             </div>
           </div>
 
-          {/* Per-card breakdown */}
-          {milesCards.length > 0 && (
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
-              <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider pt-4 pb-1">By Card</p>
-              {milesCards.map(card => <CardMilesRow key={card.id} card={card} />)}
-            </div>
-          )}
-
-          {/* Redemption section */}
+{/* Redemption section */}
           <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
             <div className="pt-4 pb-3">
               <div className="flex items-center justify-between mb-1">
