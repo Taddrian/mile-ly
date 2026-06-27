@@ -25,11 +25,13 @@ export default function AppShell() {
 
   return (
     <AppProvider>
-      <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 max-w-md mx-auto">
-        <main className="pb-20 min-h-screen overflow-y-auto">
-          <ScreenContent activeTab={activeTab} />
-        </main>
+      <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 md:flex">
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+        <main className="pb-20 md:pb-0 min-h-screen overflow-y-auto flex-1 md:ml-56">
+          <div className="max-w-md mx-auto md:max-w-2xl md:px-8 md:py-8">
+            <ScreenContent activeTab={activeTab} />
+          </div>
+        </main>
       </div>
     </AppProvider>
   );

@@ -56,7 +56,7 @@ export default function SettingsScreen() {
 
   return (
     <div className="min-h-screen">
-      <div className="px-5 pt-14 pb-4">
+      <div className="px-5 pt-14 pb-4 md:pt-6">
         <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Preferences</p>
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Settings</h1>
       </div>

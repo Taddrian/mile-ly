@@ -25,7 +25,7 @@ function CardItem({ card }: { card: CreditCard }) {
   const gradientEnd = lighten(card.color, 30);
 
   return (
-    <div className="snap-center shrink-0 w-[85vw] max-w-sm">
+    <div className="w-full">
       <div
         className="relative rounded-3xl overflow-hidden shadow-xl"
         style={{ background: `linear-gradient(135deg, ${card.color} 0%, ${gradientEnd} 100%)`, aspectRatio: '1.586' }}
@@ -90,7 +90,7 @@ export default function CardsScreen() {
 
   return (
     <div className="min-h-screen">
-      <div className="px-5 pt-14 pb-4">
+      <div className="px-5 pt-14 pb-4 md:pt-6">
         <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Your Cards</p>
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{cards.length} Cards Linked</h1>
         <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-0.5">
@@ -98,14 +98,16 @@ export default function CardsScreen() {
         </p>
       </div>
 
-      <div className="px-4 space-y-4 pb-4">
-        {cards.map((card) => (
-          <CardItem key={card.id} card={card} />
-        ))}
+      <div className="px-4 pb-4">
+        <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
+          {cards.map((card) => (
+            <CardItem key={card.id} card={card} />
+          ))}
+        </div>
 
         <button
           onClick={() => setShowModal(true)}
-          className="w-full py-4 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-sm font-semibold text-zinc-400 dark:text-zinc-500 hover:border-[#0d6e5a] hover:text-[#0d6e5a] transition-colors flex items-center justify-center gap-2"
+          className="w-full py-4 mt-4 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-sm font-semibold text-zinc-400 dark:text-zinc-500 hover:border-[#0d6e5a] hover:text-[#0d6e5a] transition-colors flex items-center justify-center gap-2"
         >
           <span className="text-xl leading-none">+</span> Add New Card
         </button>

@@ -76,7 +76,7 @@ export default function DashboardScreen() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-[#0d6e5a] dark:bg-[#0a5747] px-5 pt-14 pb-10">
+      <div className="bg-[#0d6e5a] dark:bg-[#0a5747] px-5 pt-14 pb-10 md:pt-8 md:rounded-2xl">
         <p className="text-white/70 text-sm font-medium mb-1">{getGreeting()}, Aaron 👋</p>
         <p className="text-white text-2xl font-bold">{getMonth()}</p>
       </div>

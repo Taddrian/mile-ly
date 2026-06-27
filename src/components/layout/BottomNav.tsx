@@ -61,8 +61,10 @@ const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 max-w-md mx-auto">
-      <div className="flex pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 max-w-md mx-auto md:right-auto md:top-0 md:h-screen md:w-56 md:max-w-none md:mx-0 md:border-t-0 md:border-r md:flex md:flex-col">
+
+      {/* Mobile: horizontal bottom bar */}
+      <div className="flex pb-safe md:hidden">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -78,6 +80,40 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
             </button>
           );
         })}
+      </div>
+
+      {/* Desktop: vertical sidebar */}
+      <div className="hidden md:flex md:flex-col md:h-full md:py-6 md:px-3">
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 px-2 pb-8">
+          <div className="w-8 h-8 rounded-xl bg-[#0d6e5a] flex items-center justify-center shrink-0">
+            <span className="text-white font-bold text-sm">M</span>
+          </div>
+          <span className="font-bold text-sm text-zinc-800 dark:text-zinc-100">Mile-ly</span>
+        </div>
+
+        {/* Nav items */}
+        <div className="flex flex-col gap-1">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left ${
+                  isActive
+                    ? 'bg-[#e6f4f1] dark:bg-[#0d2e28] text-[#0d6e5a] dark:text-[#10876d]'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                }`}
+              >
+                <span className={isActive ? 'text-[#0d6e5a] dark:text-[#10876d]' : 'text-zinc-400 dark:text-zinc-500'}>
+                  {tab.icon}
+                </span>
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

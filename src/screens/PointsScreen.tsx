@@ -249,9 +249,9 @@ function DestinationPicker({ selected, onSave, onClose }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-50 dark:bg-zinc-950 max-w-md mx-auto">
+    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-50 dark:bg-zinc-950 max-w-md mx-auto md:inset-y-8 md:left-1/2 md:-translate-x-1/2 md:w-[480px] md:max-w-none md:mx-0 md:rounded-2xl md:shadow-2xl md:overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-14 pb-4 bg-[#0d6e5a]">
+      <div className="flex items-center justify-between px-5 pt-14 pb-4 bg-[#0d6e5a] md:pt-5">
         <div>
           <h2 className="text-white text-lg font-bold">Choose Destinations</h2>
           <p className="text-white/70 text-xs mt-0.5">Pick up to {MAX_PICKS} · {picks.length}/{MAX_PICKS} selected</p>
@@ -301,7 +301,7 @@ function DestinationPicker({ selected, onSave, onClose }: {
       </div>
 
       {/* Save button */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-5 pb-8 pt-4 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-5 pb-8 pt-4 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 md:relative md:bottom-auto md:left-auto md:right-auto md:max-w-none md:mx-0 md:pb-5">
         <button
           onClick={() => { onSave(picks); onClose(); }}
           disabled={picks.length === 0}
@@ -449,7 +449,7 @@ export default function PointsScreen() {
 
       <div className="min-h-screen">
         {/* Header */}
-        <div className="bg-[#0d6e5a] dark:bg-[#0a5747] px-5 pt-14 pb-12">
+        <div className="bg-[#0d6e5a] dark:bg-[#0a5747] px-5 pt-14 pb-12 md:pt-8 md:rounded-2xl">
           <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Singapore Airlines</p>
           <h1 className="text-white text-2xl font-bold">KrisFlyer Miles</h1>
         </div>
