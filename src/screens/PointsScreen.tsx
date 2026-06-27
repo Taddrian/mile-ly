@@ -699,47 +699,6 @@ export default function PointsScreen() {
             )}
           </div>
 
-          {/* KrisFlyer News */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
-            <div className="pt-4 pb-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">KrisFlyer News</p>
-                <p className="text-[10px] text-zinc-400 mt-0.5">via MileLion · live</p>
-              </div>
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            </div>
-            {newsLoading ? (
-              <div className="space-y-3 pb-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse space-y-1.5">
-                    <div className="h-3 bg-zinc-100 dark:bg-zinc-800 rounded w-3/4" />
-                    <div className="h-2.5 bg-zinc-100 dark:bg-zinc-800 rounded w-full" />
-                  </div>
-                ))}
-              </div>
-            ) : news.length === 0 ? (
-              <p className="text-sm text-zinc-400 text-center py-6">Could not load news</p>
-            ) : (
-              <div className="overflow-y-auto max-h-[260px] pb-3">
-                {news.map((item, i) => (
-                  <a
-                    key={i}
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-5 px-5 transition-colors"
-                  >
-                    <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 leading-snug mb-1">{item.title}</p>
-                    <p className="text-[10px] text-zinc-400 leading-snug">{item.description}</p>
-                    <p className="text-[10px] text-zinc-300 dark:text-zinc-600 mt-1">
-                      {new Date(item.pubDate).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </p>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Spontaneous Escapes */}
           <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800">
             <div className="px-5 pt-4 pb-3">
@@ -812,6 +771,47 @@ export default function PointsScreen() {
                     ));
               })()}
             </div>
+          </div>
+
+          {/* KrisFlyer News */}
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
+            <div className="pt-4 pb-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">KrisFlyer News</p>
+                <p className="text-[10px] text-zinc-400 mt-0.5">via MileLion · live</p>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            </div>
+            {newsLoading ? (
+              <div className="space-y-3 pb-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="animate-pulse space-y-1.5">
+                    <div className="h-3 bg-zinc-100 dark:bg-zinc-800 rounded w-3/4" />
+                    <div className="h-2.5 bg-zinc-100 dark:bg-zinc-800 rounded w-full" />
+                  </div>
+                ))}
+              </div>
+            ) : news.length === 0 ? (
+              <p className="text-sm text-zinc-400 text-center py-6">Could not load news</p>
+            ) : (
+              <div className="overflow-y-auto max-h-[260px] pb-3">
+                {news.map((item, i) => (
+                  <a
+                    key={i}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-5 px-5 transition-colors"
+                  >
+                    <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 leading-snug mb-1">{item.title}</p>
+                    <p className="text-[10px] text-zinc-400 leading-snug">{item.description}</p>
+                    <p className="text-[10px] text-zinc-300 dark:text-zinc-600 mt-1">
+                      {new Date(item.pubDate).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="text-center pb-4">
