@@ -1,3 +1,5 @@
+export type MilesProgram = 'KrisFlyer' | 'Asia Miles' | 'Cashback' | 'Other';
+
 export type CreditCard = {
   id: string;
   name: string;
@@ -5,6 +7,8 @@ export type CreditCard = {
   color: string;
   monthlyLimit: number;
   currentSpent: number;
+  milesRate: number;       // miles earned per SGD spent
+  milesProgram: MilesProgram;
 };
 
 export type Transaction = {
@@ -16,4 +20,4 @@ export type Transaction = {
   date: string;
 };
 
-export type Tab = 'dashboard' | 'cards' | 'transactions' | 'settings';
+export type Tab = 'dashboard' | 'cards' | 'transactions' | 'points' | 'settings';

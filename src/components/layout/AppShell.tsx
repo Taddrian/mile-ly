@@ -7,6 +7,7 @@ import BottomNav from '@/components/layout/BottomNav';
 import DashboardScreen from '@/screens/DashboardScreen';
 import CardsScreen from '@/screens/CardsScreen';
 import TransactionsScreen from '@/screens/TransactionsScreen';
+import PointsScreen from '@/screens/PointsScreen';
 import SettingsScreen from '@/screens/SettingsScreen';
 
 function ScreenContent({ activeTab }: { activeTab: Tab }) {
@@ -14,6 +15,7 @@ function ScreenContent({ activeTab }: { activeTab: Tab }) {
     case 'dashboard': return <DashboardScreen />;
     case 'cards': return <CardsScreen />;
     case 'transactions': return <TransactionsScreen />;
+    case 'points': return <PointsScreen />;
     case 'settings': return <SettingsScreen />;
   }
 }
