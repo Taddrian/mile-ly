@@ -96,6 +96,22 @@ const ALL_DESTINATIONS: Redemption[] = [
 const DEFAULT_PICKS = ['Bangkok', 'Tokyo', 'Sydney', 'London', 'New York'];
 const MAX_PICKS = 5;
 const STORAGE_KEY = 'milely_destinations';
+const ESCAPES_KEY = 'milely_escapes';
+
+interface Escape {
+  id: string;
+  destination: string;
+  flag: string;
+  miles: number;
+  cabin: string;
+  travelWindow: string; // e.g. "1–31 Aug 2025"
+}
+
+const SAMPLE_ESCAPES: Escape[] = [
+  { id: '1', destination: 'Bangkok',   flag: '🇹🇭', miles: 6500,  cabin: 'Economy',  travelWindow: 'Jul – Aug 2025' },
+  { id: '2', destination: 'Bali',      flag: '🇮🇩', miles: 7000,  cabin: 'Economy',  travelWindow: 'Jul – Aug 2025' },
+  { id: '3', destination: 'Tokyo',     flag: '🇯🇵', miles: 14000, cabin: 'Economy',  travelWindow: 'Jul – Aug 2025' },
+];
 
 const REGIONS = [...new Set(ALL_DESTINATIONS.map(d => d.region))];
 
@@ -254,6 +270,111 @@ function DestinationPicker({ selected, onSave, onClose }: {
   );
 }
 
+function EscapeRow({ escape, totalMiles, onDelete }: { escape: Escape; totalMiles: number; onDelete: () => void }) {
+  const canAfford = totalMiles >= escape.miles;
+  const pct = Math.min((totalMiles / escape.miles) * 100, 100);
+  return (
+    <div className="py-3.5 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+      <div className="flex items-start gap-3">
+        <span className="text-xl mt-0.5">{escape.flag}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{escape.destination}</p>
+              <p className="text-xs text-zinc-400">{escape.cabin} · {escape.travelWindow}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className={`text-sm font-bold ${canAfford ? 'text-[#0d6e5a]' : 'text-zinc-500'}`}>{fmt(escape.miles)} mi</p>
+              {!canAfford && <p className="text-[10px] text-zinc-400">{fmt(escape.miles - Math.floor(totalMiles))} to go</p>}
+              {canAfford && <p className="text-[10px] text-[#0d6e5a] font-semibold">Can redeem ✓</p>}
+            </div>
+          </div>
+          <div className="mt-2 h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${canAfford ? 'bg-[#0d6e5a]' : 'bg-zinc-300 dark:bg-zinc-600'}`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        </div>
+        <button onClick={onDelete} className="text-zinc-300 dark:text-zinc-600 hover:text-red-400 transition-colors mt-0.5 shrink-0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AddEscapeForm({ onAdd, onClose }: { onAdd: (e: Escape) => void; onClose: () => void }) {
+  const [destination, setDestination] = useState('');
+  const [flag, setFlag] = useState('');
+  const [miles, setMiles] = useState('');
+  const [cabin, setCabin] = useState('Economy');
+  const [travelWindow, setTravelWindow] = useState('');
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!destination || !miles) return;
+    onAdd({
+      id: Date.now().toString(),
+      destination: destination.trim(),
+      flag: flag.trim() || '✈️',
+      miles: parseInt(miles),
+      cabin,
+      travelWindow: travelWindow.trim(),
+    });
+    onClose();
+  }
+
+  const inputCls = 'w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0d6e5a] transition-shadow';
+  const labelCls = 'block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1';
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end max-w-md mx-auto">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="relative w-full bg-white dark:bg-zinc-900 rounded-t-3xl px-5 pt-5 pb-10 shadow-xl">
+        <div className="w-10 h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto mb-5" />
+        <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 mb-4">Add Spontaneous Escape</h3>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-2">
+              <label className={labelCls}>Destination</label>
+              <input type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g. Tokyo" required className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Flag</label>
+              <input type="text" value={flag} onChange={e => setFlag(e.target.value)} placeholder="🇯🇵" className={inputCls} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className={labelCls}>Miles</label>
+              <input type="number" value={miles} onChange={e => setMiles(e.target.value)} placeholder="14000" required className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Cabin</label>
+              <select value={cabin} onChange={e => setCabin(e.target.value)} className={inputCls}>
+                <option>Economy</option>
+                <option>Business</option>
+                <option>First</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className={labelCls}>Travel Window</label>
+            <input type="text" value={travelWindow} onChange={e => setTravelWindow(e.target.value)} placeholder="e.g. Jul – Aug 2025" className={inputCls} />
+          </div>
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-semibold text-zinc-500">Cancel</button>
+            <button type="submit" className="flex-1 py-3 rounded-xl bg-[#0d6e5a] text-white text-sm font-semibold">Add Deal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function PointsScreen() {
   const { cards } = useApp();
   const [cpp, setCpp] = useState(1.5);
@@ -261,22 +382,38 @@ export default function PointsScreen() {
   const [selectedCabin, setSelectedCabin] = useState<CabinClass>('economy');
   const [showPicker, setShowPicker] = useState(false);
   const [pickedDestinations, setPickedDestinations] = useState<string[]>(DEFAULT_PICKS);
+  const [escapes, setEscapes] = useState<Escape[]>(SAMPLE_ESCAPES);
+  const [showAddEscape, setShowAddEscape] = useState(false);
   const [rates, setRates] = useState<Record<string, number> | null>(null);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
-  // Load saved destinations from localStorage
+  // Load saved destinations and escapes from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) setPickedDestinations(JSON.parse(saved));
+      const savedEscapes = localStorage.getItem(ESCAPES_KEY);
+      if (savedEscapes) setEscapes(JSON.parse(savedEscapes));
     } catch {}
   }, []);
 
   function savePicks(picks: string[]) {
     setPickedDestinations(picks);
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(picks)); } catch {}
+  }
+
+  function addEscape(escape: Escape) {
+    const updated = [...escapes, escape];
+    setEscapes(updated);
+    try { localStorage.setItem(ESCAPES_KEY, JSON.stringify(updated)); } catch {}
+  }
+
+  function deleteEscape(id: string) {
+    const updated = escapes.filter(e => e.id !== id);
+    setEscapes(updated);
+    try { localStorage.setItem(ESCAPES_KEY, JSON.stringify(updated)); } catch {}
   }
 
   const fetchRates = useCallback(() => {
@@ -481,6 +618,42 @@ export default function PointsScreen() {
             )}
           </div>
 
+          {/* Spontaneous Escapes */}
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
+            <div className="pt-4 pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Spontaneous Escapes</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">SQ flash deals · update monthly</p>
+                </div>
+                <button
+                  onClick={() => setShowAddEscape(true)}
+                  className="flex items-center gap-1 bg-[#0d6e5a] text-white text-xs font-semibold px-3 py-1.5 rounded-xl"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Add
+                </button>
+              </div>
+            </div>
+            {escapes.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="text-sm text-zinc-400">No deals added yet</p>
+                <p className="text-xs text-zinc-300 dark:text-zinc-600 mt-1">Tap Add when SQ releases monthly escapes</p>
+              </div>
+            ) : (
+              escapes.map(escape => (
+                <EscapeRow
+                  key={escape.id}
+                  escape={escape}
+                  totalMiles={displayMiles}
+                  onDelete={() => deleteEscape(escape.id)}
+                />
+              ))
+            )}
+          </div>
+
           <div className="text-center pb-4">
             <p className="text-[10px] text-zinc-300 dark:text-zinc-600">
               Award rates are approximate · Exchange rates updated live
@@ -488,6 +661,10 @@ export default function PointsScreen() {
           </div>
         </div>
       </div>
+
+      {showAddEscape && (
+        <AddEscapeForm onAdd={addEscape} onClose={() => setShowAddEscape(false)} />
+      )}
     </>
   );
 }
