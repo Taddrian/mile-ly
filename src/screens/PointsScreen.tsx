@@ -102,15 +102,60 @@ interface Escape {
   id: string;
   destination: string;
   flag: string;
-  miles: number;
-  cabin: string;
-  travelWindow: string; // e.g. "1–31 Aug 2025"
+  region: string;
+  ecoMiles: number | null;
+  bizMiles: number | null;
+  travelWindow: string;
+  bookBy: string;
+  discount: string;
 }
 
+// June 2026 Spontaneous Escapes — 30% off Saver rates, book by 30 Jun 2026, travel 1–31 Jul 2026
 const SAMPLE_ESCAPES: Escape[] = [
-  { id: '1', destination: 'Bangkok',   flag: '🇹🇭', miles: 6500,  cabin: 'Economy',  travelWindow: 'Jul – Aug 2025' },
-  { id: '2', destination: 'Bali',      flag: '🇮🇩', miles: 7000,  cabin: 'Economy',  travelWindow: 'Jul – Aug 2025' },
-  { id: '3', destination: 'Tokyo',     flag: '🇯🇵', miles: 14000, cabin: 'Economy',  travelWindow: 'Jul – Aug 2025' },
+  // South East Asia
+  { id: 'se1',  destination: 'Brunei',           flag: '🇧🇳', region: 'South East Asia', ecoMiles: 5600,  bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se2',  destination: 'Kuala Lumpur',     flag: '🇲🇾', region: 'South East Asia', ecoMiles: 5600,  bizMiles: 15400, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se3',  destination: 'Penang',           flag: '🇲🇾', region: 'South East Asia', ecoMiles: 5600,  bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se4',  destination: 'Medan',            flag: '🇮🇩', region: 'South East Asia', ecoMiles: 5600,  bizMiles: 15400, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se5',  destination: 'Jakarta',          flag: '🇮🇩', region: 'South East Asia', ecoMiles: null,  bizMiles: 15400, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se6',  destination: 'Surabaya',         flag: '🇮🇩', region: 'South East Asia', ecoMiles: null,  bizMiles: 15400, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se7',  destination: 'Bangkok',          flag: '🇹🇭', region: 'South East Asia', ecoMiles: 9100,  bizMiles: 17500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se8',  destination: 'Phuket',           flag: '🇹🇭', region: 'South East Asia', ecoMiles: 9100,  bizMiles: 17500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se9',  destination: 'Hanoi',            flag: '🇻🇳', region: 'South East Asia', ecoMiles: 9100,  bizMiles: 17500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se10', destination: 'Ho Chi Minh City', flag: '🇻🇳', region: 'South East Asia', ecoMiles: 9100,  bizMiles: 17500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se11', destination: 'Manila',           flag: '🇵🇭', region: 'South East Asia', ecoMiles: 9100,  bizMiles: 17500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se12', destination: 'Phnom Penh',       flag: '🇰🇭', region: 'South East Asia', ecoMiles: 9100,  bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'se13', destination: 'Siem Reap',        flag: '🇰🇭', region: 'South East Asia', ecoMiles: 9100,  bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  // North Asia
+  { id: 'na1',  destination: 'Taipei',           flag: '🇹🇼', region: 'North Asia',      ecoMiles: 10850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na2',  destination: 'Shenzhen',         flag: '🇨🇳', region: 'North Asia',      ecoMiles: 10850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na3',  destination: 'Xiamen',           flag: '🇨🇳', region: 'North Asia',      ecoMiles: 10850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na4',  destination: 'Chongqing',        flag: '🇨🇳', region: 'North Asia',      ecoMiles: 10850, bizMiles: 24850, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na5',  destination: 'Chengdu',          flag: '🇨🇳', region: 'North Asia',      ecoMiles: 10850, bizMiles: 24850, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na6',  destination: 'Hangzhou',         flag: '🇨🇳', region: 'North Asia',      ecoMiles: 10850, bizMiles: 24850, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na7',  destination: 'Beijing',          flag: '🇨🇳', region: 'North Asia',      ecoMiles: 14350, bizMiles: 31500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na8',  destination: 'Shanghai',         flag: '🇨🇳', region: 'North Asia',      ecoMiles: 14350, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na9',  destination: 'Busan',            flag: '🇰🇷', region: 'North Asia',      ecoMiles: 17850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na10', destination: 'Seoul',            flag: '🇰🇷', region: 'North Asia',      ecoMiles: 17850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na11', destination: 'Fukuoka',          flag: '🇯🇵', region: 'North Asia',      ecoMiles: 17850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na12', destination: 'Nagoya',           flag: '🇯🇵', region: 'North Asia',      ecoMiles: 17850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na13', destination: 'Osaka',            flag: '🇯🇵', region: 'North Asia',      ecoMiles: 17850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'na14', destination: 'Tokyo',            flag: '🇯🇵', region: 'North Asia',      ecoMiles: 17850, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  // West Asia & Africa
+  { id: 'wa1',  destination: 'Ahmedabad',        flag: '🇮🇳', region: 'West Asia',       ecoMiles: 13300, bizMiles: 31500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'wa2',  destination: 'Dhaka',            flag: '🇧🇩', region: 'West Asia',       ecoMiles: 13300, bizMiles: 31500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'wa3',  destination: 'Colombo',          flag: '🇱🇰', region: 'West Asia',       ecoMiles: null,  bizMiles: 31500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'wa4',  destination: 'Hyderabad',        flag: '🇮🇳', region: 'West Asia',       ecoMiles: null,  bizMiles: 31500, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  // Southwest Pacific
+  { id: 'sp1',  destination: 'Darwin',           flag: '🇦🇺', region: 'SW Pacific',      ecoMiles: 14350, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'sp2',  destination: 'Perth',            flag: '🇦🇺', region: 'SW Pacific',      ecoMiles: 14350, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'sp3',  destination: 'Adelaide',         flag: '🇦🇺', region: 'SW Pacific',      ecoMiles: 20300, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'sp4',  destination: 'Brisbane',         flag: '🇦🇺', region: 'SW Pacific',      ecoMiles: 20300, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'sp5',  destination: 'Cairns',           flag: '🇦🇺', region: 'SW Pacific',      ecoMiles: 20300, bizMiles: 50400, travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'sp6',  destination: 'Melbourne',        flag: '🇦🇺', region: 'SW Pacific',      ecoMiles: 20300, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  { id: 'sp7',  destination: 'Sydney',           flag: '🇦🇺', region: 'SW Pacific',      ecoMiles: 20300, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
+  // Europe
+  { id: 'eu1',  destination: 'Frankfurt',        flag: '🇩🇪', region: 'Europe',          ecoMiles: 30800, bizMiles: null,  travelWindow: '1–31 Jul 2026', bookBy: '30 Jun 2026', discount: '30% off' },
 ];
 
 const REGIONS = [...new Set(ALL_DESTINATIONS.map(d => d.region))];
@@ -270,33 +315,43 @@ function DestinationPicker({ selected, onSave, onClose }: {
   );
 }
 
+function EscapeMilesBar({ label, miles, totalMiles }: { label: string; miles: number; totalMiles: number }) {
+  const canAfford = totalMiles >= miles;
+  const pct = Math.min((totalMiles / miles) * 100, 100);
+  return (
+    <div className={`mb-1.5 ${!canAfford ? 'opacity-55' : ''}`}>
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{label}</span>
+        <div className="flex items-center gap-1.5">
+          {!canAfford && <span className="text-[10px] text-zinc-400">{fmt(miles - Math.floor(totalMiles))} to go</span>}
+          {canAfford && <span className="text-[10px] font-semibold text-[#0d6e5a]">✓</span>}
+          <span className={`text-xs font-bold ${canAfford ? 'text-[#0d6e5a]' : 'text-zinc-500'}`}>{fmt(miles)} mi</span>
+        </div>
+      </div>
+      <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full transition-all duration-500 ${canAfford ? 'bg-[#0d6e5a]' : 'bg-zinc-300 dark:bg-zinc-600'}`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
 function EscapeRow({ escape, totalMiles, onDelete }: { escape: Escape; totalMiles: number; onDelete: () => void }) {
-  const canAfford = totalMiles >= escape.miles;
-  const pct = Math.min((totalMiles / escape.miles) * 100, 100);
   return (
     <div className="py-3.5 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
       <div className="flex items-start gap-3">
         <span className="text-xl mt-0.5">{escape.flag}</span>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2 mb-2">
             <div>
               <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{escape.destination}</p>
-              <p className="text-xs text-zinc-400">{escape.cabin} · {escape.travelWindow}</p>
+              <p className="text-[10px] text-zinc-400">{escape.travelWindow} · Book by {escape.bookBy}</p>
             </div>
-            <div className="text-right shrink-0">
-              <p className={`text-sm font-bold ${canAfford ? 'text-[#0d6e5a]' : 'text-zinc-500'}`}>{fmt(escape.miles)} mi</p>
-              {!canAfford && <p className="text-[10px] text-zinc-400">{fmt(escape.miles - Math.floor(totalMiles))} to go</p>}
-              {canAfford && <p className="text-[10px] text-[#0d6e5a] font-semibold">Can redeem ✓</p>}
-            </div>
+            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded-lg shrink-0">{escape.discount}</span>
           </div>
-          <div className="mt-2 h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${canAfford ? 'bg-[#0d6e5a]' : 'bg-zinc-300 dark:bg-zinc-600'}`}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
+          {escape.ecoMiles && <EscapeMilesBar label="Economy" miles={escape.ecoMiles} totalMiles={totalMiles} />}
+          {escape.bizMiles && <EscapeMilesBar label="Business" miles={escape.bizMiles} totalMiles={totalMiles} />}
         </div>
-        <button onClick={onDelete} className="text-zinc-300 dark:text-zinc-600 hover:text-red-400 transition-colors mt-0.5 shrink-0">
+        <button onClick={onDelete} className="text-zinc-300 dark:text-zinc-600 hover:text-red-400 transition-colors mt-1 shrink-0">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
           </svg>
@@ -309,20 +364,25 @@ function EscapeRow({ escape, totalMiles, onDelete }: { escape: Escape; totalMile
 function AddEscapeForm({ onAdd, onClose }: { onAdd: (e: Escape) => void; onClose: () => void }) {
   const [destination, setDestination] = useState('');
   const [flag, setFlag] = useState('');
-  const [miles, setMiles] = useState('');
-  const [cabin, setCabin] = useState('Economy');
+  const [ecoMiles, setEcoMiles] = useState('');
+  const [bizMiles, setBizMiles] = useState('');
   const [travelWindow, setTravelWindow] = useState('');
+  const [bookBy, setBookBy] = useState('');
+  const [discount, setDiscount] = useState('30% off');
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!destination || !miles) return;
+    if (!destination || (!ecoMiles && !bizMiles)) return;
     onAdd({
       id: Date.now().toString(),
       destination: destination.trim(),
       flag: flag.trim() || '✈️',
-      miles: parseInt(miles),
-      cabin,
+      region: '',
+      ecoMiles: ecoMiles ? parseInt(ecoMiles) : null,
+      bizMiles: bizMiles ? parseInt(bizMiles) : null,
       travelWindow: travelWindow.trim(),
+      bookBy: bookBy.trim(),
+      discount: discount.trim(),
     });
     onClose();
   }
@@ -349,21 +409,27 @@ function AddEscapeForm({ onAdd, onClose }: { onAdd: (e: Escape) => void; onClose
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={labelCls}>Miles</label>
-              <input type="number" value={miles} onChange={e => setMiles(e.target.value)} placeholder="14000" required className={inputCls} />
+              <label className={labelCls}>Eco Miles</label>
+              <input type="number" value={ecoMiles} onChange={e => setEcoMiles(e.target.value)} placeholder="9100" className={inputCls} />
             </div>
             <div>
-              <label className={labelCls}>Cabin</label>
-              <select value={cabin} onChange={e => setCabin(e.target.value)} className={inputCls}>
-                <option>Economy</option>
-                <option>Business</option>
-                <option>First</option>
-              </select>
+              <label className={labelCls}>Biz Miles</label>
+              <input type="number" value={bizMiles} onChange={e => setBizMiles(e.target.value)} placeholder="17500" className={inputCls} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className={labelCls}>Travel Window</label>
+              <input type="text" value={travelWindow} onChange={e => setTravelWindow(e.target.value)} placeholder="1–31 Jul 2026" className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Book By</label>
+              <input type="text" value={bookBy} onChange={e => setBookBy(e.target.value)} placeholder="30 Jun 2026" className={inputCls} />
             </div>
           </div>
           <div>
-            <label className={labelCls}>Travel Window</label>
-            <input type="text" value={travelWindow} onChange={e => setTravelWindow(e.target.value)} placeholder="e.g. Jul – Aug 2025" className={inputCls} />
+            <label className={labelCls}>Discount</label>
+            <input type="text" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="30% off" className={inputCls} />
           </div>
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-semibold text-zinc-500">Cancel</button>
