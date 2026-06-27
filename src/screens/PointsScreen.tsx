@@ -666,7 +666,7 @@ export default function PointsScreen() {
               </div>
             </div>
 
-            <div className="overflow-y-auto max-h-[520px] px-5">
+            <div className="overflow-y-auto max-h-[185px] px-5">
               {(() => {
                 const filtered = escapes.filter(e =>
                   (escapeRegion === 'All' || e.region === escapeRegion) &&
