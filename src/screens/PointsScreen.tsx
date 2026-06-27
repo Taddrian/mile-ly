@@ -614,8 +614,9 @@ export default function PointsScreen() {
             <div className="px-5 pt-4 pb-3">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Spontaneous Escapes</p>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">30% off Saver · Updated 27 Jun 2026, 12:00 SGT</p>
+                  <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">30% off Saver</p>
+                  <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">Spontaneous Escapes</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">Updated 27 Jun 2026, 12:00 SGT</p>
                 </div>
                 {/* One-way / Return toggle */}
                 <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-xl p-0.5">
