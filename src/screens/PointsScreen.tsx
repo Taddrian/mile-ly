@@ -466,25 +466,7 @@ export default function PointsScreen() {
               onChange={(e) => setManualMiles(e.target.value)}
               className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 bg-transparent w-full outline-none border-b-2 border-zinc-200 dark:border-zinc-700 focus:border-[#0d6e5a] pb-1 mb-1 transition-colors"
             />
-            <p className="text-sm text-zinc-400 mb-4">Enter your actual KrisFlyer balance</p>
-
-            {/* Expiry warning — sample with hardcoded data */}
-            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 mb-4 flex items-start gap-3">
-              <svg className="text-amber-500 shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Miles Expiring Soon</p>
-                <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
-                  <span className="font-semibold">8,500 miles</span> expire on <span className="font-semibold">31 Jan 2027</span>
-                </p>
-                <div className="mt-2 h-1.5 bg-amber-100 dark:bg-amber-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-400 rounded-full" style={{ width: '35%' }} />
-                </div>
-                <p className="text-[10px] text-amber-500 dark:text-amber-600 mt-1">218 days left · use or transfer before they lapse</p>
-              </div>
-            </div>
+            <p className="text-sm text-zinc-400 mb-5">Enter your actual KrisFlyer balance</p>
 
             {/* Value estimator */}
             <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4">
