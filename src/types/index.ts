@@ -18,6 +18,23 @@ export type Transaction = {
   amount: number;
   category: string;
   date: string;
+  type: 'income' | 'expense';
+};
+
+export type Category = {
+  id: string;
+  userId: string;
+  name: string;
+  type: 'income' | 'expense';
+};
+
+export type Entry = {
+  id: string;
+  userId: string;
+  month: string;       // ISO date, first of month e.g. "2026-07-01"
+  amount: number;
+  categoryId: string;
+  note?: string;
 };
 
 export type Tab = 'dashboard' | 'cards' | 'transactions' | 'points' | 'settings';

@@ -24,7 +24,7 @@ export default function AddTransactionForm({ cards, onSubmit, onCancel }: AddTra
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!amount || !merchant.trim() || !cardId) return;
-    onSubmit({ amount: parseFloat(amount), merchant: merchant.trim(), cardId, category, date });
+    onSubmit({ amount: parseFloat(amount), merchant: merchant.trim(), cardId, category, date, type: 'expense' });
   }
 
   return (
