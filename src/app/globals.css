@@ -3,32 +3,53 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --color-brand: #0d6e5a;
-  --color-brand-dark: #0a5747;
-  --color-brand-light: #e6f4f1;
+  /* Brand teal scale */
+  --color-brand-50:  #E1F5EE;
+  --color-brand-100: #9FE1CB;
+  --color-brand-400: #1D9E75;
+  --color-brand-600: #0F6E56;
+  --color-brand-800: #085041;
+
+  /* 50/30/20 bucket colours */
+  --color-bucket-needs:   #185FA5;
+  --color-bucket-wants:   #BA7517;
+  --color-bucket-savings: #1D9E75;
+
+  /* Semantic */
+  --color-success: #1D9E75;
+  --color-danger:  #E24B4A;
+
+  /* Surface */
+  --color-surface-page: #F5F5F3;
+  --color-surface-card: #FFFFFF;
+
+  /* Radius tokens */
+  --radius-card: 16px;
+  --radius-hero: 20px;
+  --radius-pill: 999px;
 }
 
 :root {
-  --background: #f2f2f2;
-  --foreground: #111111;
-  --card: #ffffff;
-  --brand: #0d6e5a;
-  --brand-dark: #0a5747;
-  --brand-light: #e6f4f1;
+  --bg:            #F5F5F3;
+  --fg:            #1A1A18;
+  --card:          #FFFFFF;
+  --border:        #E7E7E3;
+  --text-secondary:#6B6B66;
+  --text-muted:    #9A9A94;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --card: #1a1a1a;
-  --brand: #10876d;
-  --brand-dark: #0d6e5a;
-  --brand-light: #0d2e28;
+  --bg:            #0a0a0a;
+  --fg:            #fafafa;
+  --card:          #1a1a1a;
+  --border:        #2a2a2a;
+  --text-secondary:#999999;
+  --text-muted:    #666666;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--fg);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
 }

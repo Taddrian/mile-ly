@@ -5,111 +5,172 @@ import { Tab } from '@/types';
 interface BottomNavProps {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
+  onAddPress: () => void;
 }
 
-const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  {
-    id: 'dashboard',
-    label: 'Home',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-      </svg>
-    ),
-  },
-  {
-    id: 'cards',
-    label: 'Cards',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="5" width="20" height="14" rx="3" /><path d="M2 10h20" />
-      </svg>
-    ),
-  },
-  {
-    id: 'transactions',
-    label: 'Txns',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M8 6l4-4 4 4" /><path d="M12 2v10.5" /><path d="M16 18l-4 4-4-4" /><path d="M12 22V11.5" />
-      </svg>
-    ),
-  },
-  {
-    id: 'points',
-    label: 'Miles',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 16.5a2.5 2.5 0 0 1-2.5 2.5H4a2 2 0 0 1-2-2v-1l2-6h14l2 4.5" />
-        <path d="M12 7V4" /><path d="M8 7l-2-3" /><path d="M16 7l2-3" />
-        <circle cx="19" cy="17" r="1" />
-      </svg>
-    ),
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-      </svg>
-    ),
-  },
+const HomeIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+    <path d="M9 21V12h6v9" />
+  </svg>
+);
+
+const BudgetIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="3" width="20" height="14" rx="2" />
+    <path d="M8 21h8M12 17v4" />
+    <path d="M6 8h4M6 11h8" />
+  </svg>
+);
+
+const MilesIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.5a2.5 2.5 0 0 1-2.5 2.5H4a2 2 0 0 1-2-2v-1l2-6h14l2 4.5" />
+    <path d="M12 7V4" /><path d="M8 7l-2-3" /><path d="M16 7l2-3" />
+    <circle cx="19" cy="17" r="1" />
+  </svg>
+);
+
+const MoreIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+    <circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+const TABS: { id: Tab; label: string; Icon: React.FC }[] = [
+  { id: 'home',   label: 'Home',   Icon: HomeIcon   },
+  { id: 'budget', label: 'Budget', Icon: BudgetIcon },
+  { id: 'miles',  label: 'Miles',  Icon: MilesIcon  },
+  { id: 'more',   label: 'More',   Icon: MoreIcon   },
 ];
 
-export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 max-w-md mx-auto md:right-auto md:top-0 md:h-screen md:w-56 md:max-w-none md:mx-0 md:border-t-0 md:border-r md:flex md:flex-col">
+export default function BottomNav({ activeTab, onTabChange, onAddPress }: BottomNavProps) {
+  const ACTIVE = '#0F6E56';
+  const INACTIVE = '#9A9A94';
 
-      {/* Mobile: horizontal bottom bar */}
-      <div className="flex pb-safe md:hidden">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-40 md:right-auto md:top-0 md:h-screen md:w-56 md:flex md:flex-col"
+      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+    >
+      {/* Mobile bottom bar */}
+      <div
+        className="flex items-end pb-safe md:hidden"
+        style={{ borderTop: '0.5px solid var(--border)' }}
+      >
+        {/* Left two tabs */}
+        {TABS.slice(0, 2).map(({ id, label, Icon }) => {
+          const active = activeTab === id;
           return (
             <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 px-1 text-[10px] font-semibold tracking-wide transition-colors ${
-                isActive ? 'text-[#0d6e5a] dark:text-[#10876d]' : 'text-zinc-400 dark:text-zinc-500'
-              }`}
+              key={id}
+              onClick={() => onTabChange(id)}
+              className="flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors"
+              style={{ color: active ? ACTIVE : INACTIVE }}
             >
-              {tab.icon}
-              <span className="uppercase">{tab.label}</span>
+              <Icon />
+              <span>{label}</span>
+            </button>
+          );
+        })}
+
+        {/* Center Add button */}
+        <div className="flex-1 flex justify-center pb-1">
+          <button
+            onClick={onAddPress}
+            className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95 -mt-4"
+            style={{ backgroundColor: ACTIVE }}
+            aria-label="Add entry"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Right two tabs */}
+        {TABS.slice(2).map(({ id, label, Icon }) => {
+          const active = activeTab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => onTabChange(id)}
+              className="flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors"
+              style={{ color: active ? ACTIVE : INACTIVE }}
+            >
+              <Icon />
+              <span>{label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Desktop: vertical sidebar */}
-      <div className="hidden md:flex md:flex-col md:h-full md:py-6 md:px-3">
+      {/* Desktop sidebar */}
+      <div
+        className="hidden md:flex md:flex-col md:h-full md:py-6 md:px-3"
+        style={{ borderRight: '0.5px solid var(--border)' }}
+      >
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-2 pb-8">
-          <div className="w-8 h-8 rounded-xl bg-[#0d6e5a] flex items-center justify-center shrink-0">
-            <span className="text-white font-bold text-sm">M</span>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: ACTIVE }}>
+            <span className="text-white font-medium text-sm">M</span>
           </div>
-          <span className="font-bold text-sm text-zinc-800 dark:text-zinc-100">Mile-ly</span>
+          <span className="font-medium text-sm" style={{ color: 'var(--fg)' }}>Mile-ly</span>
         </div>
 
-        {/* Nav items */}
+        {/* Nav items — with Add button between budget and miles */}
         <div className="flex flex-col gap-1">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
+          {TABS.slice(0, 2).map(({ id, label, Icon }) => {
+            const active = activeTab === id;
             return (
               <button
-                key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left ${
-                  isActive
-                    ? 'bg-[#e6f4f1] dark:bg-[#0d2e28] text-[#0d6e5a] dark:text-[#10876d]'
-                    : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                }`}
+                key={id}
+                onClick={() => onTabChange(id)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left"
+                style={{
+                  backgroundColor: active ? '#E1F5EE' : 'transparent',
+                  color: active ? ACTIVE : 'var(--text-secondary)',
+                }}
               >
-                <span className={isActive ? 'text-[#0d6e5a] dark:text-[#10876d]' : 'text-zinc-400 dark:text-zinc-500'}>
-                  {tab.icon}
-                </span>
-                {tab.label}
+                <span style={{ color: active ? ACTIVE : 'var(--text-muted)' }}><Icon /></span>
+                {label}
+              </button>
+            );
+          })}
+
+          {/* Add button row */}
+          <button
+            onClick={onAddPress}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <span
+              className="w-6 h-6 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: ACTIVE }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </span>
+            Add entry
+          </button>
+
+          {TABS.slice(2).map(({ id, label, Icon }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => onTabChange(id)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left"
+                style={{
+                  backgroundColor: active ? '#E1F5EE' : 'transparent',
+                  color: active ? ACTIVE : 'var(--text-secondary)',
+                }}
+              >
+                <span style={{ color: active ? ACTIVE : 'var(--text-muted)' }}><Icon /></span>
+                {label}
               </button>
             );
           })}

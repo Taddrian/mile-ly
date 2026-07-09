@@ -1,37 +1,58 @@
 'use client';
 
 import { useState } from 'react';
-import { Tab } from '@/types';
+import { Tab, MoreSection } from '@/types';
 import { AppProvider } from '@/context/AppContext';
 import BottomNav from '@/components/layout/BottomNav';
 import DashboardScreen from '@/screens/DashboardScreen';
-import CardsScreen from '@/screens/CardsScreen';
-import TransactionsScreen from '@/screens/TransactionsScreen';
+import BudgetScreen from '@/screens/BudgetScreen';
 import PointsScreen from '@/screens/PointsScreen';
-import SettingsScreen from '@/screens/SettingsScreen';
+import MoreScreen from '@/screens/MoreScreen';
+import AddEntrySheet from '@/components/transactions/AddEntrySheet';
 
-function ScreenContent({ activeTab }: { activeTab: Tab }) {
+function ScreenContent({
+  activeTab,
+  moreSection,
+  onMoreSection,
+}: {
+  activeTab: Tab;
+  moreSection: MoreSection;
+  onMoreSection: (s: MoreSection) => void;
+}) {
   switch (activeTab) {
-    case 'dashboard': return <DashboardScreen />;
-    case 'cards': return <CardsScreen />;
-    case 'transactions': return <TransactionsScreen />;
-    case 'points': return <PointsScreen />;
-    case 'settings': return <SettingsScreen />;
+    case 'home':   return <DashboardScreen />;
+    case 'budget': return <BudgetScreen />;
+    case 'miles':  return <PointsScreen />;
+    case 'more':   return <MoreScreen section={moreSection} onSection={onMoreSection} />;
   }
 }
 
 export default function AppShell() {
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [activeTab, setActiveTab] = useState<Tab>('home');
+  const [showAdd, setShowAdd] = useState(false);
+  const [moreSection, setMoreSection] = useState<MoreSection>(null);
+
+  function handleTabChange(tab: Tab) {
+    setActiveTab(tab);
+    if (tab !== 'more') setMoreSection(null);
+  }
 
   return (
     <AppProvider>
-      <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 md:flex">
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="pb-20 md:pb-0 min-h-screen overflow-y-auto flex-1 md:ml-56">
-          <div className="max-w-md mx-auto md:max-w-2xl md:px-8 md:py-8">
-            <ScreenContent activeTab={activeTab} />
+      <div className="relative min-h-screen md:flex" style={{ backgroundColor: 'var(--bg)' }}>
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} onAddPress={() => setShowAdd(true)} />
+
+        <main className="pb-24 md:pb-0 min-h-screen overflow-y-auto flex-1 md:ml-56">
+          <div className="max-w-md mx-auto md:max-w-2xl">
+            <ScreenContent
+              activeTab={activeTab}
+              moreSection={moreSection}
+              onMoreSection={setMoreSection}
+            />
           </div>
         </main>
+
+        <AddEntrySheet isOpen={showAdd} onClose={() => setShowAdd(false)} />
       </div>
     </AppProvider>
   );

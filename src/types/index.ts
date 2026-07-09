@@ -37,4 +37,5 @@ export type Entry = {
   note?: string;
 };
 
-export type Tab = 'dashboard' | 'cards' | 'transactions' | 'points' | 'settings';
+export type Tab = 'home' | 'budget' | 'miles' | 'more';
+export type MoreSection = 'cards' | 'transactions' | 'settings' | null;
