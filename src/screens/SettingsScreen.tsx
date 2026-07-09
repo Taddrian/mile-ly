@@ -112,10 +112,21 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     setDarkMode(document.documentElement.classList.contains('dark'));
+
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    function onSystemChange(e: MediaQueryListEvent) {
+      if (!localStorage.getItem('theme')) {
+        document.documentElement.classList.toggle('dark', e.matches);
+        setDarkMode(e.matches);
+      }
+    }
+    mq.addEventListener('change', onSystemChange);
+    return () => mq.removeEventListener('change', onSystemChange);
   }, []);
 
   function toggleDarkMode() {
     const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
     setDarkMode(isDark);
   }
 
