@@ -7,7 +7,7 @@ import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import Modal from '@/components/ui/Modal';
 
 export default function TransactionsScreen() {
-  const { transactions, cards, addTransaction } = useApp();
+  const { transactions, cards, categories, addTransaction, addCategory } = useApp();
   const [showModal, setShowModal] = useState(false);
 
   const totalSpend = transactions.reduce((s, t) => s + t.amount, 0);
@@ -40,7 +40,9 @@ export default function TransactionsScreen() {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Add Transaction" key={showModal ? 'open' : 'closed'}>
         <AddTransactionForm
           cards={cards}
+          categories={categories}
           onSubmit={(data) => { addTransaction(data); setShowModal(false); }}
+          onAddCategory={addCategory}
           onCancel={() => setShowModal(false)}
         />
       </Modal>
