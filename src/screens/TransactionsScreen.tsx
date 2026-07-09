@@ -7,7 +7,7 @@ import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import Modal from '@/components/ui/Modal';
 
 export default function TransactionsScreen() {
-  const { transactions, cards, categories, addTransaction, addCategory } = useApp();
+  const { transactions, cards, categories, addTransaction, deleteTransaction, addCategory } = useApp();
   const [showModal, setShowModal] = useState(false);
 
   const totalSpend = transactions.reduce((s, t) => s + t.amount, 0);
@@ -23,7 +23,7 @@ export default function TransactionsScreen() {
       </div>
 
       <div className="px-4">
-        <TransactionList transactions={transactions} cards={cards} />
+        <TransactionList transactions={transactions} cards={cards} onDelete={deleteTransaction} />
       </div>
 
       {/* FAB */}
