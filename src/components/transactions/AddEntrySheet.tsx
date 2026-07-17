@@ -161,6 +161,42 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
             ))}
           </div>
 
+          {/* Card (expense only) — shown before category so flow is top-to-bottom */}
+          {type === 'expense' && cards.length > 0 && (
+            <div>
+              <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Card <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>· optional</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setCardId('')}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: cardId === '' ? '#0F6E56' : 'var(--bg)',
+                    color: cardId === '' ? '#fff' : 'var(--text-secondary)',
+                    border: '0.5px solid var(--border)',
+                  }}
+                >
+                  Cash / Other
+                </button>
+                {cards.map((card) => (
+                  <button
+                    key={card.id}
+                    onClick={() => setCardId(card.id)}
+                    className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                    style={{
+                      backgroundColor: cardId === card.id ? card.color : 'var(--bg)',
+                      color: cardId === card.id ? '#fff' : 'var(--text-secondary)',
+                      border: `0.5px solid ${cardId === card.id ? card.color : 'var(--border)'}`,
+                    }}
+                  >
+                    {card.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Category */}
           <div>
             <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Category</p>
@@ -217,40 +253,6 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               </button>
             )}
           </div>
-
-          {/* Card (expense only) */}
-          {type === 'expense' && cards.length > 0 && (
-            <div>
-              <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Card</p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => setCardId('')}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-                  style={{
-                    backgroundColor: cardId === '' ? '#0F6E56' : 'var(--bg)',
-                    color: cardId === '' ? '#fff' : 'var(--text-secondary)',
-                    border: '0.5px solid var(--border)',
-                  }}
-                >
-                  Cash / Other
-                </button>
-                {cards.map((card) => (
-                  <button
-                    key={card.id}
-                    onClick={() => setCardId(card.id)}
-                    className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-                    style={{
-                      backgroundColor: cardId === card.id ? card.color : 'var(--bg)',
-                      color: cardId === card.id ? '#fff' : 'var(--text-secondary)',
-                      border: `0.5px solid ${cardId === card.id ? card.color : 'var(--border)'}`,
-                    }}
-                  >
-                    {card.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Date */}
           <div>
