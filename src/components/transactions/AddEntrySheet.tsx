@@ -30,6 +30,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   const [addingCat, setAddingCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const filtered = categories.filter((c) => c.type === type);
 
@@ -157,6 +158,40 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               <div className="flex flex-wrap gap-2 mb-2">
                 {filtered.map((cat) => {
                   const selected = categoryId === cat.id;
+                  const confirming = confirmDeleteId === cat.id;
+
+                  if (confirming) {
+                    return (
+                      <div
+                        key={cat.id}
+                        className="flex items-center rounded-full text-xs font-medium overflow-hidden"
+                        style={{ border: '0.5px solid #E24B4A' }}
+                      >
+                        <span className="pl-3 pr-2 py-1.5" style={{ color: '#E24B4A' }}>
+                          Remove "{cat.name}"?
+                        </span>
+                        <button
+                          onClick={() => {
+                            if (categoryId === cat.id) setCategoryId('');
+                            deleteCategory(cat.id);
+                            setConfirmDeleteId(null);
+                          }}
+                          className="px-2 py-1.5 font-semibold text-white"
+                          style={{ backgroundColor: '#E24B4A' }}
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="px-2 py-1.5"
+                          style={{ color: 'var(--text-secondary)' }}
+                        >
+                          No
+                        </button>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div
                       key={cat.id}
@@ -167,18 +202,12 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                         border: '0.5px solid var(--border)',
                       }}
                     >
-                      <button
-                        onClick={() => setCategoryId(cat.id)}
-                        className="pl-3 pr-2 py-1.5"
-                      >
+                      <button onClick={() => setCategoryId(cat.id)} className="pl-3 pr-2 py-1.5">
                         {cat.name}
                       </button>
                       <button
-                        onClick={() => {
-                          if (categoryId === cat.id) setCategoryId('');
-                          deleteCategory(cat.id);
-                        }}
-                        className="pr-2 py-1.5 opacity-50 hover:opacity-100 transition-opacity"
+                        onClick={() => setConfirmDeleteId(cat.id)}
+                        className="pr-2.5 py-1.5 opacity-40 hover:opacity-70 transition-opacity text-[10px]"
                         aria-label={`Delete ${cat.name}`}
                       >
                         ✕
