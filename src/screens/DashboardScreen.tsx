@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { supabase } from '@/lib/supabase';
 import DonutRing from '@/components/ui/DonutRing';
 import StackedBar from '@/components/ui/StackedBar';
 import StatTile from '@/components/ui/StatTile';
@@ -9,6 +10,18 @@ import MonthPicker from '@/components/ui/MonthPicker';
 
 function fmt(n: number) {
   return n.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function prevMonthStr(month: string) {
+  const d = new Date(month);
+  d.setMonth(d.getMonth() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+}
+
+function delta(current: number, previous: number) {
+  if (previous === 0) return null;
+  const pct = Math.round(((current - previous) / previous) * 100);
+  return pct;
 }
 
 function daysLeftInMonth(monthStr: string) {
@@ -21,6 +34,23 @@ function daysLeftInMonth(monthStr: string) {
 
 export default function DashboardScreen() {
   const { entries, categories, selectedMonth, setSelectedMonth } = useApp();
+  const [prevIncome, setPrevIncome] = useState(0);
+  const [prevExpenses, setPrevExpenses] = useState(0);
+
+  useEffect(() => {
+    const pm = prevMonthStr(selectedMonth);
+    supabase.from('entries').select('amount, category_id').eq('month', pm).then(({ data }) => {
+      if (!data) return;
+      let inc = 0, exp = 0;
+      data.forEach((r) => {
+        const cat = categories.find((c) => c.id === r.category_id);
+        if (cat?.type === 'income') inc += Number(r.amount);
+        else exp += Number(r.amount);
+      });
+      setPrevIncome(inc);
+      setPrevExpenses(exp);
+    });
+  }, [selectedMonth, categories]);
 
   const income = useMemo(() =>
     entries.filter((e) => categories.find((c) => c.id === e.categoryId)?.type === 'income')
@@ -81,20 +111,36 @@ export default function DashboardScreen() {
             {/* Legend */}
             <div className="flex-1 space-y-3">
               {[
-                { dot: '#E7E7E3', label: 'Income',  value: income   },
-                { dot: '#0F6E56', label: 'Spent',   value: expenses },
-                { dot: '#1D9E75', label: 'Saved',   value: saved    },
-              ].map(({ dot, label, value }) => (
-                <div key={label} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dot }} />
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+                { dot: '#E7E7E3', label: 'Income',  value: income,   prev: prevIncome   },
+                { dot: '#0F6E56', label: 'Spent',   value: expenses, prev: prevExpenses },
+                { dot: '#1D9E75', label: 'Saved',   value: saved,    prev: null         },
+              ].map(({ dot, label, value, prev }) => {
+                const d = prev !== null ? delta(value, prev) : null;
+                return (
+                  <div key={label} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dot }} />
+                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {d !== null && (
+                        <span
+                          className="text-[10px] font-medium px-1 py-0.5 rounded"
+                          style={{
+                            backgroundColor: d > 0 ? (label === 'Spent' ? '#FEE2E2' : '#D1FAE5') : (label === 'Spent' ? '#D1FAE5' : '#FEE2E2'),
+                            color: d > 0 ? (label === 'Spent' ? '#E24B4A' : '#1D9E75') : (label === 'Spent' ? '#1D9E75' : '#E24B4A'),
+                          }}
+                        >
+                          {d > 0 ? '+' : ''}{d}%
+                        </span>
+                      )}
+                      <span className="text-xs font-medium" style={{ color: 'var(--fg)' }}>
+                        {fmt(value)}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-xs font-medium" style={{ color: 'var(--fg)' }}>
-                    SGD {fmt(value)}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

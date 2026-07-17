@@ -194,5 +194,6 @@ function dbToEntry(r: Record<string, unknown>): Entry {
     amount: Number(r.amount),
     categoryId: r.category_id as string,
     note: r.note as string | undefined,
+    createdAt: r.created_at as string | undefined,
   };
 }

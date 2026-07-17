@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
+import { Category } from '@/types';
 
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
@@ -135,6 +136,35 @@ export default function SettingsScreen() {
     window.location.href = '/login';
   }
 
+  async function handleExportCSV() {
+    const { data: entries } = await supabase.from('entries').select('*').order('created_at');
+    const { data: cats } = await supabase.from('categories').select('*');
+    if (!entries || !cats) return;
+
+    const catMap = Object.fromEntries((cats as Category[]).map((c) => [c.id, c]));
+    const header = 'Date,Month,Category,Type,Amount,Note';
+    const rows = entries.map((e) => {
+      const cat = catMap[e.category_id];
+      return [
+        (e.created_at as string)?.slice(0, 10) ?? '',
+        e.month,
+        cat?.name ?? '',
+        cat?.type ?? '',
+        Number(e.amount).toFixed(2),
+        e.note ?? '',
+      ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    });
+
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `milely-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="min-h-screen">
       <div className="px-5 pt-14 pb-4 md:pt-6">
@@ -158,9 +188,13 @@ export default function SettingsScreen() {
         <CategoriesSection />
 
         <SectionCard title="Data">
-          <SettingRow label="Export CSV" description="Download your transaction history">
-            <button disabled className="text-xs font-semibold text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-4 py-2 rounded-lg cursor-not-allowed">
-              Coming Soon
+          <SettingRow label="Export CSV" description="Download all your entries">
+            <button
+              onClick={handleExportCSV}
+              className="text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+              style={{ backgroundColor: '#E1F5EE', color: '#0F6E56' }}
+            >
+              Export
             </button>
           </SettingRow>
         </SectionCard>

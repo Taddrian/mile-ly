@@ -19,13 +19,23 @@ function currentMonth() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
 }
 
+function defaultDateForMonth(month: string): string {
+  const cm = currentMonth();
+  if (month === cm) return today();
+  // Past month: last day; future month: first day
+  const [y, m] = month.split('-').map(Number);
+  const lastDay = new Date(y, m, 0).getDate();
+  const d = new Date(month) < new Date(cm) ? lastDay : 1;
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
 export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
-  const { categories, addEntry, addCategory, deleteCategory } = useApp();
+  const { categories, addEntry, addCategory, deleteCategory, selectedMonth } = useApp();
 
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [date, setDate] = useState(today());
+  const [date, setDate] = useState(today); // updated when sheet opens
   const [remark, setRemark] = useState('');
   const [addingCat, setAddingCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -42,13 +52,13 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
     if (isOpen) {
       setAmountStr('');
       setCategoryId('');
-      setDate(today());
+      setDate(defaultDateForMonth(selectedMonth));
       setRemark('');
       setType('expense');
       setAddingCat(false);
       setNewCatName('');
     }
-  }, [isOpen]);
+  }, [isOpen, selectedMonth]);
 
   async function save(andAnother = false) {
     const amount = parseFloat(amountStr);

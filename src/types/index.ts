@@ -35,6 +35,7 @@ export type Entry = {
   amount: number;
   categoryId: string;
   note?: string;
+  createdAt?: string;
 };
 
 export type Tab = 'home' | 'budget' | 'miles' | 'more';
