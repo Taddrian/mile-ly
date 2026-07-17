@@ -64,10 +64,10 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
 
   async function save(andAnother = false) {
     const amount = parseFloat(amountStr);
-    if (!amount || amount <= 0 || !categoryId) return;
+    if (!amount || amount <= 0 || (!categoryId && !cardId)) return;
     setSaving(true);
     const month = date.slice(0, 7) + '-01';
-    await addEntry({ month, amount, categoryId, cardId: cardId || undefined, note: remark || undefined });
+    await addEntry({ month, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined });
     setSaving(false);
     if (andAnother) {
       setAmountStr('');
@@ -282,7 +282,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
           {/* Actions */}
           <button
             onClick={() => save(false)}
-            disabled={saving || !amountStr || !categoryId}
+            disabled={saving || !amountStr || (!categoryId && !cardId)}
             className="w-full py-3.5 rounded-xl text-sm font-medium text-white transition-opacity disabled:opacity-40"
             style={{ backgroundColor: '#0F6E56' }}
           >
@@ -290,7 +290,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
           </button>
           <button
             onClick={() => save(true)}
-            disabled={saving || !amountStr || !categoryId}
+            disabled={saving || !amountStr || (!categoryId && !cardId)}
             className="w-full text-center text-xs font-medium py-1 disabled:opacity-40"
             style={{ color: '#0F6E56' }}
           >

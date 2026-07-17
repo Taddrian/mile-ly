@@ -123,7 +123,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       user_id: user.id,
       month: data.month,
       amount: data.amount,
-      category_id: data.categoryId,
+      category_id: data.categoryId ?? null,
       card_id: data.cardId ?? null,
       note: data.note,
     }).select().single();
