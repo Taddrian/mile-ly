@@ -40,7 +40,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   const [addingCat, setAddingCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [saving, setSaving] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const filtered = categories.filter((c) => c.type === type);
 
@@ -168,40 +168,6 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               <div className="flex flex-wrap gap-2 mb-2">
                 {filtered.map((cat) => {
                   const selected = categoryId === cat.id;
-                  const confirming = confirmDeleteId === cat.id;
-
-                  if (confirming) {
-                    return (
-                      <div
-                        key={cat.id}
-                        className="flex items-center rounded-full text-xs font-medium overflow-hidden"
-                        style={{ border: '0.5px solid #E24B4A' }}
-                      >
-                        <span className="pl-3 pr-2 py-1.5" style={{ color: '#E24B4A' }}>
-                          Remove "{cat.name}"?
-                        </span>
-                        <button
-                          onClick={() => {
-                            if (categoryId === cat.id) setCategoryId('');
-                            deleteCategory(cat.id);
-                            setConfirmDeleteId(null);
-                          }}
-                          className="px-2 py-1.5 font-semibold text-white"
-                          style={{ backgroundColor: '#E24B4A' }}
-                        >
-                          Yes
-                        </button>
-                        <button
-                          onClick={() => setConfirmDeleteId(null)}
-                          className="px-2 py-1.5"
-                          style={{ color: 'var(--text-secondary)' }}
-                        >
-                          No
-                        </button>
-                      </div>
-                    );
-                  }
-
                   return (
                     <div
                       key={cat.id}
@@ -216,7 +182,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                         {cat.name}
                       </button>
                       <button
-                        onClick={() => setConfirmDeleteId(cat.id)}
+                        onClick={() => setPendingDeleteId(cat.id)}
                         className="pr-2.5 py-1.5 opacity-40 hover:opacity-70 transition-opacity text-[10px]"
                         aria-label={`Delete ${cat.name}`}
                       >
@@ -294,6 +260,45 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
           </button>
         </div>
       </div>
+
+    {/* Category delete action sheet */}
+    {pendingDeleteId && (() => {
+      const cat = categories.find((c) => c.id === pendingDeleteId);
+      return (
+        <>
+          <div className="fixed inset-0 z-[60] bg-black/40" onClick={() => setPendingDeleteId(null)} />
+          <div
+            className="fixed bottom-0 left-0 right-0 z-[70] rounded-t-[20px] p-6 max-w-md mx-auto"
+            style={{ backgroundColor: 'var(--card)' }}
+          >
+            <p className="text-sm font-medium text-center mb-1" style={{ color: 'var(--fg)' }}>
+              Remove category?
+            </p>
+            <p className="text-xs text-center mb-6" style={{ color: 'var(--text-muted)' }}>
+              "{cat?.name}" will be permanently deleted.
+            </p>
+            <button
+              onClick={() => {
+                if (categoryId === pendingDeleteId) setCategoryId('');
+                deleteCategory(pendingDeleteId);
+                setPendingDeleteId(null);
+              }}
+              className="w-full py-4 rounded-xl text-sm font-semibold text-white mb-3"
+              style={{ backgroundColor: '#E24B4A' }}
+            >
+              Remove
+            </button>
+            <button
+              onClick={() => setPendingDeleteId(null)}
+              className="w-full py-4 rounded-xl text-sm font-medium"
+              style={{ backgroundColor: 'var(--bg)', color: 'var(--fg)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      );
+    })()}
     </>
   );
 }
