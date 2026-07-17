@@ -20,7 +20,7 @@ function currentMonth() {
 }
 
 export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
-  const { categories, addEntry, addCategory } = useApp();
+  const { categories, addEntry, addCategory, deleteCategory } = useApp();
 
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
@@ -155,20 +155,37 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>No {type} categories yet.</p>
             ) : (
               <div className="flex flex-wrap gap-2 mb-2">
-                {filtered.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setCategoryId(cat.id)}
-                    className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-                    style={{
-                      backgroundColor: categoryId === cat.id ? '#0F6E56' : 'var(--bg)',
-                      color: categoryId === cat.id ? '#fff' : 'var(--text-secondary)',
-                      border: '0.5px solid var(--border)',
-                    }}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+                {filtered.map((cat) => {
+                  const selected = categoryId === cat.id;
+                  return (
+                    <div
+                      key={cat.id}
+                      className="flex items-center rounded-full text-xs font-medium overflow-hidden"
+                      style={{
+                        backgroundColor: selected ? '#0F6E56' : 'var(--bg)',
+                        color: selected ? '#fff' : 'var(--text-secondary)',
+                        border: '0.5px solid var(--border)',
+                      }}
+                    >
+                      <button
+                        onClick={() => setCategoryId(cat.id)}
+                        className="pl-3 pr-2 py-1.5"
+                      >
+                        {cat.name}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (categoryId === cat.id) setCategoryId('');
+                          deleteCategory(cat.id);
+                        }}
+                        className="pr-2 py-1.5 opacity-50 hover:opacity-100 transition-opacity"
+                        aria-label={`Delete ${cat.name}`}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
