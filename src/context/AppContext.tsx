@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { CreditCard, Transaction, Category, Entry } from '@/types';
 import { supabase } from '@/lib/supabase';
 
@@ -124,6 +124,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       month: data.month,
       amount: data.amount,
       category_id: data.categoryId,
+      card_id: data.cardId ?? null,
       note: data.note,
     }).select().single();
     if (row) setEntries((prev) => [dbToEntry(row), ...prev]);
@@ -134,9 +135,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
+  // Derive currentSpent per card from selected month's entries
+  const cardsWithSpent = useMemo(() =>
+    cards.map((card) => ({
+      ...card,
+      currentSpent: entries
+        .filter((e) => e.cardId === card.id)
+        .reduce((s, e) => s + e.amount, 0),
+    })),
+    [cards, entries]
+  );
+
   return (
     <AppContext.Provider value={{
-      cards, transactions, categories, entries, selectedMonth, setSelectedMonth,
+      cards: cardsWithSpent, transactions, categories, entries, selectedMonth, setSelectedMonth,
       addCard, deleteCard, addTransaction, deleteTransaction,
       addCategory, deleteCategory, addEntry, deleteEntry,
     }}>
@@ -193,6 +205,7 @@ function dbToEntry(r: Record<string, unknown>): Entry {
     month: r.month as string,
     amount: Number(r.amount),
     categoryId: r.category_id as string,
+    cardId: r.card_id as string | undefined,
     note: r.note as string | undefined,
     createdAt: r.created_at as string | undefined,
   };

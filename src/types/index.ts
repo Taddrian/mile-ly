@@ -34,6 +34,7 @@ export type Entry = {
   month: string;       // ISO date, first of month e.g. "2026-07-01"
   amount: number;
   categoryId: string;
+  cardId?: string;
   note?: string;
   createdAt?: string;
 };

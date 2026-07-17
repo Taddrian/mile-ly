@@ -15,7 +15,7 @@ function fmtDate(iso?: string) {
 }
 
 export default function TransactionsScreen() {
-  const { entries, categories, deleteEntry } = useApp();
+  const { entries, categories, cards, deleteEntry } = useApp();
   const [search, setSearch] = useState('');
 
   const totalIncome = useMemo(() =>
@@ -73,6 +73,7 @@ export default function TransactionsScreen() {
           <div className="rounded-[16px] overflow-hidden" style={{ border: '0.5px solid var(--border)' }}>
             {filtered.map((entry, i) => {
               const cat = categories.find((c) => c.id === entry.categoryId);
+              const card = cards.find((c) => c.id === entry.cardId);
               const isIncome = cat?.type === 'income';
               return (
                 <SwipeableRow key={entry.id} onDelete={() => deleteEntry(entry.id)}>
@@ -87,9 +88,19 @@ export default function TransactionsScreen() {
                       <p className="text-sm font-medium truncate" style={{ color: 'var(--fg)' }}>
                         {cat?.name ?? 'Unknown'}
                       </p>
-                      {entry.note && (
-                        <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>{entry.note}</p>
-                      )}
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        {card && (
+                          <span
+                            className="text-[10px] font-medium px-1.5 py-0.5 rounded-full text-white"
+                            style={{ backgroundColor: card.color }}
+                          >
+                            {card.name}
+                          </span>
+                        )}
+                        {entry.note && (
+                          <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{entry.note}</p>
+                        )}
+                      </div>
                       <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
                         {fmtDate(entry.createdAt)}
                       </p>

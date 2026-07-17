@@ -30,7 +30,7 @@ function defaultDateForMonth(month: string): string {
 }
 
 export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
-  const { categories, addEntry, addCategory, deleteCategory, selectedMonth } = useApp();
+  const { categories, cards, addEntry, addCategory, deleteCategory, selectedMonth } = useApp();
 
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
@@ -39,6 +39,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   const [remark, setRemark] = useState('');
   const [addingCat, setAddingCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
+  const [cardId, setCardId] = useState('');
   const [saving, setSaving] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
@@ -52,6 +53,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
     if (isOpen) {
       setAmountStr('');
       setCategoryId('');
+      setCardId('');
       setDate(defaultDateForMonth(selectedMonth));
       setRemark('');
       setType('expense');
@@ -65,7 +67,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
     if (!amount || amount <= 0 || !categoryId) return;
     setSaving(true);
     const month = date.slice(0, 7) + '-01';
-    await addEntry({ month, amount, categoryId, note: remark || undefined });
+    await addEntry({ month, amount, categoryId, cardId: cardId || undefined, note: remark || undefined });
     setSaving(false);
     if (andAnother) {
       setAmountStr('');
@@ -215,6 +217,40 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               </button>
             )}
           </div>
+
+          {/* Card (expense only) */}
+          {type === 'expense' && cards.length > 0 && (
+            <div>
+              <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Card</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setCardId('')}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: cardId === '' ? '#0F6E56' : 'var(--bg)',
+                    color: cardId === '' ? '#fff' : 'var(--text-secondary)',
+                    border: '0.5px solid var(--border)',
+                  }}
+                >
+                  Cash / Other
+                </button>
+                {cards.map((card) => (
+                  <button
+                    key={card.id}
+                    onClick={() => setCardId(card.id)}
+                    className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                    style={{
+                      backgroundColor: cardId === card.id ? card.color : 'var(--bg)',
+                      color: cardId === card.id ? '#fff' : 'var(--text-secondary)',
+                      border: `0.5px solid ${cardId === card.id ? card.color : 'var(--border)'}`,
+                    }}
+                  >
+                    {card.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Date */}
           <div>
