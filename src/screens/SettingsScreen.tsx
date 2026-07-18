@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { Category } from '@/types';
+import { SEA_CURRENCIES } from '@/lib/currency';
 
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
@@ -109,6 +110,7 @@ function CategoriesSection() {
 }
 
 export default function SettingsScreen() {
+  const { currency, setCurrency } = useApp();
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
@@ -175,7 +177,16 @@ export default function SettingsScreen() {
       <div className="px-4 space-y-4">
         <SectionCard title="Currency">
           <SettingRow label="Default Currency" description="Used for all spending displays">
-            <span className="text-sm font-bold text-[#0d6e5a] bg-[#e6f4f1] dark:bg-[#0d2e28] px-3 py-1 rounded-lg">SGD</span>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="text-sm font-semibold rounded-lg px-3 py-1.5 outline-none cursor-pointer"
+              style={{ backgroundColor: '#E1F5EE', color: '#0F6E56', border: 'none' }}
+            >
+              {SEA_CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+              ))}
+            </select>
           </SettingRow>
         </SectionCard>
 

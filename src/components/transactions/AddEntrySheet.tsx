@@ -30,7 +30,7 @@ function defaultDateForMonth(month: string): string {
 }
 
 export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
-  const { categories, cards, addEntry, addCategory, deleteCategory, selectedMonth } = useApp();
+  const { categories, cards, addEntry, addCategory, deleteCategory, selectedMonth, currency } = useApp();
 
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
@@ -128,7 +128,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
           {/* Big amount */}
           <div className="text-center py-2">
             <div className="flex items-center justify-center gap-1">
-              <span className="text-2xl font-medium" style={{ color: 'var(--text-muted)' }}>SGD</span>
+              <span className="text-2xl font-medium" style={{ color: 'var(--text-muted)' }}>{currency}</span>
               <input
                 type="number"
                 inputMode="decimal"

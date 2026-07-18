@@ -3,14 +3,11 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
+import { fmtAmount } from '@/lib/currency';
 import DonutRing from '@/components/ui/DonutRing';
 import StackedBar from '@/components/ui/StackedBar';
 import StatTile from '@/components/ui/StatTile';
 import MonthPicker from '@/components/ui/MonthPicker';
-
-function fmt(n: number) {
-  return n.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 function prevMonthStr(month: string) {
   const d = new Date(month);
@@ -33,7 +30,7 @@ function daysLeftInMonth(monthStr: string) {
 }
 
 export default function DashboardScreen() {
-  const { entries, categories, selectedMonth, setSelectedMonth } = useApp();
+  const { entries, categories, selectedMonth, setSelectedMonth, currency } = useApp();
   const [prevIncome, setPrevIncome] = useState(0);
   const [prevExpenses, setPrevExpenses] = useState(0);
 
@@ -102,7 +99,7 @@ export default function DashboardScreen() {
           <div className="flex items-center gap-6">
             <DonutRing
               segments={ringSegments}
-              centerLabel={`SGD ${fmt(saved)}`}
+              centerLabel={`${currency} ${fmtAmount(saved, currency)}`}
               centerSublabel="left"
               trackColor="#E1F5EE"
               size={120}
@@ -135,7 +132,7 @@ export default function DashboardScreen() {
                         </span>
                       )}
                       <span className="text-xs font-medium" style={{ color: 'var(--fg)' }}>
-                        {fmt(value)}
+                        {fmtAmount(value, currency)}
                       </span>
                     </div>
                   </div>
@@ -150,13 +147,13 @@ export default function DashboardScreen() {
           <StatTile
             chipLabel="savings"
             label="Saved this month"
-            value={`SGD ${fmt(saved)}`}
+            value={`${currency} ${fmtAmount(saved, currency)}`}
             caption={income > 0 ? `${Math.round((saved / income) * 100)}% of income` : 'No income yet'}
           />
           <StatTile
             chipLabel="calendar"
             label="Safe to spend / day"
-            value={perDay > 0 ? `SGD ${fmt(perDay)}` : '—'}
+            value={perDay > 0 ? `${currency} ${fmtAmount(perDay, currency)}` : '—'}
             caption={daysLeft > 0 ? `${daysLeft} days left` : 'End of month'}
           />
         </div>

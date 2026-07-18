@@ -2,14 +2,11 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
+import { fmtAmount } from '@/lib/currency';
 import MonthPicker from '@/components/ui/MonthPicker';
 import ProgressBar from '@/components/ui/ProgressBar';
 import CategoryChip from '@/components/ui/CategoryChip';
 import StackedBar from '@/components/ui/StackedBar';
-
-function fmt(n: number) {
-  return n.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 function daysLeftInMonth(monthStr: string) {
   const now = new Date();
@@ -22,7 +19,7 @@ function daysLeftInMonth(monthStr: string) {
 const BUDGET_KEY = 'milely_monthly_budget';
 
 export default function BudgetScreen() {
-  const { entries, categories, selectedMonth, setSelectedMonth } = useApp();
+  const { entries, categories, selectedMonth, setSelectedMonth, currency } = useApp();
   const [monthlyBudget, setMonthlyBudget] = useState(0);
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput, setBudgetInput] = useState('');
@@ -89,9 +86,9 @@ export default function BudgetScreen() {
         <div className="rounded-[20px] p-5 text-white" style={{ backgroundColor: '#0F6E56' }}>
           <p className="text-xs text-white/70 mb-1">Spent this month</p>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-medium">SGD {fmt(expenses)}</span>
+            <span className="text-2xl font-medium">{currency} {fmtAmount(expenses, currency)}</span>
             {monthlyBudget > 0 && (
-              <span className="text-sm text-white/60">/ SGD {fmt(monthlyBudget)}</span>
+              <span className="text-sm text-white/60">/ {currency} {fmtAmount(monthlyBudget, currency)}</span>
             )}
           </div>
 
@@ -110,8 +107,8 @@ export default function BudgetScreen() {
               </div>
               <p className="text-xs text-white/80">
                 {isOver
-                  ? `SGD ${fmt(expenses - monthlyBudget)} over budget`
-                  : `SGD ${fmt(budgetLeft)} left`}
+                  ? `${currency} ${fmtAmount(expenses - monthlyBudget, currency)} over budget`
+                  : `${currency} ${fmtAmount(budgetLeft, currency)} left`}
               </p>
             </>
           ) : (
@@ -183,7 +180,7 @@ export default function BudgetScreen() {
                 <div key={label}>
                   <div className="flex justify-between text-xs mb-1.5">
                     <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
-                    <span className="font-medium" style={{ color: 'var(--fg)' }}>SGD {fmt(target)}</span>
+                    <span className="font-medium" style={{ color: 'var(--fg)' }}>{currency} {fmtAmount(target, currency)}</span>
                   </div>
                   <ProgressBar value={target} max={expenses} color={color} />
                 </div>
@@ -208,7 +205,7 @@ export default function BudgetScreen() {
                     <CategoryChip name={name} size={28} />
                     <div className="flex-1 flex justify-between text-xs">
                       <span style={{ color: 'var(--fg)' }}>{name}</span>
-                      <span className="font-medium" style={{ color: 'var(--fg)' }}>SGD {fmt(amount)}</span>
+                      <span className="font-medium" style={{ color: 'var(--fg)' }}>{currency} {fmtAmount(amount, currency)}</span>
                     </div>
                   </div>
                   <ProgressBar value={amount} max={expenses} color="#0F6E56" />

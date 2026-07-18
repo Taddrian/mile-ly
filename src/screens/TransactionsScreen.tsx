@@ -2,12 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
+import { fmtAmount } from '@/lib/currency';
 import CategoryChip from '@/components/ui/CategoryChip';
 import SwipeableRow from '@/components/transactions/SwipeableRow';
-
-function fmt(n: number) {
-  return n.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 function fmtDate(iso?: string) {
   if (!iso) return '';
@@ -15,7 +12,7 @@ function fmtDate(iso?: string) {
 }
 
 export default function TransactionsScreen() {
-  const { entries, categories, cards, deleteEntry } = useApp();
+  const { entries, categories, cards, deleteEntry, currency } = useApp();
   const [search, setSearch] = useState('');
 
   const totalIncome = useMemo(() =>
@@ -47,7 +44,7 @@ export default function TransactionsScreen() {
         <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>History</p>
         <h1 className="text-2xl font-medium" style={{ color: 'var(--fg)' }}>Transactions</h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          {entries.length} {entries.length === 1 ? 'entry' : 'entries'} · +{fmt(totalIncome)} / −{fmt(totalExpense)}
+          {entries.length} {entries.length === 1 ? 'entry' : 'entries'} · +{fmtAmount(totalIncome, currency)} / −{fmtAmount(totalExpense, currency)}
         </p>
       </div>
 
@@ -106,7 +103,7 @@ export default function TransactionsScreen() {
                       </p>
                     </div>
                     <p className="text-sm font-medium shrink-0" style={{ color: isIncome ? '#1D9E75' : 'var(--fg)' }}>
-                      {isIncome ? '+' : '−'}SGD {fmt(entry.amount)}
+                      {isIncome ? '+' : '−'}{currency} {fmtAmount(entry.amount, currency)}
                     </p>
                   </div>
                 </SwipeableRow>

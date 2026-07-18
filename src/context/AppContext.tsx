@@ -11,6 +11,8 @@ interface AppContextValue {
   entries: Entry[];
   selectedMonth: string;
   setSelectedMonth: (month: string) => void;
+  currency: string;
+  setCurrency: (c: string) => void;
   addCard: (card: Omit<CreditCard, 'id' | 'currentSpent'>) => Promise<void>;
   deleteCard: (id: string) => Promise<void>;
   addTransaction: (txn: Omit<Transaction, 'id'>) => Promise<void>;
@@ -34,6 +36,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth());
+  const [currency, setCurrencyState] = useState('SGD');
+
+  useEffect(() => {
+    const stored = localStorage.getItem('milely_currency');
+    if (stored) setCurrencyState(stored);
+  }, []);
+
+  function setCurrency(c: string) {
+    setCurrencyState(c);
+    localStorage.setItem('milely_currency', c);
+  }
 
   useEffect(() => {
     loadAll();
@@ -149,6 +162,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       cards: cardsWithSpent, transactions, categories, entries, selectedMonth, setSelectedMonth,
+      currency, setCurrency,
       addCard, deleteCard, addTransaction, deleteTransaction,
       addCategory, deleteCategory, addEntry, deleteEntry,
     }}>
