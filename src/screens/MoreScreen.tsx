@@ -1,21 +1,10 @@
 'use client';
 
 import { MoreSection } from '@/types';
-import CardsScreen from '@/screens/CardsScreen';
 import TransactionsScreen from '@/screens/TransactionsScreen';
 import SettingsScreen from '@/screens/SettingsScreen';
 
 const MENU_ITEMS: { id: Exclude<MoreSection, null>; label: string; description: string; Icon: React.FC }[] = [
-  {
-    id: 'cards',
-    label: 'Cards',
-    description: 'Manage your credit & debit cards',
-    Icon: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="5" width="20" height="14" rx="3" /><path d="M2 10h20" />
-      </svg>
-    ),
-  },
   {
     id: 'transactions',
     label: 'Transactions',
@@ -48,7 +37,6 @@ interface MoreScreenProps {
 export default function MoreScreen({ section, onSection }: MoreScreenProps) {
   if (section !== null) {
     const titles: Record<Exclude<MoreSection, null>, string> = {
-      cards: 'Cards',
       transactions: 'Transactions',
       settings: 'Settings',
     };
@@ -64,7 +52,6 @@ export default function MoreScreen({ section, onSection }: MoreScreenProps) {
           </svg>
           <span className="text-sm font-medium">More</span>
         </button>
-        {section === 'cards'        && <CardsScreen />}
         {section === 'transactions' && <TransactionsScreen />}
         {section === 'settings'     && <SettingsScreen />}
       </div>

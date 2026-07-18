@@ -8,6 +8,8 @@ import DonutRing from '@/components/ui/DonutRing';
 import StackedBar from '@/components/ui/StackedBar';
 import StatTile from '@/components/ui/StatTile';
 import MonthPicker from '@/components/ui/MonthPicker';
+import AddCardForm from '@/components/cards/AddCardForm';
+import Modal from '@/components/ui/Modal';
 
 function prevMonthStr(month: string) {
   const d = new Date(month);
@@ -30,7 +32,8 @@ function daysLeftInMonth(monthStr: string) {
 }
 
 export default function DashboardScreen() {
-  const { entries, categories, selectedMonth, setSelectedMonth, currency } = useApp();
+  const { entries, categories, cards, addCard, selectedMonth, setSelectedMonth, currency } = useApp();
+  const [showAddCard, setShowAddCard] = useState(false);
   const [prevIncome, setPrevIncome] = useState(0);
   const [prevExpenses, setPrevExpenses] = useState(0);
 
@@ -183,7 +186,76 @@ export default function DashboardScreen() {
             </p>
           </div>
         )}
+
+        {/* Cards */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Cards</p>
+            <button
+              onClick={() => setShowAddCard(true)}
+              className="text-xs font-medium"
+              style={{ color: '#0F6E56' }}
+            >
+              + Add
+            </button>
+          </div>
+
+          {cards.length === 0 ? (
+            <button
+              onClick={() => setShowAddCard(true)}
+              className="w-full py-5 rounded-[16px] text-xs border-2 border-dashed transition-colors"
+              style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
+            >
+              Add your first card
+            </button>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4" style={{ scrollbarWidth: 'none' }}>
+              {cards.map((card) => {
+                const pct = card.monthlyLimit > 0 ? Math.min((card.currentSpent / card.monthlyLimit) * 100, 100) : 0;
+                const num = parseInt(card.color.replace('#', ''), 16);
+                const r = Math.min(255, (num >> 16) + 30);
+                const g = Math.min(255, ((num >> 8) & 0xff) + 30);
+                const b = Math.min(255, (num & 0xff) + 30);
+                const lighter = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+                return (
+                  <div
+                    key={card.id}
+                    className="shrink-0 rounded-2xl p-4 flex flex-col justify-between"
+                    style={{
+                      width: 160,
+                      minHeight: 100,
+                      background: `linear-gradient(135deg, ${card.color} 0%, ${lighter} 100%)`,
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-white text-xs font-semibold truncate pr-1">{card.name}</p>
+                      <p className="text-white/60 text-[10px] font-mono shrink-0">••{card.last4}</p>
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-bold">{currency} {fmtAmount(card.currentSpent, currency)}</p>
+                      {card.monthlyLimit > 0 && (
+                        <>
+                          <p className="text-white/60 text-[10px] mb-1.5">of {currency} {fmtAmount(card.monthlyLimit, currency)}</p>
+                          <div className="h-1 rounded-full bg-white/20">
+                            <div className="h-1 rounded-full bg-white transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
+
+      <Modal isOpen={showAddCard} onClose={() => setShowAddCard(false)} title="Add New Card" key={showAddCard ? 'open' : 'closed'}>
+        <AddCardForm
+          onSubmit={(data) => { addCard(data); setShowAddCard(false); }}
+          onCancel={() => setShowAddCard(false)}
+        />
+      </Modal>
     </div>
   );
 }
