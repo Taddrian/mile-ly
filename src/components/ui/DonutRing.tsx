@@ -127,30 +127,64 @@ export default function DonutRing({
         <polygon points="7,0 8.2,5.8 14,7 8.2,8.2 7,14 5.8,8.2 0,7 5.8,5.8" fill="#FF6B5E" />
       </svg>
 
-      {/* Center text — capped so it always fits inside the inner circle */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
-        <span style={{
-          fontSize: Math.min(Math.round(11 * scale), 13),
-          fontWeight: 800,
-          color: 'var(--m-ink, #3C3C3C)',
-          letterSpacing: '-0.01em',
-          lineHeight: 1.15,
-        }}>
-          {centerLabel}
-        </span>
-        {centerSublabel && (
-          <span style={{
-            fontSize: Math.min(Math.round(7.5 * scale), 9),
-            fontWeight: 700,
-            color: 'var(--m-slate, #777777)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            marginTop: 2,
-          }}>
-            {centerSublabel}
-          </span>
-        )}
-      </div>
+      {/* Center text — auto-sized to fit inside the inner circle */}
+      {(() => {
+        // Inner circle usable width in px
+        const innerR = (R - SW / 2) * scale;
+        const usableW = innerR * 2 * 0.78;
+
+        // Split "SGD 2,448.07" → currencyPart + numberPart for better sizing
+        const spaceIdx = centerLabel.indexOf(' ');
+        const hasCurrency = spaceIdx !== -1;
+        const currencyPart = hasCurrency ? centerLabel.slice(0, spaceIdx) : '';
+        const numberPart   = hasCurrency ? centerLabel.slice(spaceIdx + 1) : centerLabel;
+
+        // Auto-size the number based on character count
+        const charRatio = 0.58; // avg char width / fontSize for weight-800 numeric
+        const autoSize = Math.floor(usableW / (numberPart.length * charRatio));
+        const numberFontSize = Math.min(Math.max(autoSize, 8), 18);
+
+        const currencyFontSize = Math.min(Math.round(7 * scale), 9);
+        const sublabelFontSize = Math.min(Math.round(7 * scale), 9);
+
+        return (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
+            {hasCurrency && (
+              <span style={{
+                fontSize: currencyFontSize,
+                fontWeight: 700,
+                color: 'var(--m-slate, #777777)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                lineHeight: 1.2,
+              }}>
+                {currencyPart}
+              </span>
+            )}
+            <span style={{
+              fontSize: numberFontSize,
+              fontWeight: 800,
+              color: 'var(--m-ink, #3C3C3C)',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.15,
+            }}>
+              {numberPart}
+            </span>
+            {centerSublabel && (
+              <span style={{
+                fontSize: sublabelFontSize,
+                fontWeight: 700,
+                color: 'var(--m-slate, #777777)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginTop: 2,
+              }}>
+                {centerSublabel}
+              </span>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
