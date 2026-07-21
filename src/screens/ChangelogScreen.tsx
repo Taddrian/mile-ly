@@ -15,6 +15,16 @@ interface Release {
 
 const CHANGELOG: Release[] = [
   {
+    version: 'v0.5.0',
+    date: 'Jul 2026',
+    changes: [
+      { type: 'new', text: 'Feedback form in More tab — report bugs or suggest features directly from the app' },
+      { type: 'new', text: 'Transactions moved to bottom nav for quicker access' },
+      { type: 'improved', text: 'Budget merged into Home tab — budget progress, 50/30/20 split, and category breakdown all in one scroll' },
+      { type: 'improved', text: 'More tab cleaned up — What\'s New moved to top, Transactions removed' },
+    ],
+  },
+  {
     version: 'v0.4.0',
     date: 'Jul 2026',
     changes: [
