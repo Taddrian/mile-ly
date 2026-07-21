@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { MoreSection } from '@/types';
 import SettingsScreen from '@/screens/SettingsScreen';
 import ChangelogScreen from '@/screens/ChangelogScreen';
 import FeedbackScreen from '@/screens/FeedbackScreen';
+import { supabase } from '@/lib/supabase';
 
 interface MenuItem {
   id: Exclude<MoreSection, null>;
@@ -64,6 +66,13 @@ interface MoreScreenProps {
 }
 
 export default function MoreScreen({ section, onSection }: MoreScreenProps) {
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    await supabase.auth.signOut();
+    setSigningOut(false);
+  }
   if (section !== null) {
     return (
       <div>
@@ -133,6 +142,34 @@ export default function MoreScreen({ section, onSection }: MoreScreenProps) {
             </svg>
           </button>
         ))}
+      </div>
+
+      {/* Sign Out */}
+      <div className="px-4 pb-4">
+        <button
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="card-chunky w-full flex items-center gap-4 p-4 text-left transition-opacity active:opacity-70"
+          style={{ borderColor: '#FFD6D3', boxShadow: '0 3px 0 #FFBDB8' }}
+        >
+          <div style={{
+            width: 48, height: 48, borderRadius: 14,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: '#FFF0EE', flexShrink: 0,
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E04E42" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 15, fontWeight: 800, color: '#E04E42' }}>
+              {signingOut ? 'Signing out…' : 'Sign Out'}
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--m-slate, #777777)', marginTop: 2 }}>End your current session</p>
+          </div>
+        </button>
       </div>
 
       {/* Version tag */}
