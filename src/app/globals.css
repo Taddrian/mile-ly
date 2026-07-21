@@ -36,6 +36,20 @@
   --border:        #E7E7E3;
   --text-secondary:#6B6B66;
   --text-muted:    #9A9A94;
+
+  /* Playful palette */
+  --m-teal:        #0D9488;
+  --m-teal-dark:   #0A6E63;
+  --m-teal-xl:     #CCFBF1;
+  --m-mint:        #2DD4BF;
+  --m-yellow:      #FFC800;
+  --m-yellow-dark: #E6A800;
+  --m-coral:       #FF6B5E;
+  --m-coral-dark:  #E04E42;
+  --m-ink:         #3C3C3C;
+  --m-slate:       #777777;
+  --m-border:      #E5E5E5;
+  --m-border-dark: #D9D9D9;
 }
 
 .dark {
@@ -45,6 +59,47 @@
   --border:        #2a2a2a;
   --text-secondary:#999999;
   --text-muted:    #666666;
+}
+
+/* Chunky 3D card — the Duolingo signature */
+.card-chunky {
+  background: var(--card);
+  border: 2px solid var(--m-border);
+  border-radius: 18px;
+  box-shadow: 0 3px 0 var(--m-border-dark);
+}
+
+.dark .card-chunky {
+  border-color: var(--border);
+  box-shadow: 0 3px 0 #3a3a3a;
+}
+
+/* Chunky button */
+.btn-chunky {
+  background: var(--m-teal);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 var(--m-teal-dark);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  transition: transform 0.06s, box-shadow 0.06s;
+}
+.btn-chunky:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--m-teal-dark);
+}
+
+/* Tab bounce animation */
+@keyframes tab-bounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.tab-bounce {
+  animation: tab-bounce 0.18s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-bounce { animation: none; }
 }
 
 body {

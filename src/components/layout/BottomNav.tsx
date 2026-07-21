@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Tab } from '@/types';
 
 interface BottomNavProps {
@@ -45,19 +46,27 @@ const TABS: { id: Tab; label: string; Icon: React.FC }[] = [
   { id: 'more',         label: 'More',         Icon: MoreIcon         },
 ];
 
+const ACTIVE_COLOR  = '#0D9488';
+const INACTIVE_COLOR = '#777777';
+
 export default function BottomNav({ activeTab, onTabChange, onAddPress }: BottomNavProps) {
-  const ACTIVE = '#0F6E56';
-  const INACTIVE = '#9A9A94';
+  const [bouncing, setBouncing] = useState<Tab | null>(null);
+
+  function handleTabPress(id: Tab) {
+    setBouncing(id);
+    setTimeout(() => setBouncing(null), 200);
+    onTabChange(id);
+  }
 
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 md:right-auto md:top-0 md:h-screen md:w-56 md:flex md:flex-col"
-      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      style={{ backgroundColor: 'var(--card)' }}
     >
-      {/* Mobile bottom bar */}
+      {/* Mobile bottom bar — Duolingo pattern */}
       <div
         className="flex items-end pb-safe md:hidden"
-        style={{ borderTop: '0.5px solid var(--border)' }}
+        style={{ borderTop: '2px solid var(--m-border, #E5E5E5)' }}
       >
         {/* Left two tabs */}
         {TABS.slice(0, 2).map(({ id, label, Icon }) => {
@@ -65,12 +74,28 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
           return (
             <button
               key={id}
-              onClick={() => onTabChange(id)}
-              className="flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors"
-              style={{ color: active ? ACTIVE : INACTIVE }}
+              onClick={() => handleTabPress(id)}
+              className={`flex-1 flex flex-col items-center gap-1 py-2 ${bouncing === id ? 'tab-bounce' : ''}`}
+              style={{ color: active ? ACTIVE_COLOR : INACTIVE_COLOR }}
             >
-              <Icon />
-              <span>{label}</span>
+              <div
+                style={{
+                  width: 52,
+                  height: 36,
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: active ? 'var(--m-teal-xl, #CCFBF1)' : 'transparent',
+                  border: active ? `2.5px solid ${ACTIVE_COLOR}` : '2.5px solid transparent',
+                  transition: 'background 0.15s, border-color 0.15s',
+                }}
+              >
+                <Icon />
+              </div>
+              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: '0.02em' }}>
+                {label}
+              </span>
             </button>
           );
         })}
@@ -79,8 +104,11 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
         <div className="flex-1 flex justify-center pb-1">
           <button
             onClick={onAddPress}
-            className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95 -mt-4"
-            style={{ backgroundColor: ACTIVE }}
+            className="w-14 h-14 rounded-full flex items-center justify-center -mt-5 active:scale-95 transition-transform"
+            style={{
+              background: ACTIVE_COLOR,
+              boxShadow: `0 4px 0 #0A6E63`,
+            }}
             aria-label="Add entry"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
@@ -95,31 +123,45 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
           return (
             <button
               key={id}
-              onClick={() => onTabChange(id)}
-              className="flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors"
-              style={{ color: active ? ACTIVE : INACTIVE }}
+              onClick={() => handleTabPress(id)}
+              className={`flex-1 flex flex-col items-center gap-1 py-2 ${bouncing === id ? 'tab-bounce' : ''}`}
+              style={{ color: active ? ACTIVE_COLOR : INACTIVE_COLOR }}
             >
-              <Icon />
-              <span>{label}</span>
+              <div
+                style={{
+                  width: 52,
+                  height: 36,
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: active ? 'var(--m-teal-xl, #CCFBF1)' : 'transparent',
+                  border: active ? `2.5px solid ${ACTIVE_COLOR}` : '2.5px solid transparent',
+                  transition: 'background 0.15s, border-color 0.15s',
+                }}
+              >
+                <Icon />
+              </div>
+              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: '0.02em' }}>
+                {label}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar — unchanged */}
       <div
         className="hidden md:flex md:flex-col md:h-full md:py-6 md:px-3"
         style={{ borderRight: '0.5px solid var(--border)' }}
       >
-        {/* Logo */}
         <div className="flex items-center gap-2.5 px-2 pb-8">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: ACTIVE }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: ACTIVE_COLOR }}>
             <span className="text-white font-medium text-sm">M</span>
           </div>
           <span className="font-medium text-sm" style={{ color: 'var(--fg)' }}>Mile-ly</span>
         </div>
 
-        {/* Nav items — with Add button between budget and miles */}
         <div className="flex flex-col gap-1">
           {TABS.slice(0, 2).map(({ id, label, Icon }) => {
             const active = activeTab === id;
@@ -129,17 +171,16 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                 onClick={() => onTabChange(id)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left"
                 style={{
-                  backgroundColor: active ? '#E1F5EE' : 'transparent',
-                  color: active ? ACTIVE : 'var(--text-secondary)',
+                  backgroundColor: active ? 'var(--m-teal-xl)' : 'transparent',
+                  color: active ? ACTIVE_COLOR : 'var(--text-secondary)',
                 }}
               >
-                <span style={{ color: active ? ACTIVE : 'var(--text-muted)' }}><Icon /></span>
+                <span style={{ color: active ? ACTIVE_COLOR : 'var(--text-muted)' }}><Icon /></span>
                 {label}
               </button>
             );
           })}
 
-          {/* Add button row */}
           <button
             onClick={onAddPress}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left"
@@ -147,7 +188,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
           >
             <span
               className="w-6 h-6 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: ACTIVE }}
+              style={{ backgroundColor: ACTIVE_COLOR }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M12 5v14M5 12h14" />
@@ -164,11 +205,11 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                 onClick={() => onTabChange(id)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left"
                 style={{
-                  backgroundColor: active ? '#E1F5EE' : 'transparent',
-                  color: active ? ACTIVE : 'var(--text-secondary)',
+                  backgroundColor: active ? 'var(--m-teal-xl)' : 'transparent',
+                  color: active ? ACTIVE_COLOR : 'var(--text-secondary)',
                 }}
               >
-                <span style={{ color: active ? ACTIVE : 'var(--text-muted)' }}><Icon /></span>
+                <span style={{ color: active ? ACTIVE_COLOR : 'var(--text-muted)' }}><Icon /></span>
                 {label}
               </button>
             );
