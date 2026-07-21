@@ -370,7 +370,7 @@ function DestinationPicker({ selected, onSave, onClose }: {
         <button
           onClick={() => { onSave(picks); onClose(); }}
           disabled={picks.length === 0}
-          className="w-full py-3.5 rounded-2xl bg-[#0d6e5a] text-white font-semibold text-sm disabled:opacity-40 transition-opacity"
+          style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#0D9488', color: 'white', fontSize: 14, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', border: '2px solid #0D9488', boxShadow: '0 4px 0 #0A6E63', opacity: picks.length === 0 ? 0.4 : 1 }}
         >
           Save {picks.length} destination{picks.length !== 1 ? 's' : ''}
         </button>
@@ -549,18 +549,42 @@ export default function PointsScreen() {
 
       <div className="min-h-screen">
         {/* Header */}
-        <div className="bg-[#0d6e5a] dark:bg-[#0a5747] px-5 pt-14 pb-12 md:pt-8 md:rounded-2xl">
-          <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Singapore Airlines</p>
-          <h1 className="text-white text-2xl font-bold">KrisFlyer Miles</h1>
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #0D9488 100%)',
+            padding: '52px 20px 52px',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Decorative stars */}
+          <div style={{ position: 'absolute', top: 18, right: 28 }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden><polygon points="7,0 8.2,5.8 14,7 8.2,8.2 7,14 5.8,8.2 0,7 5.8,5.8" fill="#FFC800" /></svg>
+          </div>
+          <div style={{ position: 'absolute', top: 38, right: 58 }}>
+            <svg width="9" height="9" viewBox="0 0 14 14" aria-hidden><polygon points="7,0 8.2,5.8 14,7 8.2,8.2 7,14 5.8,8.2 0,7 5.8,5.8" fill="rgba(255,255,255,0.6)" /></svg>
+          </div>
+          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>
+            Singapore Airlines
+          </p>
+          <h1 style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: 'white' }}>
+            KrisFlyer Miles
+          </h1>
+          {/* Wave */}
+          <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0 }}>
+            <svg viewBox="0 0 375 24" preserveAspectRatio="none" style={{ width: '100%', height: 24, display: 'block' }}>
+              <path d="M0,14 C70,28 140,0 210,14 C280,28 330,6 375,14 L375,24 L0,24 Z" fill="var(--bg)" />
+            </svg>
+          </div>
         </div>
 
         <div className="px-4 space-y-5 -mt-6">
           {/* Total miles card */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+          <div className="card-chunky overflow-hidden">
             {/* Card top — green band */}
-            <div className="bg-[#0d6e5a]/8 dark:bg-[#0d6e5a]/20 px-5 pt-4 pb-4">
+            <div style={{ background: 'linear-gradient(135deg, #CCFBF1 0%, #E0F2FE 100%)', padding: '16px 20px' }}>
               <div className="flex items-center justify-between mb-1">
-                <p className="text-[10px] font-bold text-[#0d6e5a] uppercase tracking-widest">KrisFlyer Miles Balance</p>
+                <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#0D9488' }}>KrisFlyer Miles Balance</p>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d6e5a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.6">
                   <path d="M22 16.5a2.5 2.5 0 0 1-2.5 2.5H4a2 2 0 0 1-2-2v-1l2-6h14l2 4.5" />
                   <path d="M12 7V4" /><path d="M8 7l-2-3" /><path d="M16 7l2-3" />
@@ -574,7 +598,8 @@ export default function PointsScreen() {
                   placeholder={String(totalMiles)}
                   value={manualMiles}
                   onChange={(e) => setManualMiles(e.target.value)}
-                  className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 bg-transparent w-full outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="bg-transparent w-full outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                style={{ fontSize: 44, fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em' }}
                 />
                 <span className="text-sm font-semibold text-zinc-400 mb-1.5 shrink-0">miles</span>
               </div>
@@ -658,7 +683,7 @@ export default function PointsScreen() {
           </div>
 
 {/* Redemption section */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
+          <div className="card-chunky px-5">
             <div className="pt-4 pb-3">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">What Can You Redeem?</p>
@@ -675,20 +700,28 @@ export default function PointsScreen() {
               </div>
               <p className="text-[10px] text-zinc-400 mb-3">One-way from SIN · Saver &amp; Advantage awards</p>
               {/* Cabin selector */}
-              <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-xl p-1 gap-1">
-                {(['economy', 'business', 'first'] as CabinClass[]).map(cabin => (
+              <div style={{ display: 'flex', gap: 8 }}>
+                {(['economy', 'business', 'first'] as CabinClass[]).map((cabin, i) => {
+                  const colors = ['#0D9488', '#2563EB', '#7C3AED'];
+                  const darks  = ['#0A6E63', '#1D4ED8', '#6D28D9'];
+                  const active = selectedCabin === cabin;
+                  return (
                   <button
                     key={cabin}
                     onClick={() => setSelectedCabin(cabin)}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
-                      selectedCabin === cabin
-                        ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                        : 'text-zinc-400 dark:text-zinc-500'
-                    }`}
+                    style={{
+                      flex: 1, padding: '10px 0', borderRadius: 12, fontSize: 12, fontWeight: 700, textTransform: 'capitalize',
+                      background: active ? colors[i] : 'var(--card)',
+                      color: active ? 'white' : 'var(--m-slate)',
+                      border: active ? `2px solid ${colors[i]}` : '2px solid var(--m-border)',
+                      boxShadow: active ? `0 3px 0 ${darks[i]}` : '0 3px 0 var(--m-border-dark)',
+                      transition: 'all 0.1s',
+                    }}
                   >
                     {cabin}
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -715,7 +748,7 @@ export default function PointsScreen() {
           </div>
 
           {/* Spontaneous Escapes */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800">
+          <div className="card-chunky">
             <div className="px-5 pt-4 pb-3">
               <div className="flex items-center justify-between mb-3">
                 <div>
@@ -789,7 +822,7 @@ export default function PointsScreen() {
           </div>
 
           {/* KrisFlyer News */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl px-5 shadow-sm border border-zinc-100 dark:border-zinc-800">
+          <div className="card-chunky px-5">
             <div className="pt-4 pb-3 flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">KrisFlyer News</p>

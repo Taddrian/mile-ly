@@ -5,6 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { fmtAmount } from '@/lib/currency';
 import CategoryChip from '@/components/ui/CategoryChip';
 import SwipeableRow from '@/components/transactions/SwipeableRow';
+import Sparkle from '@/components/decor/Sparkle';
 
 function fmtDate(iso?: string) {
   if (!iso) return '';
@@ -40,71 +41,171 @@ export default function TransactionsScreen() {
 
   return (
     <div className="min-h-screen">
-      <div className="px-5 pt-14 pb-4 md:pt-6">
-        <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>History</p>
-        <h1 className="text-2xl font-medium" style={{ color: 'var(--fg)' }}>Transactions</h1>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          {entries.length} {entries.length === 1 ? 'entry' : 'entries'} · +{fmtAmount(totalIncome, currency)} / −{fmtAmount(totalExpense, currency)}
+
+      {/* ── Header band ── */}
+      <div style={{
+        position: 'relative',
+        background: 'linear-gradient(135deg, #1D4ED8 0%, #38BDF8 100%)',
+        paddingTop: 52,
+        paddingBottom: 36,
+        paddingLeft: 20,
+        paddingRight: 20,
+        color: 'white',
+      }}>
+        {/* Sparkles */}
+        <div style={{ position: 'absolute', top: 18, right: 28 }}>
+          <Sparkle size={14} color="#FFC800" />
+        </div>
+        <div style={{ position: 'absolute', top: 42, right: 56 }}>
+          <Sparkle size={9} color="rgba(255,255,255,0.7)" />
+        </div>
+
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>
+          History
         </p>
+        <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.02em', color: 'white', marginBottom: 16 }}>
+          Transactions
+        </h1>
+
+        {/* Summary tiles */}
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ flex: 1, background: 'rgba(255,255,255,0.18)', borderRadius: 14, padding: '10px 14px', backdropFilter: 'blur(8px)' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.75)', marginBottom: 3 }}>
+              Income
+            </p>
+            <p style={{ fontSize: 18, fontWeight: 900, color: 'white', letterSpacing: '-0.01em' }}>
+              {fmtAmount(totalIncome, currency)}
+            </p>
+          </div>
+          <div style={{ flex: 1, background: 'rgba(255,255,255,0.18)', borderRadius: 14, padding: '10px 14px', backdropFilter: 'blur(8px)' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.75)', marginBottom: 3 }}>
+              Spent
+            </p>
+            <p style={{ fontSize: 18, fontWeight: 900, color: 'white', letterSpacing: '-0.01em' }}>
+              {fmtAmount(totalExpense, currency)}
+            </p>
+          </div>
+        </div>
+
+        {/* Wavy bottom */}
+        <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0 }}>
+          <svg viewBox="0 0 375 24" preserveAspectRatio="none" style={{ width: '100%', height: 24, display: 'block' }}>
+            <path d="M0,14 C70,28 140,0 210,14 C280,28 330,6 375,14 L375,24 L0,24 Z" fill="var(--bg)" />
+          </svg>
+        </div>
       </div>
 
-      <div className="px-4 pb-6">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search category or remark…"
-          className="w-full rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0F6E56] mb-4"
-          style={{
-            backgroundColor: 'var(--card)',
-            color: 'var(--fg)',
-            border: '0.5px solid var(--border)',
-          }}
-        />
+      {/* ── Content ── */}
+      <div className="px-4 pt-3 pb-6 space-y-3">
 
+        {/* Search */}
+        <div style={{ position: 'relative' }}>
+          <svg
+            style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--m-slate)' }}
+            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+          >
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search entries…"
+            className="w-full outline-none"
+            style={{
+              padding: '12px 16px 12px 38px',
+              fontSize: 14,
+              fontWeight: 500,
+              color: 'var(--fg)',
+              background: 'var(--card)',
+              border: '2px solid var(--m-border)',
+              borderRadius: 14,
+              boxShadow: '0 3px 0 var(--m-border-dark)',
+            }}
+          />
+        </div>
+
+        {/* Entry count label */}
+        <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', paddingLeft: 2 }}>
+          {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'}
+        </p>
+
+        {/* Transaction cards */}
         {filtered.length === 0 ? (
-          <p className="text-sm text-center py-12" style={{ color: 'var(--text-muted)' }}>
-            {search ? 'No results found' : 'No entries yet — tap + to add one'}
-          </p>
+          <div className="card-chunky p-10 text-center">
+            <p style={{ fontSize: 32, marginBottom: 10 }}>🧾</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--m-ink)' }}>Nothing here yet</p>
+            <p style={{ fontSize: 12, color: 'var(--m-slate)', marginTop: 4 }}>
+              {search ? 'No results for that search' : 'Tap + to add your first entry'}
+            </p>
+          </div>
         ) : (
-          <div className="rounded-[16px] overflow-hidden" style={{ border: '0.5px solid var(--border)' }}>
-            {filtered.map((entry, i) => {
+          <div className="space-y-2">
+            {filtered.map((entry) => {
               const cat = categories.find((c) => c.id === entry.categoryId);
               const card = cards.find((c) => c.id === entry.cardId);
               const isIncome = cat?.type === 'income';
               return (
                 <SwipeableRow key={entry.id} onDelete={() => deleteEntry(entry.id)}>
                   <div
-                    className="flex items-center gap-3 px-4 py-3.5"
-                    style={{
-                      borderBottom: i < filtered.length - 1 ? '0.5px solid var(--border)' : 'none',
-                    }}
+                    className="card-chunky flex items-center gap-3 p-4"
+                    style={{ cursor: 'default' }}
                   >
-                    <CategoryChip name={cat?.name ?? '?'} size={36} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: 'var(--fg)' }}>
+                    <CategoryChip name={cat?.name ?? '?'} size={40} />
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--m-ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {cat?.name ?? 'Unknown'}
                       </p>
-                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
                         {card && (
-                          <span
-                            className="text-[10px] font-medium px-1.5 py-0.5 rounded-full text-white"
-                            style={{ backgroundColor: card.color }}
-                          >
+                          <span style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: 999,
+                            color: 'white',
+                            background: card.color,
+                            letterSpacing: '0.02em',
+                          }}>
                             {card.name}
                           </span>
                         )}
                         {entry.note && (
-                          <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{entry.note}</p>
+                          <p style={{ fontSize: 11, color: 'var(--m-slate)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {entry.note}
+                          </p>
                         )}
                       </div>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      <p style={{ fontSize: 11, color: 'var(--m-slate)', marginTop: 2 }}>
                         {fmtDate(entry.createdAt)}
                       </p>
                     </div>
-                    <p className="text-sm font-medium shrink-0" style={{ color: isIncome ? '#1D9E75' : 'var(--fg)' }}>
-                      {isIncome ? '+' : '−'}{currency} {fmtAmount(entry.amount, currency)}
-                    </p>
+
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <p style={{
+                        fontSize: 15,
+                        fontWeight: 800,
+                        color: isIncome ? '#0D9488' : '#FF6B5E',
+                        letterSpacing: '-0.01em',
+                      }}>
+                        {isIncome ? '+' : '−'}{fmtAmount(entry.amount, currency)}
+                      </p>
+                      <span style={{
+                        display: 'inline-block',
+                        marginTop: 3,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        padding: '2px 7px',
+                        borderRadius: 999,
+                        background: isIncome ? '#CCFBF1' : '#FFE4E1',
+                        color: isIncome ? '#0D9488' : '#FF6B5E',
+                      }}>
+                        {isIncome ? 'IN' : 'OUT'}
+                      </span>
+                    </div>
                   </div>
                 </SwipeableRow>
               );

@@ -22,7 +22,6 @@ function currentMonth() {
 function defaultDateForMonth(month: string): string {
   const cm = currentMonth();
   if (month === cm) return today();
-  // Past month: last day; future month: first day
   const [y, m] = month.split('-').map(Number);
   const lastDay = new Date(y, m, 0).getDate();
   const d = new Date(month) < new Date(cm) ? lastDay : 1;
@@ -35,7 +34,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [date, setDate] = useState(today); // updated when sheet opens
+  const [date, setDate] = useState(today);
   const [remark, setRemark] = useState('');
   const [addingCat, setAddingCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -45,9 +44,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
 
   const filtered = categories.filter((c) => c.type === type);
 
-  useEffect(() => {
-    setCategoryId('');
-  }, [type]);
+  useEffect(() => { setCategoryId(''); }, [type]);
 
   useEffect(() => {
     if (isOpen) {
@@ -85,127 +82,187 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
     setAddingCat(false);
   }
 
-  const amount = parseFloat(amountStr) || 0;
   const isIncome = type === 'income';
-  const amountColor = isIncome ? '#1D9E75' : '#1A1A18';
+  const canSave = !!amountStr && (!!categoryId || !!cardId);
+  const accentColor = isIncome ? '#0D9488' : '#FF6B5E';
+  const accentDark  = isIncome ? '#0A6E63' : '#E04E42';
 
   if (!isOpen) return null;
+
+  const inputStyle = {
+    background: 'var(--bg)',
+    color: 'var(--fg)',
+    border: '2px solid var(--m-border)',
+    borderRadius: 14,
+    padding: '12px 14px',
+    fontSize: 14,
+    fontWeight: 500,
+    width: '100%',
+    outline: 'none',
+    boxShadow: '0 2px 0 var(--m-border-dark)',
+  } as React.CSSProperties;
 
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
 
       {/* Sheet */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-[24px] shadow-2xl max-w-md mx-auto pb-safe"
-        style={{ backgroundColor: 'var(--card)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto pb-safe"
+        style={{
+          background: 'var(--card)',
+          borderRadius: '24px 24px 0 0',
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
+        }}
       >
         {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: 'var(--border)' }} />
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12, paddingBottom: 4 }}>
+          <div style={{ width: 40, height: 5, borderRadius: 999, background: 'var(--m-border)' }} />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3">
+        {/* Close + title */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 20px 4px' }}>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: 'var(--bg)' }}
+            style={{
+              width: 34, height: 34, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'var(--bg)', border: '2px solid var(--m-border)',
+              color: 'var(--m-slate)',
+            }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
-          <p className="text-sm font-medium" style={{ color: 'var(--fg)' }}>New entry</p>
-          <div className="w-8" />
+          <p style={{ fontSize: 15, fontWeight: 800, color: 'var(--m-ink)', letterSpacing: '-0.01em' }}>New Entry</p>
+          <div style={{ width: 34 }} />
         </div>
 
-        <div className="px-5 pb-6 space-y-5">
-          {/* Big amount */}
-          <div className="text-center py-2">
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-2xl font-medium" style={{ color: 'var(--text-muted)' }}>{currency}</span>
+        <div style={{ padding: '8px 20px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+          {/* Amount hero */}
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+              <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--m-slate)' }}>{currency}</span>
               <input
                 type="number"
                 inputMode="decimal"
                 value={amountStr}
                 onChange={(e) => setAmountStr(e.target.value)}
                 placeholder="0.00"
-                className="text-[40px] font-medium bg-transparent outline-none w-40 text-center"
-                style={{ color: amountColor }}
+                style={{
+                  fontSize: 48,
+                  fontWeight: 900,
+                  background: 'transparent',
+                  outline: 'none',
+                  width: 180,
+                  textAlign: 'center',
+                  color: accentColor,
+                  letterSpacing: '-0.03em',
+                  border: 'none',
+                }}
               />
             </div>
           </div>
 
           {/* Type toggle */}
-          <div
-            className="flex rounded-xl overflow-hidden"
-            style={{ border: '0.5px solid var(--border)' }}
-          >
-            {(['expense', 'income'] as EntryType[]).map((t) => (
-              <button
-                key={t}
-                onClick={() => setType(t)}
-                className="flex-1 py-2.5 text-xs font-medium transition-colors"
-                style={{
-                  backgroundColor: type === t ? (t === 'income' ? '#0F6E56' : '#E24B4A') : 'var(--bg)',
-                  color: type === t ? '#fff' : 'var(--text-secondary)',
-                }}
-              >
-                {t === 'income' ? 'Income' : 'Spending'}
-              </button>
-            ))}
-          </div>
-
-          {/* Card (expense only) — tap to select, tap again to deselect */}
-          {type === 'expense' && cards.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {cards.map((card) => (
+          <div style={{ display: 'flex', gap: 8 }}>
+            {(['expense', 'income'] as EntryType[]).map((t) => {
+              const active = type === t;
+              const color = t === 'income' ? '#0D9488' : '#FF6B5E';
+              const dark  = t === 'income' ? '#0A6E63' : '#E04E42';
+              const label = t === 'income' ? '💚  Income' : '🛍️  Spending';
+              return (
                 <button
-                  key={card.id}
-                  onClick={() => setCardId(cardId === card.id ? '' : card.id)}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                  key={t}
+                  onClick={() => setType(t)}
                   style={{
-                    backgroundColor: cardId === card.id ? card.color : 'var(--bg)',
-                    color: cardId === card.id ? '#fff' : 'var(--text-secondary)',
-                    border: `0.5px solid ${cardId === card.id ? card.color : 'var(--border)'}`,
+                    flex: 1,
+                    padding: '12px 0',
+                    borderRadius: 14,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    letterSpacing: '0.01em',
+                    border: active ? `2px solid ${color}` : '2px solid var(--m-border)',
+                    boxShadow: active ? `0 3px 0 ${dark}` : '0 3px 0 var(--m-border-dark)',
+                    background: active ? color : 'var(--card)',
+                    color: active ? 'white' : 'var(--m-slate)',
+                    transition: 'all 0.12s',
+                    transform: active ? 'translateY(0)' : 'translateY(0)',
                   }}
                 >
-                  {card.name}
+                  {label}
                 </button>
-              ))}
+              );
+            })}
+          </div>
+
+          {/* Card selector (expense only) */}
+          {type === 'expense' && cards.length > 0 && (
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 8 }}>
+                Card
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {cards.map((card) => (
+                  <button
+                    key={card.id}
+                    onClick={() => setCardId(cardId === card.id ? '' : card.id)}
+                    style={{
+                      padding: '7px 14px',
+                      borderRadius: 999,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      border: `2px solid ${cardId === card.id ? card.color : 'var(--m-border)'}`,
+                      boxShadow: cardId === card.id ? `0 3px 0 rgba(0,0,0,0.2)` : '0 2px 0 var(--m-border-dark)',
+                      background: cardId === card.id ? card.color : 'var(--card)',
+                      color: cardId === card.id ? '#fff' : 'var(--m-slate)',
+                      transition: 'all 0.1s',
+                    }}
+                  >
+                    {card.name}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
           {/* Category */}
           <div>
-            <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Category</p>
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 8 }}>
+              Category
+            </p>
             {filtered.length === 0 && !addingCat ? (
-              <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>No {type} categories yet.</p>
+              <p style={{ fontSize: 12, color: 'var(--m-slate)', marginBottom: 6 }}>No {type} categories yet.</p>
             ) : (
-              <div className="flex flex-wrap gap-2 mb-2">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
                 {filtered.map((cat) => {
                   const selected = categoryId === cat.id;
                   return (
                     <div
                       key={cat.id}
-                      className="flex items-center rounded-full text-xs font-medium overflow-hidden"
                       style={{
-                        backgroundColor: selected ? '#0F6E56' : 'var(--bg)',
-                        color: selected ? '#fff' : 'var(--text-secondary)',
-                        border: '0.5px solid var(--border)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        borderRadius: 999,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        border: selected ? `2px solid ${accentColor}` : '2px solid var(--m-border)',
+                        boxShadow: selected ? `0 3px 0 ${accentDark}` : '0 2px 0 var(--m-border-dark)',
+                        background: selected ? accentColor : 'var(--card)',
+                        color: selected ? '#fff' : 'var(--m-slate)',
+                        overflow: 'hidden',
+                        transition: 'all 0.1s',
                       }}
                     >
-                      <button onClick={() => setCategoryId(cat.id)} className="pl-3 pr-2 py-1.5">
+                      <button onClick={() => setCategoryId(cat.id)} style={{ padding: '7px 12px 7px 14px', background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer' }}>
                         {cat.name}
                       </button>
                       <button
                         onClick={() => setPendingDeleteId(cat.id)}
-                        className="pr-2.5 py-1.5 opacity-40 hover:opacity-70 transition-opacity text-[10px]"
+                        style={{ padding: '7px 12px 7px 2px', background: 'none', border: 'none', opacity: 0.5, cursor: 'pointer', fontSize: 11, color: 'inherit' }}
                         aria-label={`Delete ${cat.name}`}
                       >
                         ✕
@@ -217,7 +274,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
             )}
 
             {addingCat ? (
-              <div className="flex gap-2">
+              <div style={{ display: 'flex', gap: 8 }}>
                 <input
                   type="text"
                   value={newCatName}
@@ -225,102 +282,143 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                   placeholder="Category name"
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCat()}
-                  className="flex-1 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0F6E56]"
-                  style={{ backgroundColor: 'var(--bg)', color: 'var(--fg)', border: '0.5px solid var(--border)' }}
+                  style={{ ...inputStyle, flex: 1 }}
                 />
-                <button onClick={handleAddCat} className="px-3 py-2 rounded-xl text-xs font-medium text-white" style={{ backgroundColor: '#0F6E56' }}>Add</button>
-                <button onClick={() => setAddingCat(false)} className="px-3 py-2 rounded-xl text-xs" style={{ border: '0.5px solid var(--border)', color: 'var(--text-secondary)' }}>✕</button>
+                <button
+                  onClick={handleAddCat}
+                  style={{ padding: '10px 14px', borderRadius: 12, fontSize: 13, fontWeight: 700, background: accentColor, color: 'white', border: `2px solid ${accentColor}`, boxShadow: `0 3px 0 ${accentDark}` }}
+                >
+                  Add
+                </button>
+                <button
+                  onClick={() => setAddingCat(false)}
+                  style={{ padding: '10px 14px', borderRadius: 12, fontSize: 13, fontWeight: 700, background: 'var(--card)', color: 'var(--m-slate)', border: '2px solid var(--m-border)', boxShadow: '0 3px 0 var(--m-border-dark)' }}
+                >
+                  ✕
+                </button>
               </div>
             ) : (
-              <button onClick={() => setAddingCat(true)} className="text-xs font-medium" style={{ color: '#0F6E56' }}>
+              <button
+                onClick={() => setAddingCat(true)}
+                style={{ fontSize: 12, fontWeight: 700, color: accentColor }}
+              >
                 + New category
               </button>
             )}
           </div>
 
-          {/* Date */}
-          <div>
-            <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Date</p>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0F6E56]"
-              style={{ backgroundColor: 'var(--bg)', color: 'var(--fg)', border: '0.5px solid var(--border)' }}
-            />
+          {/* Date + Remark in a row */}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Date</p>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Remark</p>
+              <input
+                type="text"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                placeholder="Optional"
+                style={inputStyle}
+              />
+            </div>
           </div>
 
-          {/* Remark */}
-          <div>
-            <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Remark</p>
-            <input
-              type="text"
-              value={remark}
-              onChange={(e) => setRemark(e.target.value)}
-              placeholder="Optional note"
-              className="w-full rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0F6E56]"
-              style={{ backgroundColor: 'var(--bg)', color: 'var(--fg)', border: '0.5px solid var(--border)' }}
-            />
-          </div>
-
-          {/* Actions */}
+          {/* Chunky save button */}
           <button
             onClick={() => save(false)}
-            disabled={saving || !amountStr || (!categoryId && !cardId)}
-            className="w-full py-3.5 rounded-xl text-sm font-medium text-white transition-opacity disabled:opacity-40"
-            style={{ backgroundColor: '#0F6E56' }}
+            disabled={saving || !canSave}
+            style={{
+              width: '100%',
+              padding: '16px 0',
+              borderRadius: 16,
+              fontSize: 15,
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: 'white',
+              background: canSave ? accentColor : 'var(--m-border)',
+              border: `2px solid ${canSave ? accentColor : 'var(--m-border)'}`,
+              boxShadow: canSave ? `0 4px 0 ${accentDark}` : '0 4px 0 var(--m-border-dark)',
+              opacity: saving ? 0.7 : 1,
+              transition: 'all 0.1s',
+              cursor: canSave ? 'pointer' : 'not-allowed',
+            }}
           >
-            {saving ? 'Saving…' : 'Save entry'}
+            {saving ? 'Saving…' : 'Save Entry'}
           </button>
+
+          {/* Secondary: save and add another */}
           <button
             onClick={() => save(true)}
-            disabled={saving || !amountStr || (!categoryId && !cardId)}
-            className="w-full text-center text-xs font-medium py-1 disabled:opacity-40"
-            style={{ color: '#0F6E56' }}
+            disabled={saving || !canSave}
+            style={{
+              width: '100%',
+              padding: '13px 0',
+              borderRadius: 14,
+              fontSize: 13,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: canSave ? accentColor : 'var(--m-border-dark)',
+              background: 'var(--card)',
+              border: `2px solid ${canSave ? accentColor : 'var(--m-border)'}`,
+              boxShadow: '0 3px 0 var(--m-border-dark)',
+              opacity: saving ? 0.7 : 1,
+              cursor: canSave ? 'pointer' : 'not-allowed',
+              marginTop: -8,
+            }}
           >
-            Save and add another
+            + Save Another
           </button>
         </div>
       </div>
 
-    {/* Category delete action sheet */}
-    {pendingDeleteId && (() => {
-      const cat = categories.find((c) => c.id === pendingDeleteId);
-      return (
-        <>
-          <div className="fixed inset-0 z-[60] bg-black/40" onClick={() => setPendingDeleteId(null)} />
-          <div
-            className="fixed bottom-0 left-0 right-0 z-[70] rounded-t-[20px] p-6 max-w-md mx-auto"
-            style={{ backgroundColor: 'var(--card)' }}
-          >
-            <p className="text-sm font-medium text-center mb-1" style={{ color: 'var(--fg)' }}>
-              Remove category?
-            </p>
-            <p className="text-xs text-center mb-6" style={{ color: 'var(--text-muted)' }}>
-              "{cat?.name}" will be permanently deleted.
-            </p>
-            <button
-              onClick={() => {
-                if (categoryId === pendingDeleteId) setCategoryId('');
-                deleteCategory(pendingDeleteId);
-                setPendingDeleteId(null);
-              }}
-              className="w-full py-4 rounded-xl text-sm font-semibold text-white mb-3"
-              style={{ backgroundColor: '#E24B4A' }}
+      {/* Category delete action sheet */}
+      {pendingDeleteId && (() => {
+        const cat = categories.find((c) => c.id === pendingDeleteId);
+        return (
+          <>
+            <div className="fixed inset-0 z-[60] bg-black/50" onClick={() => setPendingDeleteId(null)} />
+            <div
+              className="fixed bottom-0 left-0 right-0 z-[70] max-w-md mx-auto"
+              style={{ background: 'var(--card)', borderRadius: '20px 20px 0 0', padding: '24px 20px' }}
             >
-              Remove
-            </button>
-            <button
-              onClick={() => setPendingDeleteId(null)}
-              className="w-full py-4 rounded-xl text-sm font-medium"
-              style={{ backgroundColor: 'var(--bg)', color: 'var(--fg)' }}
-            >
-              Cancel
-            </button>
-          </div>
-        </>
-      );
-    })()}
+              <p style={{ fontSize: 15, fontWeight: 800, textAlign: 'center', color: 'var(--m-ink)', marginBottom: 6 }}>
+                Remove category?
+              </p>
+              <p style={{ fontSize: 13, textAlign: 'center', color: 'var(--m-slate)', marginBottom: 24 }}>
+                "{cat?.name}" will be permanently deleted.
+              </p>
+              <button
+                onClick={() => {
+                  if (categoryId === pendingDeleteId) setCategoryId('');
+                  deleteCategory(pendingDeleteId);
+                  setPendingDeleteId(null);
+                }}
+                style={{
+                  width: '100%', padding: '15px', borderRadius: 14, marginBottom: 10,
+                  fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em',
+                  color: 'white', background: '#FF6B5E', border: '2px solid #FF6B5E', boxShadow: '0 4px 0 #E04E42',
+                }}
+              >
+                Remove
+              </button>
+              <button
+                onClick={() => setPendingDeleteId(null)}
+                style={{
+                  width: '100%', padding: '14px', borderRadius: 14,
+                  fontSize: 14, fontWeight: 700, color: 'var(--m-slate)',
+                  background: 'var(--card)', border: '2px solid var(--m-border)', boxShadow: '0 3px 0 var(--m-border-dark)',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        );
+      })()}
     </>
   );
 }
