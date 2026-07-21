@@ -20,3 +20,23 @@ export function fmtAmount(n: number, code: string): string {
     maximumFractionDigits: cur.decimals,
   });
 }
+
+// Compact formatter for small display spaces (DonutRing center, stat tiles, etc.)
+// Rounds to 3 significant digits and appends K / M / B suffix.
+export function fmtShort(n: number): string {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000_000) {
+    const v = n / 1_000_000_000;
+    return `${+v.toPrecision(3)}B`;
+  }
+  if (abs >= 1_000_000) {
+    const v = n / 1_000_000;
+    return `${+v.toPrecision(3)}M`;
+  }
+  if (abs >= 10_000) {
+    const v = n / 1_000;
+    return `${+v.toPrecision(3)}K`;
+  }
+  // Below 10K — return plain integer (no locale separators needed, fits fine)
+  return String(Math.round(n));
+}

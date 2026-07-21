@@ -3,7 +3,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
-import { fmtAmount } from '@/lib/currency';
+import { fmtAmount, fmtShort } from '@/lib/currency';
 import DonutRing from '@/components/ui/DonutRing';
 import StackedBar from '@/components/ui/StackedBar';
 import StatTile from '@/components/ui/StatTile';
@@ -184,7 +184,7 @@ export default function DashboardScreen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <DonutRing
               segments={ringSegments}
-              centerLabel={`${currency} ${fmtAmount(saved, currency)}`}
+              centerLabel={`${currency} ${fmtShort(saved)}`}
               centerSublabel="left to spend"
               trackColor="#EFF3F2"
               size={140}
