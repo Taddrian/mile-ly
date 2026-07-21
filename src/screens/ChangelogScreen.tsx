@@ -15,6 +15,18 @@ interface Release {
 
 const CHANGELOG: Release[] = [
   {
+    version: 'v0.6.0',
+    date: 'Jul 2026',
+    changes: [
+      { type: 'new',      text: 'Milo the mascot — your friendly teal companion on the Home screen' },
+      { type: 'new',      text: 'Playful Duolingo-style design: chunky 3D cards, bold typography, teal-mint gradient header' },
+      { type: 'improved', text: 'Donut ring redesigned with thick strokes, round caps, and a golden star cap decoration' },
+      { type: 'improved', text: 'Budget bar now shows percentage inside the fill for a cleaner read' },
+      { type: 'improved', text: 'Tab bar updated with active rounded-square highlight and tap bounce animation' },
+      { type: 'improved', text: 'Ring colours updated: saved is now teal, spent is coral for clearer visual distinction' },
+    ],
+  },
+  {
     version: 'v0.5.0',
     date: 'Jul 2026',
     changes: [
