@@ -127,25 +127,25 @@ export default function DonutRing({
         <polygon points="7,0 8.2,5.8 14,7 8.2,8.2 7,14 5.8,8.2 0,7 5.8,5.8" fill="#FF6B5E" />
       </svg>
 
-      {/* Center text */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-3">
+      {/* Center text — capped so it always fits inside the inner circle */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
         <span style={{
-          fontSize: Math.round(15 * scale),
+          fontSize: Math.min(Math.round(11 * scale), 13),
           fontWeight: 800,
           color: 'var(--m-ink, #3C3C3C)',
-          letterSpacing: '-0.02em',
-          lineHeight: 1.1,
+          letterSpacing: '-0.01em',
+          lineHeight: 1.15,
         }}>
           {centerLabel}
         </span>
         {centerSublabel && (
           <span style={{
-            fontSize: Math.round(9 * scale),
+            fontSize: Math.min(Math.round(7.5 * scale), 9),
             fontWeight: 700,
             color: 'var(--m-slate, #777777)',
             textTransform: 'uppercase',
-            letterSpacing: '0.07em',
-            marginTop: 3,
+            letterSpacing: '0.06em',
+            marginTop: 2,
           }}>
             {centerSublabel}
           </span>
