@@ -5,7 +5,7 @@ import { Tab, MoreSection } from '@/types';
 import { AppProvider } from '@/context/AppContext';
 import BottomNav from '@/components/layout/BottomNav';
 import DashboardScreen from '@/screens/DashboardScreen';
-import BudgetScreen from '@/screens/BudgetScreen';
+import TransactionsScreen from '@/screens/TransactionsScreen';
 import PointsScreen from '@/screens/PointsScreen';
 import MoreScreen from '@/screens/MoreScreen';
 import AddEntrySheet from '@/components/transactions/AddEntrySheet';
@@ -20,10 +20,10 @@ function ScreenContent({
   onMoreSection: (s: MoreSection) => void;
 }) {
   switch (activeTab) {
-    case 'home':   return <DashboardScreen />;
-    case 'budget': return <BudgetScreen />;
-    case 'miles':  return <PointsScreen />;
-    case 'more':   return <MoreScreen section={moreSection} onSection={onMoreSection} />;
+    case 'home':         return <DashboardScreen />;
+    case 'transactions': return <TransactionsScreen />;
+    case 'miles':        return <PointsScreen />;
+    case 'more':         return <MoreScreen section={moreSection} onSection={onMoreSection} />;
   }
 }
 

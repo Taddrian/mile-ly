@@ -8,8 +8,12 @@ import DonutRing from '@/components/ui/DonutRing';
 import StackedBar from '@/components/ui/StackedBar';
 import StatTile from '@/components/ui/StatTile';
 import MonthPicker from '@/components/ui/MonthPicker';
+import ProgressBar from '@/components/ui/ProgressBar';
+import CategoryChip from '@/components/ui/CategoryChip';
 import AddCardForm from '@/components/cards/AddCardForm';
 import Modal from '@/components/ui/Modal';
+
+const BUDGET_KEY = 'milely_monthly_budget';
 
 function prevMonthStr(month: string) {
   const d = new Date(month);
@@ -34,6 +38,23 @@ function daysLeftInMonth(monthStr: string) {
 export default function DashboardScreen() {
   const { entries, categories, cards, addCard, selectedMonth, setSelectedMonth, currency } = useApp();
   const [showAddCard, setShowAddCard] = useState(false);
+  const [monthlyBudget, setMonthlyBudget] = useState(0);
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState('');
+
+  useEffect(() => {
+    const stored = localStorage.getItem(BUDGET_KEY);
+    if (stored) setMonthlyBudget(parseFloat(stored));
+  }, []);
+
+  function saveBudget() {
+    const val = parseFloat(budgetInput);
+    if (val > 0) {
+      setMonthlyBudget(val);
+      localStorage.setItem(BUDGET_KEY, String(val));
+    }
+    setEditingBudget(false);
+  }
   const [prevIncome, setPrevIncome] = useState(0);
   const [prevExpenses, setPrevExpenses] = useState(0);
 
@@ -68,6 +89,21 @@ export default function DashboardScreen() {
   const total = income > 0 ? income : expenses + saved;
   const daysLeft = daysLeftInMonth(selectedMonth);
   const perDay = daysLeft > 0 && saved > 0 ? saved / daysLeft : 0;
+
+  const budgetLeft = monthlyBudget > 0 ? monthlyBudget - expenses : 0;
+  const budgetPct  = monthlyBudget > 0 ? Math.min(expenses / monthlyBudget, 1) : 0;
+  const isOver     = monthlyBudget > 0 && expenses > monthlyBudget;
+
+  const catSpend = useMemo(() => {
+    const map: Record<string, { name: string; amount: number }> = {};
+    entries.forEach((e) => {
+      const cat = categories.find((c) => c.id === e.categoryId);
+      if (!cat || cat.type !== 'expense') return;
+      if (!map[cat.id]) map[cat.id] = { name: cat.name, amount: 0 };
+      map[cat.id].amount += e.amount;
+    });
+    return Object.values(map).sort((a, b) => b.amount - a.amount);
+  }, [entries, categories]);
 
   const ringSegments = [
     { value: expenses, color: '#0F6E56' },
@@ -161,6 +197,61 @@ export default function DashboardScreen() {
           />
         </div>
 
+        {/* Budget progress */}
+        <div
+          className="rounded-[16px] p-4"
+          style={{ backgroundColor: 'var(--card)', border: '0.5px solid var(--border)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Budget</p>
+            <button
+              onClick={() => { setEditingBudget(true); setBudgetInput(monthlyBudget > 0 ? String(monthlyBudget) : ''); }}
+              className="text-xs font-medium"
+              style={{ color: '#0F6E56' }}
+            >
+              {monthlyBudget > 0 ? 'Edit' : 'Set budget'}
+            </button>
+          </div>
+
+          {editingBudget ? (
+            <div className="flex gap-2">
+              <input
+                type="number"
+                value={budgetInput}
+                onChange={(e) => setBudgetInput(e.target.value)}
+                placeholder="Monthly budget"
+                autoFocus
+                onKeyDown={(e) => e.key === 'Enter' && saveBudget()}
+                className="flex-1 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0F6E56]"
+                style={{ backgroundColor: 'var(--bg)', color: 'var(--fg)', border: '0.5px solid var(--border)' }}
+              />
+              <button onClick={saveBudget} className="px-3 py-2 rounded-xl text-xs font-medium text-white" style={{ backgroundColor: '#0F6E56' }}>Set</button>
+              <button onClick={() => setEditingBudget(false)} className="px-3 py-2 rounded-xl text-xs" style={{ border: '0.5px solid var(--border)', color: 'var(--text-secondary)' }}>✕</button>
+            </div>
+          ) : monthlyBudget > 0 ? (
+            <>
+              <div className="flex items-baseline justify-between mb-2">
+                <span className="text-sm font-semibold" style={{ color: 'var(--fg)' }}>
+                  {currency} {fmtAmount(expenses, currency)}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  of {currency} {fmtAmount(monthlyBudget, currency)}
+                </span>
+              </div>
+              <ProgressBar value={expenses} max={monthlyBudget} color={isOver ? '#E24B4A' : '#0F6E56'} />
+              <p className="text-xs mt-2" style={{ color: isOver ? '#E24B4A' : 'var(--text-muted)' }}>
+                {isOver
+                  ? `${currency} ${fmtAmount(expenses - monthlyBudget, currency)} over budget`
+                  : `${currency} ${fmtAmount(budgetLeft, currency)} left`}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              No budget set — tap "Set budget" to track your spending limit.
+            </p>
+          )}
+        </div>
+
         {/* Where it's going */}
         {expenses > 0 && (
           <div
@@ -171,6 +262,32 @@ export default function DashboardScreen() {
               Where it's going
             </p>
             <StackedBar segments={bucketSegments} height={10} />
+          </div>
+        )}
+
+        {/* Category breakdown */}
+        {catSpend.length > 0 && (
+          <div
+            className="rounded-[16px] p-5"
+            style={{ backgroundColor: 'var(--card)', border: '0.5px solid var(--border)' }}
+          >
+            <p className="text-xs font-medium mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Spending by category
+            </p>
+            <div className="space-y-4">
+              {catSpend.map(({ name, amount }) => (
+                <div key={name}>
+                  <div className="flex items-center gap-3 mb-1.5">
+                    <CategoryChip name={name} size={28} />
+                    <div className="flex-1 flex justify-between text-xs">
+                      <span style={{ color: 'var(--fg)' }}>{name}</span>
+                      <span className="font-medium" style={{ color: 'var(--fg)' }}>{currency} {fmtAmount(amount, currency)}</span>
+                    </div>
+                  </div>
+                  <ProgressBar value={amount} max={expenses} color="#0F6E56" />
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

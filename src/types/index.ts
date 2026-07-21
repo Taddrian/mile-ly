@@ -39,5 +39,5 @@ export type Entry = {
   createdAt?: string;
 };
 
-export type Tab = 'home' | 'budget' | 'miles' | 'more';
+export type Tab = 'home' | 'transactions' | 'miles' | 'more';
 export type MoreSection = 'transactions' | 'settings' | 'changelog' | null;

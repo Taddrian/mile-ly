@@ -15,11 +15,10 @@ const HomeIcon = () => (
   </svg>
 );
 
-const BudgetIcon = () => (
+const TransactionsIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="3" width="20" height="14" rx="2" />
-    <path d="M8 21h8M12 17v4" />
-    <path d="M6 8h4M6 11h8" />
+    <path d="M8 6l4-4 4 4" /><path d="M12 2v10.5" />
+    <path d="M16 18l-4 4-4-4" /><path d="M12 22V11.5" />
   </svg>
 );
 
@@ -40,10 +39,10 @@ const MoreIcon = () => (
 );
 
 const TABS: { id: Tab; label: string; Icon: React.FC }[] = [
-  { id: 'home',   label: 'Home',   Icon: HomeIcon   },
-  { id: 'budget', label: 'Budget', Icon: BudgetIcon },
-  { id: 'miles',  label: 'Miles',  Icon: MilesIcon  },
-  { id: 'more',   label: 'More',   Icon: MoreIcon   },
+  { id: 'home',         label: 'Home',         Icon: HomeIcon         },
+  { id: 'transactions', label: 'Transactions', Icon: TransactionsIcon },
+  { id: 'miles',        label: 'Miles',        Icon: MilesIcon        },
+  { id: 'more',         label: 'More',         Icon: MoreIcon         },
 ];
 
 export default function BottomNav({ activeTab, onTabChange, onAddPress }: BottomNavProps) {
