@@ -40,4 +40,4 @@ export type Entry = {
 };
 
 export type Tab = 'home' | 'transactions' | 'miles' | 'more';
-export type MoreSection = 'transactions' | 'settings' | 'changelog' | null;
+export type MoreSection = 'changelog' | 'settings' | null;

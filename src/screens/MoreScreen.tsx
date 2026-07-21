@@ -1,19 +1,17 @@
 'use client';
 
 import { MoreSection } from '@/types';
-import TransactionsScreen from '@/screens/TransactionsScreen';
 import SettingsScreen from '@/screens/SettingsScreen';
 import ChangelogScreen from '@/screens/ChangelogScreen';
 
 const MENU_ITEMS: { id: Exclude<MoreSection, null>; label: string; description: string; Icon: React.FC }[] = [
   {
-    id: 'transactions',
-    label: 'Transactions',
-    description: 'Browse your full transaction history',
+    id: 'changelog',
+    label: "What's New",
+    description: 'Latest features and improvements',
     Icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M8 6l4-4 4 4" /><path d="M12 2v10.5" />
-        <path d="M16 18l-4 4-4-4" /><path d="M12 22V11.5" />
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
       </svg>
     ),
   },
@@ -28,16 +26,6 @@ const MENU_ITEMS: { id: Exclude<MoreSection, null>; label: string; description: 
       </svg>
     ),
   },
-  {
-    id: 'changelog',
-    label: "What's New",
-    description: 'Latest features and improvements',
-    Icon: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-    ),
-  },
 ];
 
 interface MoreScreenProps {
@@ -47,11 +35,6 @@ interface MoreScreenProps {
 
 export default function MoreScreen({ section, onSection }: MoreScreenProps) {
   if (section !== null) {
-    const titles: Record<Exclude<MoreSection, null>, string> = {
-      transactions: 'Transactions',
-      settings: 'Settings',
-      changelog: "What's New",
-    };
     return (
       <div>
         <button
@@ -64,9 +47,8 @@ export default function MoreScreen({ section, onSection }: MoreScreenProps) {
           </svg>
           <span className="text-sm font-medium">More</span>
         </button>
-        {section === 'transactions' && <TransactionsScreen />}
-        {section === 'settings'     && <SettingsScreen />}
-        {section === 'changelog'    && <ChangelogScreen />}
+        {section === 'changelog' && <ChangelogScreen />}
+        {section === 'settings'  && <SettingsScreen />}
       </div>
     );
   }
