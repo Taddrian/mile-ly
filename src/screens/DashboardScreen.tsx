@@ -5,7 +5,6 @@ import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { fmtAmount, fmtShort } from '@/lib/currency';
 import DonutRing from '@/components/ui/DonutRing';
-import StackedBar from '@/components/ui/StackedBar';
 import StatTile from '@/components/ui/StatTile';
 import MonthPicker from '@/components/ui/MonthPicker';
 import CategoryChip from '@/components/ui/CategoryChip';
@@ -14,8 +13,6 @@ import Modal from '@/components/ui/Modal';
 import MiloMascot from '@/components/decor/MiloMascot';
 import OnTrackBadge from '@/components/decor/OnTrackBadge';
 import Sparkle from '@/components/decor/Sparkle';
-
-const BUDGET_KEY = 'milely_monthly_budget';
 
 function prevMonthStr(month: string) {
   const d = new Date(month);
@@ -39,22 +36,22 @@ function daysLeftInMonth(monthStr: string) {
 export default function DashboardScreen() {
   const { entries, categories, cards, addCard, selectedMonth, setSelectedMonth, currency } = useApp();
   const [showAddCard, setShowAddCard] = useState(false);
-  const [monthlyBudget, setMonthlyBudget] = useState(0);
-  const [editingBudget, setEditingBudget] = useState(false);
-  const [budgetInput, setBudgetInput] = useState('');
+  const [remark, setRemark] = useState('');
+  const [editingRemark, setEditingRemark] = useState(false);
+  const [remarkInput, setRemarkInput] = useState('');
 
   useEffect(() => {
-    const stored = localStorage.getItem(BUDGET_KEY);
-    if (stored) setMonthlyBudget(parseFloat(stored));
-  }, []);
+    const stored = localStorage.getItem(`milely_remark_${selectedMonth}`);
+    setRemark(stored ?? '');
+    setEditingRemark(false);
+  }, [selectedMonth]);
 
-  function saveBudget() {
-    const val = parseFloat(budgetInput);
-    if (val > 0) {
-      setMonthlyBudget(val);
-      localStorage.setItem(BUDGET_KEY, String(val));
-    }
-    setEditingBudget(false);
+  function saveRemark() {
+    const trimmed = remarkInput.trim();
+    setRemark(trimmed);
+    if (trimmed) localStorage.setItem(`milely_remark_${selectedMonth}`, trimmed);
+    else localStorage.removeItem(`milely_remark_${selectedMonth}`);
+    setEditingRemark(false);
   }
 
   const [prevIncome, setPrevIncome] = useState(0);
@@ -91,10 +88,6 @@ export default function DashboardScreen() {
   const daysLeft = daysLeftInMonth(selectedMonth);
   const perDay = daysLeft > 0 && saved > 0 ? saved / daysLeft : 0;
 
-  const budgetLeft = monthlyBudget > 0 ? monthlyBudget - expenses : 0;
-  const budgetPct  = monthlyBudget > 0 ? Math.min(expenses / monthlyBudget, 1) : 0;
-  const isOver     = monthlyBudget > 0 && expenses > monthlyBudget;
-
   const catSpend = useMemo(() => {
     const map: Record<string, { name: string; amount: number }> = {};
     entries.forEach((e) => {
@@ -110,12 +103,6 @@ export default function DashboardScreen() {
   const ringSegments = [
     { value: saved,    color: '#0D9488' },
     { value: expenses, color: '#FF6B5E' },
-  ];
-
-  const bucketSegments = [
-    { label: 'Needs',   value: expenses * 0.5, color: '#185FA5' },
-    { label: 'Wants',   value: expenses * 0.3, color: '#BA7517' },
-    { label: 'Savings', value: expenses * 0.2, color: '#1D9E75' },
   ];
 
   const legendItems = [
@@ -241,95 +228,76 @@ export default function DashboardScreen() {
           />
         </div>
 
-        {/* Budget progress */}
+        {/* Remarks */}
         <div className="card-chunky p-4">
           <div className="flex items-center justify-between mb-3">
-            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)' }}>
-              Monthly Budget
-            </p>
-            <button
-              onClick={() => { setEditingBudget(true); setBudgetInput(monthlyBudget > 0 ? String(monthlyBudget) : ''); }}
-              style={{ fontSize: 12, fontWeight: 700, color: 'var(--m-teal, #0D9488)' }}
-            >
-              {monthlyBudget > 0 ? 'Edit' : 'Set budget'}
-            </button>
+            <div className="flex items-center gap-2">
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: '#FFF3C4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+              </div>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)' }}>
+                Remarks
+              </p>
+            </div>
+            {!editingRemark ? (
+              <button
+                onClick={() => { setRemarkInput(remark); setEditingRemark(true); }}
+                style={{ fontSize: 12, fontWeight: 700, color: 'var(--m-teal, #0D9488)' }}
+              >
+                {remark ? 'Edit' : '+ Add'}
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  onClick={saveRemark}
+                  className="px-3 py-1 rounded-lg text-xs font-bold text-white"
+                  style={{ background: 'var(--m-teal)', boxShadow: '0 2px 0 var(--m-teal-dark)' }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setEditingRemark(false)}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold"
+                  style={{ border: '2px solid var(--m-border)', color: 'var(--m-slate)' }}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </div>
 
-          {editingBudget ? (
-            <div className="flex gap-2">
-              <input
-                type="number"
-                value={budgetInput}
-                onChange={(e) => setBudgetInput(e.target.value)}
-                placeholder="Monthly budget"
-                autoFocus
-                onKeyDown={(e) => e.key === 'Enter' && saveBudget()}
-                className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
-                style={{ backgroundColor: 'var(--bg)', color: 'var(--fg)', border: '2px solid var(--m-border)', boxShadow: '0 2px 0 var(--m-border-dark)' }}
-              />
-              <button onClick={saveBudget} className="px-3 py-2 rounded-xl text-xs font-bold text-white" style={{ background: 'var(--m-teal)', boxShadow: '0 3px 0 var(--m-teal-dark)' }}>Set</button>
-              <button onClick={() => setEditingBudget(false)} className="px-3 py-2 rounded-xl text-xs font-semibold" style={{ border: '2px solid var(--m-border)', color: 'var(--text-secondary)' }}>✕</button>
-            </div>
-          ) : monthlyBudget > 0 ? (
-            <>
-              <div className="flex items-baseline justify-between mb-2">
-                <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--m-ink, #3C3C3C)' }}>
-                  {currency} {fmtAmount(expenses, currency)}
-                </span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--m-slate, #777777)' }}>
-                  of {currency} {fmtAmount(monthlyBudget, currency)}
-                </span>
-              </div>
-
-              {/* Label-in-bar */}
-              <div style={{ height: 22, borderRadius: 999, background: '#EFF3F2', overflow: 'hidden', position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0, left: 0, bottom: 0,
-                    width: `${budgetPct * 100}%`,
-                    background: isOver ? '#FF6B5E' : '#0D9488',
-                    borderRadius: 999,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    paddingRight: 8,
-                    minWidth: budgetPct > 0 ? 8 : 0,
-                    transition: 'width 0.6s ease',
-                  }}
-                >
-                  {/* Highlight strip */}
-                  <div style={{ position: 'absolute', top: 3, left: 4, right: 4, height: 4, borderRadius: 999, background: 'rgba(255,255,255,0.3)' }} />
-                  {budgetPct > 0.18 && (
-                    <span style={{ color: 'white', fontSize: 11, fontWeight: 700, position: 'relative' }}>
-                      {Math.round(budgetPct * 100)}%
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <p style={{ marginTop: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: isOver ? '#FF6B5E' : 'var(--m-slate, #777777)' }}>
-                {isOver
-                  ? `${currency} ${fmtAmount(expenses - monthlyBudget, currency)} over budget`
-                  : `${currency} ${fmtAmount(budgetLeft, currency)} left`}
-              </p>
-            </>
+          {editingRemark ? (
+            <textarea
+              value={remarkInput}
+              onChange={(e) => setRemarkInput(e.target.value)}
+              autoFocus
+              placeholder={"e.g. Splurged on flights ✈️, birthday dinner 🎂, gym membership renewed..."}
+              rows={4}
+              className="w-full outline-none resize-none"
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                lineHeight: 1.6,
+                color: 'var(--fg)',
+                background: 'var(--bg)',
+                border: '2px solid var(--m-border)',
+                borderRadius: 12,
+                padding: '10px 12px',
+                boxShadow: '0 2px 0 var(--m-border-dark)',
+              }}
+            />
+          ) : remark ? (
+            <p style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.6, color: 'var(--fg)', whiteSpace: 'pre-wrap' }}>
+              {remark}
+            </p>
           ) : (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              No budget set — tap "Set budget" to track your spending limit.
+            <p style={{ fontSize: 12, color: 'var(--m-slate, #777777)', fontStyle: 'italic' }}>
+              No remarks yet — tap "+ Add" to note any highlights or surprises this month.
             </p>
           )}
         </div>
-
-        {/* Where it's going */}
-        {expenses > 0 && (
-          <div className="card-chunky p-5">
-            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)', marginBottom: 14 }}>
-              Where it's going
-            </p>
-            <StackedBar segments={bucketSegments} />
-          </div>
-        )}
 
         {/* Category breakdown */}
         {catSpend.length > 0 && (
