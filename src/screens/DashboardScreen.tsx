@@ -266,6 +266,9 @@ export default function DashboardScreen() {
         {/* Empty state */}
         {income === 0 && expenses === 0 && (
           <div className="card-chunky p-8 text-center">
+            <div style={{ width: 140, height: 84, margin: '0 auto 6px' }}>
+              <MiloMascot />
+            </div>
             <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--m-ink)' }} className="mb-1">Nothing here yet</p>
             <p style={{ fontSize: 12, color: 'var(--m-slate)' }}>
               Tap the + button to add your first entry

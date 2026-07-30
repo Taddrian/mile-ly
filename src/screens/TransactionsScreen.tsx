@@ -6,6 +6,7 @@ import { fmtCurrency } from '@/lib/currency';
 import CategoryChip from '@/components/ui/CategoryChip';
 import SwipeableRow from '@/components/transactions/SwipeableRow';
 import Sparkle from '@/components/decor/Sparkle';
+import MiloMascot from '@/components/decor/MiloMascot';
 
 function fmtDate(iso?: string) {
   if (!iso) return '';
@@ -133,7 +134,9 @@ export default function TransactionsScreen() {
         {/* Transaction cards */}
         {filtered.length === 0 ? (
           <div className="card-chunky p-10 text-center">
-            <p style={{ fontSize: 32, marginBottom: 10 }}>🧾</p>
+            <div style={{ width: 140, height: 84, margin: '0 auto 10px' }}>
+              <MiloMascot />
+            </div>
             <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--m-ink)' }}>Nothing here yet</p>
             <p style={{ fontSize: 12, color: 'var(--m-slate)', marginTop: 4 }}>
               {search ? 'No results for that search' : 'Tap + to add your first entry'}

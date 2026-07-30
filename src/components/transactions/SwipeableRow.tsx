@@ -41,16 +41,18 @@ export default function SwipeableRow({ children, onDelete, className, style }: S
     setOffset(offset < -REVEAL / 2 ? -REVEAL : 0);
   }
 
+  const armed = offset <= -REVEAL;
+
   return (
     <div className={`relative overflow-hidden ${className ?? ''}`} style={style}>
       {/* Delete affordance */}
       <div
         className="absolute right-0 top-0 bottom-0 flex items-center justify-center"
-        style={{ width: REVEAL, backgroundColor: '#E24B4A' }}
+        style={{ width: REVEAL, backgroundColor: armed ? '#C93A3A' : '#E24B4A', transition: 'background-color 0.15s' }}
       >
         <button
           onClick={onDelete}
-          className="w-full h-full flex items-center justify-center text-white text-xs font-semibold"
+          className={`w-full h-full flex items-center justify-center text-white text-xs font-semibold ${armed ? 'delete-armed-pulse' : ''}`}
         >
           Delete
         </button>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { CreditCard } from '@/types';
 import { fmtCurrency } from '@/lib/currency';
+import { useCountUp } from '@/lib/useCountUp';
 
 interface CardRowProps {
   card: CreditCard;
@@ -14,7 +15,8 @@ interface CardRowProps {
 
 export default function CardRow({ card, currency, onClick, style, className }: CardRowProps) {
   const hasLimit = card.monthlyLimit > 0;
-  const pct = hasLimit ? Math.min((card.currentSpent / card.monthlyLimit) * 100, 100) : 0;
+  const animatedSpent = useCountUp(card.currentSpent);
+  const pct = hasLimit ? Math.min((animatedSpent / card.monthlyLimit) * 100, 100) : 0;
 
   const [filled, setFilled] = useState(false);
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function CardRow({ card, currency, onClick, style, className }: C
 
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <p className="text-sm font-extrabold" style={{ color: 'var(--m-ink, #3C3C3C)' }}>
-          {fmtCurrency(card.currentSpent, currency)}
+          {fmtCurrency(Math.round(animatedSpent), currency)}
         </p>
         {hasLimit && (
           <p className="text-[10px] mt-0.5" style={{ color: 'var(--m-slate)' }}>

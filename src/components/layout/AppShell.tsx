@@ -44,11 +44,13 @@ export default function AppShell() {
 
         <main className="pb-24 md:pb-0 min-h-screen overflow-y-auto flex-1 md:ml-56">
           <div className="max-w-md mx-auto md:max-w-2xl">
-            <ScreenContent
-              activeTab={activeTab}
-              moreSection={moreSection}
-              onMoreSection={setMoreSection}
-            />
+            <div key={activeTab} className="tab-fade-in">
+              <ScreenContent
+                activeTab={activeTab}
+                moreSection={moreSection}
+                onMoreSection={setMoreSection}
+              />
+            </div>
           </div>
         </main>
 
