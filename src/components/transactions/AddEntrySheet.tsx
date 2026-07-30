@@ -74,25 +74,31 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
       const newTotal = parseFloat(spentStr);
       if (isNaN(newTotal) || newTotal < 0) return;
       setSaving(true);
-      await updateCardSpent(cardId, newTotal);
-      setSaving(false);
-      setJustSaved(true);
-      setTimeout(onClose, 260);
+      try {
+        await updateCardSpent(cardId, newTotal);
+        setJustSaved(true);
+        onClose();
+      } finally {
+        setSaving(false);
+      }
       return;
     }
     const amount = parseFloat(amountStr);
     if (!amount || amount <= 0 || (!categoryId && !cardId)) return;
     setSaving(true);
-    const month = date.slice(0, 7) + '-01';
-    await addEntry({ month, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined });
-    setSaving(false);
-    setJustSaved(true);
-    if (andAnother) {
-      setAmountStr('');
-      setRemark('');
-      setTimeout(() => setJustSaved(false), 500);
-    } else {
-      setTimeout(onClose, 260);
+    try {
+      const month = date.slice(0, 7) + '-01';
+      await addEntry({ month, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined });
+      setJustSaved(true);
+      if (andAnother) {
+        setAmountStr('');
+        setRemark('');
+        setTimeout(() => setJustSaved(false), 500);
+      } else {
+        onClose();
+      }
+    } finally {
+      setSaving(false);
     }
   }
 
