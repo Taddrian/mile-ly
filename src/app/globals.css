@@ -52,8 +52,9 @@
   --m-border-dark: #D9D9D9;
 
   /* Glass nav */
-  --glass-bg:      rgba(255, 255, 255, 0.04);
-  --glass-border:  rgba(255, 255, 255, 0.22);
+  --glass-bg:      rgba(255, 255, 255, 0.02);
+  --glass-border:  rgba(255, 255, 255, 0.5);
+  --glass-highlight: rgba(255, 255, 255, 0.7);
   --glass-icon:    #6B6B66;
 }
 
@@ -66,8 +67,9 @@
   --text-muted:    #666666;
 
   /* Glass nav */
-  --glass-bg:      rgba(28, 28, 30, 0.05);
-  --glass-border:  rgba(255, 255, 255, 0.08);
+  --glass-bg:      rgba(28, 28, 30, 0.02);
+  --glass-border:  rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
   --glass-icon:    #B0B0B0;
 }
 

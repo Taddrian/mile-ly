@@ -76,9 +76,9 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
             borderRadius: 999,
             background: 'var(--glass-bg)',
             border: '1px solid var(--glass-border)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-            backdropFilter: 'blur(40px) saturate(2)',
-            WebkitBackdropFilter: 'blur(40px) saturate(2)',
+            boxShadow: `0 8px 24px rgba(0,0,0,0.12), inset 0 1px 0 var(--glass-highlight)`,
+            backdropFilter: 'blur(14px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(14px) saturate(1.4)',
           }}
         >
           {/* Left two tabs */}
