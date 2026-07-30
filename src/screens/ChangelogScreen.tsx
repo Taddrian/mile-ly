@@ -15,6 +15,24 @@ interface Release {
 
 const CHANGELOG: Release[] = [
   {
+    version: 'v0.7.0',
+    date: 'Jul 2026',
+    changes: [
+      { type: 'new',      text: 'Update a card\'s total spent right from the "+" sheet instead of logging every transaction one by one' },
+      { type: 'new',      text: 'Edit a card\'s name, colour, limit, and miles rate anytime after adding it' },
+      { type: 'new',      text: 'Monthly Remarks section — jot down notable spending highlights for the month' },
+      { type: 'new',      text: 'Sign Out promoted to its own row in the More tab' },
+      { type: 'improved', text: '"Your Cards" redesigned as a scrollable vertical list instead of a horizontal swipe carousel' },
+      { type: 'improved', text: 'Bottom nav redesigned as a floating frosted-glass pill' },
+      { type: 'improved', text: 'Milo now swims around and reacts to your balance — happy when you\'re on track, droopy when overspent' },
+      { type: 'improved', text: 'Donut ring fills in and the balance number counts up on load; lists fade in with a subtle stagger' },
+      { type: 'improved', text: 'Large currency amounts auto-shorten (e.g. "2.45M") so they always fit inside the ring' },
+      { type: 'improved', text: 'Card fields (last 4 digits, monthly limit, miles rate) are now optional when adding a card' },
+      { type: 'fix',      text: 'Add Entry sheet no longer gets stuck showing "Saved!" after saving' },
+      { type: 'fix',      text: 'Typing a new card balance no longer prepends to the prefilled amount' },
+    ],
+  },
+  {
     version: 'v0.6.0',
     date: 'Jul 2026',
     changes: [
