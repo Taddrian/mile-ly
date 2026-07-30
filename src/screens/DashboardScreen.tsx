@@ -5,6 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { fmtShort, fmtCurrency, currencySymbol } from '@/lib/currency';
 import { useCountUp } from '@/lib/useCountUp';
+import { addCycle, cycleEndExclusive, daysLeftInCycle } from '@/lib/cycle';
 import DonutRing from '@/components/ui/DonutRing';
 import StatTile from '@/components/ui/StatTile';
 import MonthPicker from '@/components/ui/MonthPicker';
@@ -17,27 +18,13 @@ import MiloMascot from '@/components/decor/MiloMascot';
 import OnTrackBadge from '@/components/decor/OnTrackBadge';
 import Sparkle from '@/components/decor/Sparkle';
 
-function prevMonthStr(month: string) {
-  const d = new Date(month);
-  d.setMonth(d.getMonth() - 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-}
-
 function delta(current: number, previous: number) {
   if (previous === 0) return null;
   return Math.round(((current - previous) / previous) * 100);
 }
 
-function daysLeftInMonth(monthStr: string) {
-  const now = new Date();
-  const [y, m] = monthStr.split('-').map(Number);
-  const lastDay = new Date(y, m, 0).getDate();
-  const isCurrentMonth = now.getFullYear() === y && now.getMonth() + 1 === m;
-  return isCurrentMonth ? lastDay - now.getDate() + 1 : 0;
-}
-
 export default function DashboardScreen() {
-  const { cards, addCard, updateCard, deleteCard, entries, categories, selectedMonth, setSelectedMonth, currency } = useApp();
+  const { cards, addCard, updateCard, deleteCard, entries, categories, selectedMonth, setSelectedMonth, cycleStartDay, currency } = useApp();
   const [showAddCard, setShowAddCard] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [showAllCards, setShowAllCards] = useState(false);
@@ -63,18 +50,21 @@ export default function DashboardScreen() {
   const [prevExpenses, setPrevExpenses] = useState(0);
 
   useEffect(() => {
-    const pm = prevMonthStr(selectedMonth);
-    supabase.from('entries').select('amount, category_id').eq('month', pm).then(({ data }) => {
-      if (!data) return;
-      let inc = 0, exp = 0;
-      data.forEach((r) => {
-        const cat = categories.find((c) => c.id === r.category_id);
-        if (cat?.type === 'income') inc += Number(r.amount);
-        else exp += Number(r.amount);
+    const prevCycleStart = addCycle(selectedMonth, -1);
+    supabase.from('entries').select('amount, category_id')
+      .gte('date', prevCycleStart)
+      .lt('date', cycleEndExclusive(prevCycleStart))
+      .then(({ data }) => {
+        if (!data) return;
+        let inc = 0, exp = 0;
+        data.forEach((r) => {
+          const cat = categories.find((c) => c.id === r.category_id);
+          if (cat?.type === 'income') inc += Number(r.amount);
+          else exp += Number(r.amount);
+        });
+        setPrevIncome(inc);
+        setPrevExpenses(exp);
       });
-      setPrevIncome(inc);
-      setPrevExpenses(exp);
-    });
   }, [selectedMonth, categories]);
 
   const income = useMemo(() =>
@@ -91,7 +81,7 @@ export default function DashboardScreen() {
 
   const saved = Math.max(0, income - expenses);
   const animatedSaved = useCountUp(saved);
-  const daysLeft = daysLeftInMonth(selectedMonth);
+  const daysLeft = daysLeftInCycle(selectedMonth, cycleStartDay);
   const perDay = daysLeft > 0 && saved > 0 ? saved / daysLeft : 0;
 
   const catSpend = useMemo(() => {
@@ -159,7 +149,7 @@ export default function DashboardScreen() {
           Mile-ly
         </p>
         <div style={{ color: 'white' }}>
-          <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
+          <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
         </div>
 
         {/* Wavy bottom edge */}

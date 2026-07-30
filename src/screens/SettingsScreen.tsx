@@ -109,8 +109,14 @@ function CategoriesSection() {
   );
 }
 
+function ordinal(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
+}
+
 export default function SettingsScreen() {
-  const { currency, setCurrency } = useApp();
+  const { currency, setCurrency, cycleStartDay, setCycleStartDay } = useApp();
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
@@ -185,6 +191,21 @@ export default function SettingsScreen() {
             >
               {SEA_CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+              ))}
+            </select>
+          </SettingRow>
+        </SectionCard>
+
+        <SectionCard title="Billing Cycle">
+          <SettingRow label="Cycle Start Day" description="When your card statement / salary period begins">
+            <select
+              value={cycleStartDay}
+              onChange={(e) => setCycleStartDay(Number(e.target.value))}
+              className="text-sm font-semibold rounded-lg px-3 py-1.5 outline-none cursor-pointer"
+              style={{ backgroundColor: '#E1F5EE', color: '#0F6E56', border: 'none' }}
+            >
+              {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
+                <option key={day} value={day}>{ordinal(day)}</option>
               ))}
             </select>
           </SettingRow>

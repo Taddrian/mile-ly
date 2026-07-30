@@ -31,7 +31,8 @@ export type Category = {
 export type Entry = {
   id: string;
   userId: string;
-  month: string;       // ISO date, first of month e.g. "2026-07-01"
+  month: string;       // ISO date, first of month e.g. "2026-07-01" (legacy bucket, kept for backward compat)
+  date: string;        // ISO date, the exact day the transaction occurred
   amount: number;
   categoryId?: string;
   cardId?: string;

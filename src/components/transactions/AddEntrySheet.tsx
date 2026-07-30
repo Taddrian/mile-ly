@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { currencySymbol } from '@/lib/currency';
+import { defaultDateForCycle } from '@/lib/cycle';
 
 interface AddEntrySheetProps {
   isOpen: boolean;
@@ -11,31 +12,13 @@ interface AddEntrySheetProps {
 
 type EntryType = 'income' | 'expense' | 'card';
 
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function currentMonth() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-}
-
-function defaultDateForMonth(month: string): string {
-  const cm = currentMonth();
-  if (month === cm) return today();
-  const [y, m] = month.split('-').map(Number);
-  const lastDay = new Date(y, m, 0).getDate();
-  const d = new Date(month) < new Date(cm) ? lastDay : 1;
-  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-}
-
 export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
-  const { categories, cards, addEntry, addCategory, deleteCategory, updateCardSpent, selectedMonth, currency } = useApp();
+  const { categories, cards, addEntry, addCategory, deleteCategory, updateCardSpent, selectedMonth, cycleStartDay, currency } = useApp();
 
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [date, setDate] = useState(today);
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [remark, setRemark] = useState('');
   const [addingCat, setAddingCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -56,13 +39,13 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
       setCategoryId('');
       setCardId('');
       setSpentStr('');
-      setDate(defaultDateForMonth(selectedMonth));
+      setDate(defaultDateForCycle(selectedMonth, cycleStartDay));
       setRemark('');
       setType('expense');
       setAddingCat(false);
       setNewCatName('');
     }
-  }, [isOpen, selectedMonth]);
+  }, [isOpen, selectedMonth, cycleStartDay]);
 
   // When picking a card in "card update" mode, prefill with its current total
   useEffect(() => {
@@ -91,7 +74,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
     setSaving(true);
     try {
       const month = date.slice(0, 7) + '-01';
-      await addEntry({ month, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined });
+      await addEntry({ month, date, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined });
       setJustSaved(true);
       if (andAnother) {
         setAmountStr('');

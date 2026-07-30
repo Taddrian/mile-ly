@@ -1,19 +1,19 @@
 'use client';
 
+import { addCycle, formatCycleLabel } from '@/lib/cycle';
+
 interface MonthPickerProps {
   value: string;
   onChange: (month: string) => void;
+  cycleStartDay: number;
   className?: string;
 }
 
-export default function MonthPicker({ value, onChange, className = '' }: MonthPickerProps) {
-  const date = new Date(value);
-  const label = date.toLocaleDateString('en-SG', { month: 'long', year: 'numeric' });
+export default function MonthPicker({ value, onChange, cycleStartDay, className = '' }: MonthPickerProps) {
+  const label = formatCycleLabel(value, cycleStartDay);
 
   function shift(delta: number) {
-    const d = new Date(value);
-    d.setMonth(d.getMonth() + delta);
-    onChange(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`);
+    onChange(addCycle(value, delta));
   }
 
   return (
@@ -21,7 +21,7 @@ export default function MonthPicker({ value, onChange, className = '' }: MonthPi
       <button
         onClick={() => shift(-1)}
         className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors text-base leading-none"
-        aria-label="Previous month"
+        aria-label="Previous cycle"
       >
         ‹
       </button>
@@ -29,7 +29,7 @@ export default function MonthPicker({ value, onChange, className = '' }: MonthPi
       <button
         onClick={() => shift(1)}
         className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors text-base leading-none"
-        aria-label="Next month"
+        aria-label="Next cycle"
       >
         ›
       </button>

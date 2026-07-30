@@ -19,7 +19,7 @@ function daysLeftInMonth(monthStr: string) {
 const BUDGET_KEY = 'milely_monthly_budget';
 
 export default function BudgetScreen() {
-  const { entries, categories, selectedMonth, setSelectedMonth, currency } = useApp();
+  const { entries, categories, selectedMonth, setSelectedMonth, cycleStartDay, currency } = useApp();
   const [monthlyBudget, setMonthlyBudget] = useState(0);
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput, setBudgetInput] = useState('');
@@ -78,7 +78,7 @@ export default function BudgetScreen() {
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-14 pb-4 md:pt-6">
         <span className="text-lg font-medium" style={{ color: 'var(--fg)' }}>Budget</span>
-        <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
+        <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
       </div>
 
       <div className="px-4 space-y-3 pb-6">

@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { CreditCard, Transaction, Category, Entry } from '@/types';
 import { supabase } from '@/lib/supabase';
+import { cycleStartForDate, cycleEndExclusive } from '@/lib/cycle';
 
 interface AppContextValue {
   cards: CreditCard[];
@@ -13,6 +14,8 @@ interface AppContextValue {
   setSelectedMonth: (month: string) => void;
   currency: string;
   setCurrency: (c: string) => void;
+  cycleStartDay: number;
+  setCycleStartDay: (day: number) => Promise<void>;
   addCard: (card: Omit<CreditCard, 'id' | 'currentSpent'>) => Promise<void>;
   updateCard: (id: string, patch: Partial<Omit<CreditCard, 'id' | 'currentSpent'>>) => Promise<void>;
   deleteCard: (id: string) => Promise<void>;
@@ -29,17 +32,13 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export const CARD_UPDATE_NOTE = '⚡ Balance update';
 
-function currentMonth() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-}
-
 export function AppProvider({ children }: { children: ReactNode }) {
   const [cards, setCards] = useState<CreditCard[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth());
+  const [cycleStartDay, setCycleStartDayState] = useState(1);
+  const [selectedMonth, setSelectedMonth] = useState(() => cycleStartForDate(new Date(), 1));
   const [currency, setCurrencyState] = useState('SGD');
 
   useEffect(() => {
@@ -64,26 +63,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const [cardsRes, txnRes, catRes] = await Promise.all([
+    const [cardsRes, txnRes, catRes, settingsRes] = await Promise.all([
       supabase.from('cards').select('*').order('created_at'),
       supabase.from('transactions').select('*').order('date', { ascending: false }),
       supabase.from('categories').select('*').order('name'),
+      supabase.from('user_settings').select('*').eq('user_id', user.id).maybeSingle(),
     ]);
 
     if (cardsRes.data) setCards(cardsRes.data.map(dbToCard));
     if (txnRes.data) setTransactions(txnRes.data.map(dbToTxn));
     if (catRes.data) setCategories(catRes.data.map(dbToCat));
 
-    await loadEntries();
+    const day = settingsRes.data ? Number(settingsRes.data.cycle_start_day) : 1;
+    setCycleStartDayState(day);
+    setSelectedMonth(cycleStartForDate(new Date(), day));
+
+    await loadEntriesFor(cycleStartForDate(new Date(), day));
   }
 
   async function loadEntries() {
+    await loadEntriesFor(selectedMonth);
+  }
+
+  async function loadEntriesFor(cycleStart: string) {
     const { data } = await supabase
       .from('entries')
       .select('*')
-      .eq('month', selectedMonth)
-      .order('created_at', { ascending: false });
+      .gte('date', cycleStart)
+      .lt('date', cycleEndExclusive(cycleStart))
+      .order('date', { ascending: false });
     if (data) setEntries(data.map(dbToEntry));
+  }
+
+  async function setCycleStartDay(day: number) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from('user_settings').upsert({ user_id: user.id, cycle_start_day: day });
+    setCycleStartDayState(day);
+    setSelectedMonth(cycleStartForDate(new Date(), day));
   }
 
   // --- Cards ---
@@ -154,6 +171,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { data: row } = await supabase.from('entries').insert({
       user_id: user.id,
       month: data.month,
+      date: data.date,
       amount: data.amount,
       category_id: data.categoryId ?? null,
       card_id: data.cardId ?? null,
@@ -184,6 +202,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!cat) cat = await addCategory('Credit Card', 'expense');
       await addEntry({
         month: selectedMonth,
+        date: selectedMonth,
         amount: neededQuickAmount,
         categoryId: cat?.id,
         cardId,
@@ -206,7 +225,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       cards: cardsWithSpent, transactions, categories, entries, selectedMonth, setSelectedMonth,
-      currency, setCurrency,
+      currency, setCurrency, cycleStartDay, setCycleStartDay,
       addCard, updateCard, deleteCard, addTransaction, deleteTransaction,
       addCategory, deleteCategory, addEntry, deleteEntry, updateCardSpent,
     }}>
@@ -261,6 +280,7 @@ function dbToEntry(r: Record<string, unknown>): Entry {
     id: r.id as string,
     userId: r.user_id as string,
     month: r.month as string,
+    date: (r.date as string) ?? (r.month as string),
     amount: Number(r.amount),
     categoryId: r.category_id as string,
     cardId: r.card_id as string | undefined,

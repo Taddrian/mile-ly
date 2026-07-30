@@ -31,7 +31,7 @@ export default function TransactionsScreen() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return [...entries]
-      .sort((a, b) => new Date(b.createdAt ?? b.month).getTime() - new Date(a.createdAt ?? a.month).getTime())
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .filter((e) => {
         if (!q) return true;
         const cat = categories.find((c) => c.id === e.categoryId);
@@ -183,7 +183,7 @@ export default function TransactionsScreen() {
                         )}
                       </div>
                       <p style={{ fontSize: 11, color: 'var(--m-slate)', marginTop: 2 }}>
-                        {fmtDate(entry.createdAt)}
+                        {fmtDate(entry.date)}
                       </p>
                     </div>
 
