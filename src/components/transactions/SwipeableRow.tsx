@@ -5,11 +5,13 @@ import { useRef, useState } from 'react';
 interface SwipeableRowProps {
   children: React.ReactNode;
   onDelete: () => void;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 const REVEAL = 76;
 
-export default function SwipeableRow({ children, onDelete }: SwipeableRowProps) {
+export default function SwipeableRow({ children, onDelete, className, style }: SwipeableRowProps) {
   const [offset, setOffset] = useState(0);
   const startX = useRef(0);
   const startY = useRef(0);
@@ -40,7 +42,7 @@ export default function SwipeableRow({ children, onDelete }: SwipeableRowProps) 
   }
 
   return (
-    <div className="relative overflow-hidden">
+    <div className={`relative overflow-hidden ${className ?? ''}`} style={style}>
       {/* Delete affordance */}
       <div
         className="absolute right-0 top-0 bottom-0 flex items-center justify-center"

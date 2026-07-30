@@ -21,11 +21,11 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm backdrop-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl max-h-[92vh] overflow-y-auto"
+        className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl max-h-[92vh] overflow-y-auto sheet-pop-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Pull handle */}

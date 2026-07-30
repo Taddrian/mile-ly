@@ -41,6 +41,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   const [cardId, setCardId] = useState('');
   const [spentStr, setSpentStr] = useState('');
   const [saving, setSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const filtered = categories.filter((c) => c.type === type);
@@ -75,7 +76,8 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
       setSaving(true);
       await updateCardSpent(cardId, newTotal);
       setSaving(false);
-      onClose();
+      setJustSaved(true);
+      setTimeout(onClose, 260);
       return;
     }
     const amount = parseFloat(amountStr);
@@ -84,11 +86,13 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
     const month = date.slice(0, 7) + '-01';
     await addEntry({ month, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined });
     setSaving(false);
+    setJustSaved(true);
     if (andAnother) {
       setAmountStr('');
       setRemark('');
+      setTimeout(() => setJustSaved(false), 500);
     } else {
-      onClose();
+      setTimeout(onClose, 260);
     }
   }
 
@@ -126,11 +130,11 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-black/50 backdrop-fade-in" onClick={onClose} />
 
       {/* Sheet */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto pb-safe"
+        className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto pb-safe sheet-pop-in"
         style={{
           background: 'var(--card)',
           borderRadius: '24px 24px 0 0',
@@ -389,7 +393,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
           {/* Chunky save button */}
           <button
             onClick={() => save(false)}
-            disabled={saving || !canSave}
+            disabled={saving || justSaved || !canSave}
             style={{
               width: '100%',
               padding: '16px 0',
@@ -405,16 +409,27 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               opacity: saving ? 0.7 : 1,
               transition: 'all 0.1s',
               cursor: canSave ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
             }}
           >
-            {saving ? 'Saving…' : isCardUpdate ? 'Update Card' : 'Save Entry'}
+            {justSaved ? (
+              <>
+                <svg className="save-check-pop" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                Saved!
+              </>
+            ) : saving ? 'Saving…' : isCardUpdate ? 'Update Card' : 'Save Entry'}
           </button>
 
           {/* Secondary: save and add another (not shown in card-update mode) */}
           {!isCardUpdate && (
             <button
               onClick={() => save(true)}
-              disabled={saving || !canSave}
+              disabled={saving || justSaved || !canSave}
               style={{
                 width: '100%',
                 padding: '13px 0',

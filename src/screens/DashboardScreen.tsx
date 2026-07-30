@@ -4,6 +4,7 @@ import { useMemo, useEffect, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { fmtAmount, fmtShort } from '@/lib/currency';
+import { useCountUp } from '@/lib/useCountUp';
 import DonutRing from '@/components/ui/DonutRing';
 import StatTile from '@/components/ui/StatTile';
 import MonthPicker from '@/components/ui/MonthPicker';
@@ -89,6 +90,7 @@ export default function DashboardScreen() {
   );
 
   const saved = Math.max(0, income - expenses);
+  const animatedSaved = useCountUp(saved);
   const daysLeft = daysLeftInMonth(selectedMonth);
   const perDay = daysLeft > 0 && saved > 0 ? saved / daysLeft : 0;
 
@@ -174,9 +176,11 @@ export default function DashboardScreen() {
         {/* Balance ring card */}
         <div className="card-chunky p-5" style={{ position: 'relative', overflow: 'visible' }}>
           {/* OnTrackBadge overlapping top-right */}
-          <div style={{ position: 'absolute', top: -14, right: 14, zIndex: 10 }}>
-            <OnTrackBadge />
-          </div>
+          {income > 0 && saved > 0 && (
+            <div style={{ position: 'absolute', top: -14, right: 14, zIndex: 10 }}>
+              <OnTrackBadge />
+            </div>
+          )}
 
           <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', color: 'var(--m-slate, #777777)', marginBottom: 14 }}>
             Balance
@@ -186,12 +190,12 @@ export default function DashboardScreen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <DonutRing
               segments={ringSegments}
-              centerLabel={`${currency} ${fmtShort(saved)}`}
+              centerLabel={`${currency} ${fmtShort(Math.round(animatedSaved))}`}
               centerSublabel="left to spend"
               trackColor="#EFF3F2"
               size={140}
             />
-            <MiloMascot />
+            <MiloMascot mood={income > 0 && saved <= 0 ? 'sad' : 'happy'} />
           </div>
 
           {/* Horizontal legend */}
@@ -304,12 +308,14 @@ export default function DashboardScreen() {
           ) : (
             <>
               <div className="space-y-2">
-                {sortedCards.slice(0, 4).map((card) => (
+                {sortedCards.slice(0, 4).map((card, i) => (
                   <CardRow
                     key={card.id}
                     card={card}
                     currency={currency}
                     onClick={() => setEditingCardId(card.id)}
+                    className="list-item-in"
+                    style={{ animationDelay: `${i * 60}ms` }}
                   />
                 ))}
               </div>
@@ -407,12 +413,14 @@ export default function DashboardScreen() {
 
       <Modal isOpen={showAllCards} onClose={() => setShowAllCards(false)} title="Your Cards" key={showAllCards ? 'all-open' : 'all-closed'}>
         <div className="space-y-2">
-          {sortedCards.map((card) => (
+          {sortedCards.map((card, i) => (
             <CardRow
               key={card.id}
               card={card}
               currency={currency}
               onClick={() => { setShowAllCards(false); setEditingCardId(card.id); }}
+              className="list-item-in"
+              style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
             />
           ))}
         </div>

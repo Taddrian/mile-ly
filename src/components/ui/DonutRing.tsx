@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 const R = 44;
 const CX = 60;
 const CY = 60;
@@ -39,12 +41,19 @@ export default function DonutRing({
   const total = segments.reduce((s, seg) => s + seg.value, 0);
   const scale = size / 120;
 
+  // Fill the ring in from empty on mount instead of snapping to its final value
+  const [filled, setFilled] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setFilled(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   // Each segment is shortened by GAP to create breathing room for round caps
   const GAP = 8;
   let offset = 0;
   const arcs = segments.map((seg) => {
     const fullLen = total > 0 ? (seg.value / total) * CIRC : 0;
-    const len = Math.max(0, fullLen - GAP);
+    const len = filled ? Math.max(0, fullLen - GAP) : 0;
     const dashoffset = -offset;
     offset += fullLen;
     return { ...seg, len, dashoffset };
@@ -85,6 +94,7 @@ export default function DonutRing({
             strokeDasharray={`${arc.len} ${CIRC}`}
             strokeDashoffset={arc.dashoffset}
             strokeLinecap="round"
+            style={{ transition: 'stroke-dasharray 0.9s cubic-bezier(0.22, 1, 0.36, 1)' }}
           />
         ))}
       </svg>
@@ -96,7 +106,11 @@ export default function DonutRing({
           height={starS}
           viewBox={`0 0 ${starS} ${starS}`}
           aria-hidden
-          style={{ position: 'absolute', left: starLeft, top: starTop, pointerEvents: 'none' }}
+          style={{
+            position: 'absolute', left: starLeft, top: starTop, pointerEvents: 'none',
+            opacity: filled ? 1 : 0,
+            transition: 'opacity 0.3s ease-out 0.7s',
+          }}
         >
           <polygon
             points={star5Points(starS / 2, starS / 2, starS / 2 - 1, (starS / 2 - 1) * 0.42)}

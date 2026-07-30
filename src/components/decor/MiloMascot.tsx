@@ -1,4 +1,10 @@
-export default function MiloMascot() {
+interface MiloMascotProps {
+  mood?: 'happy' | 'sad';
+}
+
+export default function MiloMascot({ mood = 'happy' }: MiloMascotProps) {
+  const sad = mood === 'sad';
+
   return (
     <div style={{ flex: 1, position: 'relative', height: 84, minWidth: 60 }}>
       <svg
@@ -7,7 +13,11 @@ export default function MiloMascot() {
         height="84"
         viewBox="0 0 90 80"
         aria-hidden
-        style={{ position: 'absolute', left: 0, top: 0, display: 'block' }}
+        style={{
+          position: 'absolute', left: 0, top: 0, display: 'block',
+          animationDuration: sad ? '13s' : '7s',
+          opacity: sad ? 0.88 : 1,
+        }}
       >
         {/* Motion puffs behind */}
         <ellipse className="milo-puff" style={{ '--puff-o': 0.55 } as React.CSSProperties} cx="10" cy="32" rx="5.5" ry="4" fill="white" />
@@ -15,19 +25,24 @@ export default function MiloMascot() {
         <ellipse className="milo-puff" style={{ '--puff-o': 0.48, animationDelay: '1.2s' } as React.CSSProperties} cx="13" cy="51" rx="4.5" ry="3.2" fill="white" />
 
         {/* Tail fins */}
-        <g className="milo-tail">
+        <g className="milo-tail" style={{ animationDuration: sad ? '1.1s' : '0.4s' }}>
           <path d="M 20 30 Q 4 21 6 38 Q 14 34 22 37 Z" fill="#0A6E63" />
           <path d="M 20 52 Q 4 61 6 44 Q 14 47 22 45 Z" fill="#0A6E63" />
         </g>
 
         {/* Body */}
-        <ellipse cx="47" cy="41" rx="28" ry="21" fill="#0D9488" />
+        <ellipse cx="47" cy="41" rx="28" ry="21" fill={sad ? '#4B9992' : '#0D9488'} />
 
         {/* Top fin */}
         <path d="M 34 21 Q 44 7 61 17 Q 52 23 37 22 Z" fill="#2DD4BF" />
 
         {/* Beak / nose */}
         <ellipse cx="73" cy="41" rx="11" ry="7" fill="#FFC800" stroke="#E6A800" strokeWidth="0.8" />
+
+        {/* Furrowed brow — sad only */}
+        {sad && (
+          <path d="M 52 22 Q 59 25.5 66 23" stroke="#2D3748" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+        )}
 
         {/* Eye */}
         <g className="milo-eye">
@@ -40,10 +55,14 @@ export default function MiloMascot() {
         </g>
 
         {/* Rosy cheek */}
-        <ellipse cx="51" cy="46" rx="6" ry="4.5" fill="#FF8888" opacity="0.35" />
+        <ellipse cx="51" cy="46" rx="6" ry="4.5" fill="#FF8888" opacity={sad ? 0.15 : 0.35} />
 
-        {/* Smile */}
-        <path d="M 56 50 Q 62 57 69 51" stroke="#2D3748" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+        {/* Mouth — smile or frown */}
+        {sad ? (
+          <path d="M 56 55 Q 62 49 69 54" stroke="#2D3748" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+        ) : (
+          <path d="M 56 50 Q 62 57 69 51" stroke="#2D3748" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+        )}
       </svg>
     </div>
   );

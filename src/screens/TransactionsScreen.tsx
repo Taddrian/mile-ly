@@ -141,12 +141,17 @@ export default function TransactionsScreen() {
           </div>
         ) : (
           <div className="space-y-2">
-            {filtered.map((entry) => {
+            {filtered.map((entry, i) => {
               const cat = categories.find((c) => c.id === entry.categoryId);
               const card = cards.find((c) => c.id === entry.cardId);
               const isIncome = cat?.type === 'income';
               return (
-                <SwipeableRow key={entry.id} onDelete={() => deleteEntry(entry.id)}>
+                <SwipeableRow
+                  key={entry.id}
+                  onDelete={() => deleteEntry(entry.id)}
+                  className="list-item-in"
+                  style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
+                >
                   <div
                     className="card-chunky flex items-center gap-3 p-4"
                     style={{ cursor: 'default' }}
