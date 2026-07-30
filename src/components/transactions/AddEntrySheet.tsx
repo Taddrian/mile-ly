@@ -189,6 +189,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                   inputMode="decimal"
                   value={amountStr}
                   onChange={(e) => setAmountStr(e.target.value)}
+                  onFocus={(e) => e.target.select()}
                   placeholder="0.00"
                   style={{
                     fontSize: 48,
@@ -282,6 +283,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                   inputMode="decimal"
                   value={spentStr}
                   onChange={(e) => setSpentStr(e.target.value)}
+                  onFocus={(e) => e.target.select()}
                   placeholder="0.00"
                   style={{
                     fontSize: 40,
