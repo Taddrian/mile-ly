@@ -35,7 +35,7 @@ export default function AddCardForm({ onSubmit, onCancel }: AddCardFormProps) {
   const [last4, setLast4] = useState('');
   const [limit, setLimit] = useState('');
   const [color, setColor] = useState(PRESET_COLORS[0]);
-  const [milesRate, setMilesRate] = useState('1.2');
+  const [milesRate, setMilesRate] = useState('');
   const [milesProgram, setMilesProgram] = useState<MilesProgram>('KrisFlyer');
   const [showPresets, setShowPresets] = useState(false);
 
@@ -48,7 +48,7 @@ export default function AddCardForm({ onSubmit, onCancel }: AddCardFormProps) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !last4 || !limit) return;
+    if (!name.trim() || !limit) return;
     onSubmit({
       name: name.trim(),
       last4,
@@ -93,14 +93,13 @@ export default function AddCardForm({ onSubmit, onCancel }: AddCardFormProps) {
       </div>
 
       <div>
-        <label className={labelClass}>Last 4 Digits</label>
+        <label className={labelClass}>Last 4 Digits (optional)</label>
         <input
           type="text"
           value={last4}
           onChange={(e) => setLast4(e.target.value.replace(/\D/g, '').slice(0, 4))}
           placeholder="1234"
           maxLength={4}
-          required
           className={inputClass}
         />
       </div>
@@ -113,7 +112,7 @@ export default function AddCardForm({ onSubmit, onCancel }: AddCardFormProps) {
       {/* Miles fields */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>Miles per SGD</label>
+          <label className={labelClass}>Miles per SGD (optional)</label>
           <input
             type="number"
             value={milesRate}
@@ -121,7 +120,6 @@ export default function AddCardForm({ onSubmit, onCancel }: AddCardFormProps) {
             placeholder="1.2"
             min="0"
             step="0.1"
-            required
             className={inputClass}
           />
         </div>

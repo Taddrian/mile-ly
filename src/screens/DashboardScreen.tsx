@@ -389,7 +389,7 @@ export default function DashboardScreen() {
                         <div style={{ width: 18, height: 13, borderRadius: 3, background: 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
                         <p className="text-white text-xs font-bold truncate">{card.name}</p>
                       </div>
-                      <p className="text-white/60 text-[10px] font-mono shrink-0 ml-1">••{card.last4}</p>
+                      {card.last4 && <p className="text-white/60 text-[10px] font-mono shrink-0 ml-1">••{card.last4}</p>}
                     </div>
                     <div className="relative">
                       <p className="text-white text-sm font-extrabold">{currency} {fmtAmount(card.currentSpent, currency)}</p>

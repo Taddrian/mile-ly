@@ -53,9 +53,11 @@ function CardItem({ card, currency }: { card: CreditCard; currency: string }) {
 
           {/* Bottom */}
           <div>
-            <p className="text-white/90 text-base font-mono tracking-widest mb-3">
-              •••• •••• •••• {card.last4}
-            </p>
+            {card.last4 && (
+              <p className="text-white/90 text-base font-mono tracking-widest mb-3">
+                •••• •••• •••• {card.last4}
+              </p>
+            )}
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-white/60 text-xs mb-0.5">Spent</p>

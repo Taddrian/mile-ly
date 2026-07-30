@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CreditCard } from '@/types';
+import { CreditCard, MilesProgram } from '@/types';
 
 interface EditCardFormProps {
   card: CreditCard;
@@ -17,15 +17,25 @@ const PRESET_COLORS = [
   '#0891B2', '#4F46E5', '#BE185D', '#374151',
 ];
 
+const PROGRAMS: MilesProgram[] = ['KrisFlyer', 'Asia Miles', 'Cashback', 'Other'];
+
 export default function EditCardForm({ card, onSave, onDelete, onCancel }: EditCardFormProps) {
   const [color, setColor] = useState(card.color);
   const [name, setName] = useState(card.name);
   const [limit, setLimit] = useState(String(card.monthlyLimit));
+  const [milesRate, setMilesRate] = useState(card.milesRate ? String(card.milesRate) : '');
+  const [milesProgram, setMilesProgram] = useState<MilesProgram>(card.milesProgram);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   function handleSave() {
     if (!name.trim()) return;
-    onSave({ name: name.trim(), color, monthlyLimit: parseFloat(limit) || 0 });
+    onSave({
+      name: name.trim(),
+      color,
+      monthlyLimit: parseFloat(limit) || 0,
+      milesRate: parseFloat(milesRate) || 0,
+      milesProgram,
+    });
   }
 
   return (
@@ -36,7 +46,7 @@ export default function EditCardForm({ card, onSave, onDelete, onCancel }: EditC
         style={{ background: `linear-gradient(135deg, ${color} 0%, ${color} 100%)`, boxShadow: '0 4px 0 rgba(0,0,0,0.18)' }}
       >
         <p className="text-white text-sm font-bold truncate">{name || 'Card name'}</p>
-        <p className="text-white/70 text-xs font-mono mt-1">•• {card.last4}</p>
+        {card.last4 && <p className="text-white/70 text-xs font-mono mt-1">•• {card.last4}</p>}
       </div>
 
       <div>
@@ -73,6 +83,45 @@ export default function EditCardForm({ card, onSave, onDelete, onCancel }: EditC
             boxShadow: '0 2px 0 var(--m-border-dark)',
           }}
         />
+      </div>
+
+      <div className="flex gap-3">
+        <div style={{ flex: 1 }}>
+          <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--m-slate)' }}>
+            Miles per SGD
+          </label>
+          <input
+            type="number"
+            value={milesRate}
+            onChange={(e) => setMilesRate(e.target.value)}
+            placeholder="1.2"
+            min="0"
+            step="0.1"
+            className="w-full mt-1.5 outline-none"
+            style={{
+              padding: '10px 14px', fontSize: 14, fontWeight: 600, color: 'var(--fg)',
+              background: 'var(--card)', border: '2px solid var(--m-border)', borderRadius: 12,
+              boxShadow: '0 2px 0 var(--m-border-dark)',
+            }}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--m-slate)' }}>
+            Program
+          </label>
+          <select
+            value={milesProgram}
+            onChange={(e) => setMilesProgram(e.target.value as MilesProgram)}
+            className="w-full mt-1.5 outline-none"
+            style={{
+              padding: '10px 14px', fontSize: 14, fontWeight: 600, color: 'var(--fg)',
+              background: 'var(--card)', border: '2px solid var(--m-border)', borderRadius: 12,
+              boxShadow: '0 2px 0 var(--m-border-dark)',
+            }}
+          >
+            {PROGRAMS.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
       </div>
 
       <div>

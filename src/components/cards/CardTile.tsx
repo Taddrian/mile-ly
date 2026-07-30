@@ -56,9 +56,11 @@ export default function CardTile({ card }: CardTileProps) {
           </div>
 
           {/* Card number */}
-          <p className="text-white/90 text-sm font-mono tracking-widest">
-            •••• •••• •••• {card.last4}
-          </p>
+          {card.last4 && (
+            <p className="text-white/90 text-sm font-mono tracking-widest">
+              •••• •••• •••• {card.last4}
+            </p>
+          )}
         </div>
       </div>
 
