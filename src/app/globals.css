@@ -50,6 +50,11 @@
   --m-slate:       #777777;
   --m-border:      #E5E5E5;
   --m-border-dark: #D9D9D9;
+
+  /* Glass nav */
+  --glass-bg:      rgba(255, 255, 255, 0.65);
+  --glass-border:  rgba(255, 255, 255, 0.5);
+  --glass-icon:    #6B6B66;
 }
 
 .dark {
@@ -59,6 +64,11 @@
   --border:        #2a2a2a;
   --text-secondary:#999999;
   --text-muted:    #666666;
+
+  /* Glass nav */
+  --glass-bg:      rgba(28, 28, 30, 0.65);
+  --glass-border:  rgba(255, 255, 255, 0.08);
+  --glass-icon:    #B0B0B0;
 }
 
 /* Chunky 3D card — the Duolingo signature */

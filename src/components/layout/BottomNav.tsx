@@ -60,94 +60,92 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 md:right-auto md:top-0 md:h-screen md:w-56 md:flex md:flex-col"
+      className="md:fixed md:left-0 md:top-0 md:h-screen md:w-56 md:flex md:flex-col"
       style={{ backgroundColor: 'var(--card)' }}
     >
-      {/* Mobile bottom bar — Duolingo pattern */}
+      {/* Mobile floating glass pill */}
       <div
-        className="flex items-end pb-safe md:hidden"
-        style={{ borderTop: '2px solid var(--m-border, #E5E5E5)' }}
+        className="fixed left-4 right-4 z-40 md:hidden flex justify-center"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
       >
-        {/* Left two tabs */}
-        {TABS.slice(0, 2).map(({ id, label, Icon }) => {
-          const active = activeTab === id;
-          return (
-            <button
-              key={id}
-              onClick={() => handleTabPress(id)}
-              className={`flex-1 flex flex-col items-center gap-1 py-2 ${bouncing === id ? 'tab-bounce' : ''}`}
-              style={{ color: active ? ACTIVE_COLOR : INACTIVE_COLOR }}
-            >
-              <div
+        <div
+          className="flex items-center justify-between w-full"
+          style={{
+            maxWidth: 360,
+            padding: '8px 14px',
+            borderRadius: 999,
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--glass-border)',
+            boxShadow: '0 8px 28px rgba(0,0,0,0.18)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+          }}
+        >
+          {/* Left two tabs */}
+          {TABS.slice(0, 2).map(({ id, Icon }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => handleTabPress(id)}
+                aria-label={TABS.find((t) => t.id === id)?.label}
+                className={`flex items-center justify-center ${bouncing === id ? 'tab-bounce' : ''}`}
                 style={{
-                  width: 52,
-                  height: 36,
-                  borderRadius: 12,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: active ? 'var(--m-teal-xl, #CCFBF1)' : 'transparent',
-                  border: active ? `2.5px solid ${ACTIVE_COLOR}` : '2.5px solid transparent',
-                  transition: 'background 0.15s, border-color 0.15s',
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  color: active ? '#fff' : 'var(--glass-icon)',
+                  background: active ? ACTIVE_COLOR : 'transparent',
+                  transition: 'background 0.15s, color 0.15s',
                 }}
               >
                 <Icon />
-              </div>
-              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: '0.02em' }}>
-                {label}
-              </span>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
 
-        {/* Center Add button */}
-        <div className="flex-1 flex justify-center pb-1">
+          {/* Center Add button */}
           <button
             onClick={onAddPress}
-            className="w-14 h-14 rounded-full flex items-center justify-center -mt-5 active:scale-95 transition-transform"
+            className="flex items-center justify-center active:scale-95 transition-transform"
             style={{
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
               background: ACTIVE_COLOR,
-              boxShadow: `0 4px 0 #0A6E63`,
+              boxShadow: '0 4px 12px rgba(13,148,136,0.4)',
+              flexShrink: 0,
             }}
             aria-label="Add entry"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
           </button>
-        </div>
 
-        {/* Right two tabs */}
-        {TABS.slice(2).map(({ id, label, Icon }) => {
-          const active = activeTab === id;
-          return (
-            <button
-              key={id}
-              onClick={() => handleTabPress(id)}
-              className={`flex-1 flex flex-col items-center gap-1 py-2 ${bouncing === id ? 'tab-bounce' : ''}`}
-              style={{ color: active ? ACTIVE_COLOR : INACTIVE_COLOR }}
-            >
-              <div
+          {/* Right two tabs */}
+          {TABS.slice(2).map(({ id, Icon }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => handleTabPress(id)}
+                aria-label={TABS.find((t) => t.id === id)?.label}
+                className={`flex items-center justify-center ${bouncing === id ? 'tab-bounce' : ''}`}
                 style={{
-                  width: 52,
-                  height: 36,
-                  borderRadius: 12,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: active ? 'var(--m-teal-xl, #CCFBF1)' : 'transparent',
-                  border: active ? `2.5px solid ${ACTIVE_COLOR}` : '2.5px solid transparent',
-                  transition: 'background 0.15s, border-color 0.15s',
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  color: active ? '#fff' : 'var(--glass-icon)',
+                  background: active ? ACTIVE_COLOR : 'transparent',
+                  transition: 'background 0.15s, color 0.15s',
                 }}
               >
                 <Icon />
-              </div>
-              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: '0.02em' }}>
-                {label}
-              </span>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Desktop sidebar — unchanged */}
