@@ -112,25 +112,27 @@
   .tab-bounce { animation: none; }
 }
 
-/* Milo mascot — Tamagotchi-style idle hop */
-@keyframes milo-hop {
-  0%   { transform: translateY(0) scale(1, 1); }
-  30%  { transform: translateY(-9px) scale(0.96, 1.05); }
-  55%  { transform: translateY(0) scale(1.06, 0.9); }
-  70%  { transform: translateY(0) scale(0.98, 1.02); }
-  100% { transform: translateY(0) scale(1, 1); }
+/* Milo mascot — swims back and forth beside the donut ring */
+@keyframes milo-swim {
+  0%   { transform: translateX(0%)    translateY(0px)  scaleX(1); }
+  22%  { transform: translateX(58%)   translateY(-7px) scaleX(1); }
+  28%  { transform: translateX(58%)   translateY(-7px) scaleX(-1); }
+  50%  { transform: translateX(0%)    translateY(0px)  scaleX(-1); }
+  72%  { transform: translateX(-58%)  translateY(-7px) scaleX(-1); }
+  78%  { transform: translateX(-58%)  translateY(-7px) scaleX(1); }
+  100% { transform: translateX(0%)    translateY(0px)  scaleX(1); }
 }
-.milo-hop {
-  animation: milo-hop 0.9s cubic-bezier(0.33, 0, 0.4, 1) infinite;
-  transform-origin: 47px 62px;
+.milo-swim {
+  animation: milo-swim 7s ease-in-out infinite;
+  transform-origin: 50% 50%;
 }
 
 @keyframes milo-tail-wag {
   0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(8deg); }
+  50%      { transform: rotate(14deg); }
 }
 .milo-tail {
-  animation: milo-tail-wag 0.45s ease-in-out infinite;
+  animation: milo-tail-wag 0.4s ease-in-out infinite;
   transform-origin: 20px 41px;
 }
 
@@ -152,7 +154,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .milo-hop, .milo-tail, .milo-eye, .milo-puff { animation: none; }
+  .milo-swim, .milo-tail, .milo-eye, .milo-puff { animation: none; }
 }
 
 body {
