@@ -78,6 +78,8 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
         await updateCardSpent(cardId, newTotal);
         setJustSaved(true);
         onClose();
+        // Safety net: re-enable the button if the sheet somehow doesn't close
+        setTimeout(() => setJustSaved(false), 2000);
       } finally {
         setSaving(false);
       }
@@ -96,6 +98,8 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
         setTimeout(() => setJustSaved(false), 500);
       } else {
         onClose();
+        // Safety net: re-enable the button if the sheet somehow doesn't close
+        setTimeout(() => setJustSaved(false), 2000);
       }
     } finally {
       setSaving(false);
