@@ -9,8 +9,9 @@ interface AddCardFormProps {
 }
 
 const PRESET_COLORS = [
-  '#0d6e5a', '#1E3A8A', '#DC2626', '#7C3AED',
-  '#B45309', '#0369A1', '#BE185D', '#374151',
+  '#0D9488', '#2563EB', '#7C3AED', '#DB2777',
+  '#E04E42', '#EA580C', '#D97706', '#65A30D',
+  '#0891B2', '#4F46E5', '#BE185D', '#374151',
 ];
 
 const PROGRAMS: MilesProgram[] = ['KrisFlyer', 'Asia Miles', 'Cashback', 'Other'];

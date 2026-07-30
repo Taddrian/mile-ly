@@ -14,6 +14,7 @@ interface AppContextValue {
   currency: string;
   setCurrency: (c: string) => void;
   addCard: (card: Omit<CreditCard, 'id' | 'currentSpent'>) => Promise<void>;
+  updateCard: (id: string, patch: Partial<Omit<CreditCard, 'id' | 'currentSpent'>>) => Promise<void>;
   deleteCard: (id: string) => Promise<void>;
   addTransaction: (txn: Omit<Transaction, 'id'>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
@@ -98,6 +99,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (row) setCards((prev) => [...prev, dbToCard(row)]);
   }
 
+  async function updateCard(id: string, patch: Partial<Omit<CreditCard, 'id' | 'currentSpent'>>) {
+    const dbPatch: Record<string, unknown> = {};
+    if (patch.name !== undefined) dbPatch.name = patch.name;
+    if (patch.last4 !== undefined) dbPatch.last4 = patch.last4;
+    if (patch.color !== undefined) dbPatch.color = patch.color;
+    if (patch.monthlyLimit !== undefined) dbPatch.monthly_limit = patch.monthlyLimit;
+    if (patch.milesRate !== undefined) dbPatch.miles_rate = patch.milesRate;
+    if (patch.milesProgram !== undefined) dbPatch.miles_program = patch.milesProgram;
+    await supabase.from('cards').update(dbPatch).eq('id', id);
+    setCards((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  }
+
   async function deleteCard(id: string) {
     await supabase.from('cards').delete().eq('id', id);
     setCards((prev) => prev.filter((c) => c.id !== id));
@@ -163,7 +176,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       cards: cardsWithSpent, transactions, categories, entries, selectedMonth, setSelectedMonth,
       currency, setCurrency,
-      addCard, deleteCard, addTransaction, deleteTransaction,
+      addCard, updateCard, deleteCard, addTransaction, deleteTransaction,
       addCategory, deleteCategory, addEntry, deleteEntry,
     }}>
       {children}
