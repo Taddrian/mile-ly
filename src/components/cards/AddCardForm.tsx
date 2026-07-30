@@ -48,12 +48,12 @@ export default function AddCardForm({ onSubmit, onCancel }: AddCardFormProps) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !limit) return;
+    if (!name.trim()) return;
     onSubmit({
       name: name.trim(),
       last4,
       color,
-      monthlyLimit: parseFloat(limit),
+      monthlyLimit: parseFloat(limit) || 0,
       milesRate: parseFloat(milesRate) || 1.0,
       milesProgram,
     });
@@ -105,8 +105,8 @@ export default function AddCardForm({ onSubmit, onCancel }: AddCardFormProps) {
       </div>
 
       <div>
-        <label className={labelClass}>Monthly Limit (SGD)</label>
-        <input type="number" value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="5000" min="1" step="0.01" required className={inputClass} />
+        <label className={labelClass}>Monthly Limit (SGD, optional)</label>
+        <input type="number" value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="5000" min="0" step="0.01" className={inputClass} />
       </div>
 
       {/* Miles fields */}
