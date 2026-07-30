@@ -10,6 +10,7 @@ import MonthPicker from '@/components/ui/MonthPicker';
 import CategoryChip from '@/components/ui/CategoryChip';
 import AddCardForm from '@/components/cards/AddCardForm';
 import EditCardForm from '@/components/cards/EditCardForm';
+import CardRow from '@/components/cards/CardRow';
 import Modal from '@/components/ui/Modal';
 import MiloMascot from '@/components/decor/MiloMascot';
 import OnTrackBadge from '@/components/decor/OnTrackBadge';
@@ -38,6 +39,7 @@ export default function DashboardScreen() {
   const { cards, addCard, updateCard, deleteCard, entries, categories, selectedMonth, setSelectedMonth, currency } = useApp();
   const [showAddCard, setShowAddCard] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [showAllCards, setShowAllCards] = useState(false);
   const [remark, setRemark] = useState('');
   const [editingRemark, setEditingRemark] = useState(false);
   const [remarkInput, setRemarkInput] = useState('');
@@ -100,6 +102,17 @@ export default function DashboardScreen() {
     });
     return Object.values(map).sort((a, b) => b.amount - a.amount);
   }, [entries, categories]);
+
+  // Surface the most recently touched card first (itemized entries or balance updates)
+  const sortedCards = useMemo(() => {
+    const lastActivity = (cardId: string) => {
+      const times = entries
+        .filter((e) => e.cardId === cardId)
+        .map((e) => (e.createdAt ? new Date(e.createdAt).getTime() : -Infinity));
+      return times.length > 0 ? Math.max(...times) : -Infinity;
+    };
+    return [...cards].sort((a, b) => lastActivity(b.id) - lastActivity(a.id));
+  }, [cards, entries]);
 
   // teal = saved, coral = spent  (matches reference design)
   const ringSegments = [
@@ -360,52 +373,27 @@ export default function DashboardScreen() {
               Add your first card
             </button>
           ) : (
-            <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4" style={{ scrollbarWidth: 'none' }}>
-              {cards.map((card) => {
-                const pct = card.monthlyLimit > 0 ? Math.min((card.currentSpent / card.monthlyLimit) * 100, 100) : 0;
-                const num = parseInt(card.color.replace('#', ''), 16);
-                const r = Math.min(255, (num >> 16) + 30);
-                const g = Math.min(255, ((num >> 8) & 0xff) + 30);
-                const b = Math.min(255, (num & 0xff) + 30);
-                const lighter = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-                return (
-                  <button
+            <>
+              <div className="space-y-2">
+                {sortedCards.slice(0, 4).map((card) => (
+                  <CardRow
                     key={card.id}
+                    card={card}
+                    currency={currency}
                     onClick={() => setEditingCardId(card.id)}
-                    className="shrink-0 rounded-2xl p-4 flex flex-col justify-between text-left relative overflow-hidden active:scale-[0.97] transition-transform"
-                    style={{
-                      width: 168,
-                      minHeight: 110,
-                      background: `linear-gradient(135deg, ${card.color} 0%, ${lighter} 100%)`,
-                      boxShadow: '0 4px 0 rgba(0,0,0,0.18)',
-                    }}
-                  >
-                    {/* Decorative circles for depth */}
-                    <div className="absolute -top-5 -right-5 w-20 h-20 rounded-full bg-white/10 pointer-events-none" />
-                    <div className="absolute bottom-0 right-6 w-10 h-10 rounded-full bg-white/10 pointer-events-none" />
-
-                    <div className="flex items-center justify-between mb-3 relative">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <div style={{ width: 18, height: 13, borderRadius: 3, background: 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
-                        <p className="text-white text-xs font-bold truncate">{card.name}</p>
-                      </div>
-                      {card.last4 && <p className="text-white/60 text-[10px] font-mono shrink-0 ml-1">••{card.last4}</p>}
-                    </div>
-                    <div className="relative">
-                      <p className="text-white text-sm font-extrabold">{currency} {fmtAmount(card.currentSpent, currency)}</p>
-                      {card.monthlyLimit > 0 && (
-                        <>
-                          <p className="text-white/60 text-[10px] mb-1.5">of {currency} {fmtAmount(card.monthlyLimit, currency)}</p>
-                          <div className="h-1.5 rounded-full bg-white/20">
-                            <div className="h-1.5 rounded-full bg-white transition-all" style={{ width: `${pct}%` }} />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                  />
+                ))}
+              </div>
+              {cards.length > 4 && (
+                <button
+                  onClick={() => setShowAllCards(true)}
+                  className="w-full text-center mt-2"
+                  style={{ fontSize: 12, fontWeight: 700, color: 'var(--m-teal, #0D9488)' }}
+                >
+                  See all {cards.length} cards
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -415,6 +403,19 @@ export default function DashboardScreen() {
           onSubmit={(data) => { addCard(data); setShowAddCard(false); }}
           onCancel={() => setShowAddCard(false)}
         />
+      </Modal>
+
+      <Modal isOpen={showAllCards} onClose={() => setShowAllCards(false)} title="Your Cards" key={showAllCards ? 'all-open' : 'all-closed'}>
+        <div className="space-y-2">
+          {sortedCards.map((card) => (
+            <CardRow
+              key={card.id}
+              card={card}
+              currency={currency}
+              onClick={() => { setShowAllCards(false); setEditingCardId(card.id); }}
+            />
+          ))}
+        </div>
       </Modal>
 
       <Modal isOpen={!!editingCardId} onClose={() => setEditingCardId(null)} title="Edit Card" key={editingCardId ?? 'closed'}>
