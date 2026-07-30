@@ -194,7 +194,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
 
           {/* Type toggle */}
           <div style={{ display: 'flex', gap: 8 }}>
-            {(cards.length > 0 ? ['expense', 'income', 'card'] : ['expense', 'income']).map((t) => {
+            {(cards.length > 0 ? ['income', 'card', 'expense'] : ['income', 'expense']).map((t) => {
               const et = t as EntryType;
               const active = type === et;
               const color = et === 'income' ? '#0D9488' : et === 'card' ? '#2563EB' : '#FF6B5E';
