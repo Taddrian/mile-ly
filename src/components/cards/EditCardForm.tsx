@@ -5,9 +5,7 @@ import { CreditCard } from '@/types';
 
 interface EditCardFormProps {
   card: CreditCard;
-  itemizedTotal: number;
-  currency: string;
-  onSave: (patch: Partial<Omit<CreditCard, 'id' | 'currentSpent'>>, newSpent: number) => void;
+  onSave: (patch: Partial<Omit<CreditCard, 'id' | 'currentSpent'>>) => void;
   onDelete: () => void;
   onCancel: () => void;
 }
@@ -19,19 +17,15 @@ const PRESET_COLORS = [
   '#0891B2', '#4F46E5', '#BE185D', '#374151',
 ];
 
-export default function EditCardForm({ card, itemizedTotal, currency, onSave, onDelete, onCancel }: EditCardFormProps) {
+export default function EditCardForm({ card, onSave, onDelete, onCancel }: EditCardFormProps) {
   const [color, setColor] = useState(card.color);
   const [name, setName] = useState(card.name);
   const [limit, setLimit] = useState(String(card.monthlyLimit));
-  const [spent, setSpent] = useState(String(card.currentSpent));
   const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const spentNum = parseFloat(spent) || 0;
-  const willClampToItemized = spentNum < itemizedTotal;
 
   function handleSave() {
     if (!name.trim()) return;
-    onSave({ name: name.trim(), color, monthlyLimit: parseFloat(limit) || 0 }, spentNum);
+    onSave({ name: name.trim(), color, monthlyLimit: parseFloat(limit) || 0 });
   }
 
   return (
@@ -60,30 +54,6 @@ export default function EditCardForm({ card, itemizedTotal, currency, onSave, on
             boxShadow: '0 2px 0 var(--m-border-dark)',
           }}
         />
-      </div>
-
-      <div>
-        <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--m-slate)' }}>
-          Current Spent This Month
-        </label>
-        <input
-          type="number"
-          value={spent}
-          onChange={(e) => setSpent(e.target.value)}
-          min="0"
-          step="0.01"
-          className="w-full mt-1.5 outline-none"
-          style={{
-            padding: '10px 14px', fontSize: 14, fontWeight: 700, color: 'var(--fg)',
-            background: 'var(--card)', border: '2px solid var(--m-border)', borderRadius: 12,
-            boxShadow: '0 2px 0 var(--m-border-dark)',
-          }}
-        />
-        <p style={{ fontSize: 11, color: 'var(--m-slate)', marginTop: 6 }}>
-          {willClampToItemized
-            ? `You've logged ${currency} ${itemizedTotal.toFixed(2)} in itemized transactions already — the card will show that amount instead.`
-            : 'Just type the latest total from your statement — we\'ll work out the difference for you.'}
-        </p>
       </div>
 
       <div>

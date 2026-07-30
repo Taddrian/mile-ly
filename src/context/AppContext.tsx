@@ -22,9 +22,12 @@ interface AppContextValue {
   deleteCategory: (id: string) => Promise<void>;
   addEntry: (data: Omit<Entry, 'id' | 'userId'>) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
+  updateCardSpent: (cardId: string, newTotal: number) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
+
+export const CARD_UPDATE_NOTE = '⚡ Balance update';
 
 function currentMonth() {
   const d = new Date();
@@ -164,6 +167,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
+  // Maintains a single replaceable entry per card per month so users can
+  // type in the latest statement total instead of logging every transaction.
+  async function updateCardSpent(cardId: string, newTotal: number) {
+    const cardEntries = entries.filter((e) => e.cardId === cardId);
+    const quickEntry = cardEntries.find((e) => e.note === CARD_UPDATE_NOTE);
+    const itemizedTotal = cardEntries
+      .filter((e) => e.note !== CARD_UPDATE_NOTE)
+      .reduce((s, e) => s + e.amount, 0);
+    const neededQuickAmount = Math.round((newTotal - itemizedTotal) * 100) / 100;
+
+    if (quickEntry) await deleteEntry(quickEntry.id);
+
+    if (neededQuickAmount > 0) {
+      let cat = categories.find((c) => c.name === 'Credit Card' && c.type === 'expense');
+      if (!cat) cat = await addCategory('Credit Card', 'expense');
+      await addEntry({
+        month: selectedMonth,
+        amount: neededQuickAmount,
+        categoryId: cat?.id,
+        cardId,
+        note: CARD_UPDATE_NOTE,
+      });
+    }
+  }
+
   // Derive currentSpent per card from selected month's entries
   const cardsWithSpent = useMemo(() =>
     cards.map((card) => ({
@@ -180,7 +208,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       cards: cardsWithSpent, transactions, categories, entries, selectedMonth, setSelectedMonth,
       currency, setCurrency,
       addCard, updateCard, deleteCard, addTransaction, deleteTransaction,
-      addCategory, deleteCategory, addEntry, deleteEntry,
+      addCategory, deleteCategory, addEntry, deleteEntry, updateCardSpent,
     }}>
       {children}
     </AppContext.Provider>

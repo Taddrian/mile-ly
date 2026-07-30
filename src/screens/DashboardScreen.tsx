@@ -35,34 +35,9 @@ function daysLeftInMonth(monthStr: string) {
 }
 
 export default function DashboardScreen() {
-  const { entries, categories, cards, addCard, updateCard, deleteCard, addEntry, deleteEntry, addCategory, selectedMonth, setSelectedMonth, currency } = useApp();
+  const { cards, addCard, updateCard, deleteCard, entries, categories, selectedMonth, setSelectedMonth, currency } = useApp();
   const [showAddCard, setShowAddCard] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
-
-  const QUICK_UPDATE_NOTE = '⚡ Balance update';
-
-  async function updateCardSpent(cardId: string, newTotal: number) {
-    const cardEntries = entries.filter((e) => e.cardId === cardId);
-    const quickEntry = cardEntries.find((e) => e.note === QUICK_UPDATE_NOTE);
-    const itemizedTotal = cardEntries
-      .filter((e) => e.note !== QUICK_UPDATE_NOTE)
-      .reduce((s, e) => s + e.amount, 0);
-    const neededQuickAmount = Math.round((newTotal - itemizedTotal) * 100) / 100;
-
-    if (quickEntry) await deleteEntry(quickEntry.id);
-
-    if (neededQuickAmount > 0) {
-      let cat = categories.find((c) => c.name === 'Credit Card' && c.type === 'expense');
-      if (!cat) cat = await addCategory('Credit Card', 'expense');
-      await addEntry({
-        month: selectedMonth,
-        amount: neededQuickAmount,
-        categoryId: cat?.id,
-        cardId,
-        note: QUICK_UPDATE_NOTE,
-      });
-    }
-  }
   const [remark, setRemark] = useState('');
   const [editingRemark, setEditingRemark] = useState(false);
   const [remarkInput, setRemarkInput] = useState('');
@@ -446,19 +421,10 @@ export default function DashboardScreen() {
         {editingCardId && (() => {
           const card = cards.find((c) => c.id === editingCardId);
           if (!card) return null;
-          const itemizedTotal = entries
-            .filter((e) => e.cardId === card.id && e.note !== QUICK_UPDATE_NOTE)
-            .reduce((s, e) => s + e.amount, 0);
           return (
             <EditCardForm
               card={card}
-              itemizedTotal={itemizedTotal}
-              currency={currency}
-              onSave={(patch, newSpent) => {
-                updateCard(card.id, patch);
-                if (newSpent !== card.currentSpent) updateCardSpent(card.id, newSpent);
-                setEditingCardId(null);
-              }}
+              onSave={(patch) => { updateCard(card.id, patch); setEditingCardId(null); }}
               onDelete={() => { deleteCard(card.id); setEditingCardId(null); }}
               onCancel={() => setEditingCardId(null)}
             />

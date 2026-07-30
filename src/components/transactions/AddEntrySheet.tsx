@@ -8,7 +8,7 @@ interface AddEntrySheetProps {
   onClose: () => void;
 }
 
-type EntryType = 'income' | 'expense';
+type EntryType = 'income' | 'expense' | 'card';
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -29,7 +29,7 @@ function defaultDateForMonth(month: string): string {
 }
 
 export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
-  const { categories, cards, addEntry, addCategory, deleteCategory, selectedMonth, currency } = useApp();
+  const { categories, cards, addEntry, addCategory, deleteCategory, updateCardSpent, selectedMonth, currency } = useApp();
 
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
@@ -39,10 +39,12 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   const [addingCat, setAddingCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [cardId, setCardId] = useState('');
+  const [spentStr, setSpentStr] = useState('');
   const [saving, setSaving] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const filtered = categories.filter((c) => c.type === type);
+  const selectedCard = cards.find((c) => c.id === cardId);
 
   useEffect(() => { setCategoryId(''); }, [type]);
 
@@ -51,6 +53,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
       setAmountStr('');
       setCategoryId('');
       setCardId('');
+      setSpentStr('');
       setDate(defaultDateForMonth(selectedMonth));
       setRemark('');
       setType('expense');
@@ -59,7 +62,22 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
     }
   }, [isOpen, selectedMonth]);
 
+  // When picking a card in "card update" mode, prefill with its current total
+  useEffect(() => {
+    if (type === 'card' && selectedCard) setSpentStr(String(selectedCard.currentSpent));
+  }, [type, cardId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function save(andAnother = false) {
+    if (type === 'card') {
+      if (!cardId) return;
+      const newTotal = parseFloat(spentStr);
+      if (isNaN(newTotal) || newTotal < 0) return;
+      setSaving(true);
+      await updateCardSpent(cardId, newTotal);
+      setSaving(false);
+      onClose();
+      return;
+    }
     const amount = parseFloat(amountStr);
     if (!amount || amount <= 0 || (!categoryId && !cardId)) return;
     setSaving(true);
@@ -76,15 +94,18 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
 
   async function handleAddCat() {
     const name = newCatName.trim();
-    if (!name) return;
+    if (!name || type === 'card') return;
     await addCategory(name, type);
     setNewCatName('');
     setAddingCat(false);
   }
 
   const isIncome = type === 'income';
-  const canSave = !!amountStr && (!!categoryId || !!cardId);
-  const accentColor = isIncome ? '#0D9488' : '#FF6B5E';
+  const isCardUpdate = type === 'card';
+  const canSave = isCardUpdate
+    ? !!cardId && !!spentStr && !isNaN(parseFloat(spentStr))
+    : !!amountStr && (!!categoryId || !!cardId);
+  const accentColor = isCardUpdate ? (selectedCard?.color ?? '#0D9488') : isIncome ? '#0D9488' : '#FF6B5E';
   const accentDark  = isIncome ? '#0A6E63' : '#E04E42';
 
   if (!isOpen) return null;
@@ -136,48 +157,53 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
-          <p style={{ fontSize: 15, fontWeight: 800, color: 'var(--m-ink)', letterSpacing: '-0.01em' }}>New Entry</p>
+          <p style={{ fontSize: 15, fontWeight: 800, color: 'var(--m-ink)', letterSpacing: '-0.01em' }}>
+            {isCardUpdate ? 'Update Card' : 'New Entry'}
+          </p>
           <div style={{ width: 34 }} />
         </div>
 
         <div style={{ padding: '8px 20px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
 
-          {/* Amount hero */}
-          <div style={{ textAlign: 'center', padding: '8px 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-              <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--m-slate)' }}>{currency}</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={amountStr}
-                onChange={(e) => setAmountStr(e.target.value)}
-                placeholder="0.00"
-                style={{
-                  fontSize: 48,
-                  fontWeight: 900,
-                  background: 'transparent',
-                  outline: 'none',
-                  width: 180,
-                  textAlign: 'center',
-                  color: accentColor,
-                  letterSpacing: '-0.03em',
-                  border: 'none',
-                }}
-              />
+          {/* Amount hero (hidden in card-update mode) */}
+          {!isCardUpdate && (
+            <div style={{ textAlign: 'center', padding: '8px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--m-slate)' }}>{currency}</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={amountStr}
+                  onChange={(e) => setAmountStr(e.target.value)}
+                  placeholder="0.00"
+                  style={{
+                    fontSize: 48,
+                    fontWeight: 900,
+                    background: 'transparent',
+                    outline: 'none',
+                    width: 180,
+                    textAlign: 'center',
+                    color: accentColor,
+                    letterSpacing: '-0.03em',
+                    border: 'none',
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Type toggle */}
           <div style={{ display: 'flex', gap: 8 }}>
-            {(['expense', 'income'] as EntryType[]).map((t) => {
-              const active = type === t;
-              const color = t === 'income' ? '#0D9488' : '#FF6B5E';
-              const dark  = t === 'income' ? '#0A6E63' : '#E04E42';
-              const label = t === 'income' ? '💚  Income' : '🛍️  Spending';
+            {(cards.length > 0 ? ['expense', 'income', 'card'] : ['expense', 'income']).map((t) => {
+              const et = t as EntryType;
+              const active = type === et;
+              const color = et === 'income' ? '#0D9488' : et === 'card' ? '#2563EB' : '#FF6B5E';
+              const dark  = et === 'income' ? '#0A6E63' : et === 'card' ? '#1E40AF' : '#E04E42';
+              const label = et === 'income' ? '💚 Income' : et === 'card' ? '💳 Card' : '🛍️ Spending';
               return (
                 <button
-                  key={t}
-                  onClick={() => setType(t)}
+                  key={et}
+                  onClick={() => setType(et)}
                   style={{
                     flex: 1,
                     padding: '12px 0',
@@ -199,8 +225,8 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
             })}
           </div>
 
-          {/* Card selector (expense only) */}
-          {type === 'expense' && cards.length > 0 && (
+          {/* Card selector (expense + card-update modes) */}
+          {(type === 'expense' || isCardUpdate) && cards.length > 0 && (
             <div>
               <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 8 }}>
                 Card
@@ -209,7 +235,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                 {cards.map((card) => (
                   <button
                     key={card.id}
-                    onClick={() => setCardId(cardId === card.id ? '' : card.id)}
+                    onClick={() => setCardId(isCardUpdate ? card.id : (cardId === card.id ? '' : card.id))}
                     style={{
                       padding: '7px 14px',
                       borderRadius: 999,
@@ -229,8 +255,41 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
             </div>
           )}
 
-          {/* Category */}
-          <div>
+          {/* Current spent input (card-update mode only) */}
+          {isCardUpdate && selectedCard && (
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 8 }}>
+                Current Spent This Month
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', padding: '8px 0' }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--m-slate)' }}>{currency}</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={spentStr}
+                  onChange={(e) => setSpentStr(e.target.value)}
+                  placeholder="0.00"
+                  style={{
+                    fontSize: 40,
+                    fontWeight: 900,
+                    background: 'transparent',
+                    outline: 'none',
+                    width: 180,
+                    textAlign: 'center',
+                    color: accentColor,
+                    letterSpacing: '-0.03em',
+                    border: 'none',
+                  }}
+                />
+              </div>
+              <p style={{ fontSize: 11, color: 'var(--m-slate)', textAlign: 'center' }}>
+                Just type the latest total from your statement — we&rsquo;ll work out the difference for you.
+              </p>
+            </div>
+          )}
+
+          {/* Category (hidden in card-update mode) */}
+          {!isCardUpdate && <div>
             <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 8 }}>
               Category
             </p>
@@ -305,25 +364,27 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                 + New category
               </button>
             )}
-          </div>
+          </div>}
 
-          {/* Date + Remark in a row */}
-          <div style={{ display: 'flex', gap: 10 }}>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Date</p>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
+          {/* Date + Remark in a row (hidden in card-update mode) */}
+          {!isCardUpdate && (
+            <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Date</p>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Remark</p>
+                <input
+                  type="text"
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                  placeholder="Optional"
+                  style={inputStyle}
+                />
+              </div>
             </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Remark</p>
-              <input
-                type="text"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-                placeholder="Optional"
-                style={inputStyle}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Chunky save button */}
           <button
@@ -346,32 +407,34 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               cursor: canSave ? 'pointer' : 'not-allowed',
             }}
           >
-            {saving ? 'Saving…' : 'Save Entry'}
+            {saving ? 'Saving…' : isCardUpdate ? 'Update Card' : 'Save Entry'}
           </button>
 
-          {/* Secondary: save and add another */}
-          <button
-            onClick={() => save(true)}
-            disabled={saving || !canSave}
-            style={{
-              width: '100%',
-              padding: '13px 0',
-              borderRadius: 14,
-              fontSize: 13,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: canSave ? accentColor : 'var(--m-border-dark)',
-              background: 'var(--card)',
-              border: `2px solid ${canSave ? accentColor : 'var(--m-border)'}`,
-              boxShadow: '0 3px 0 var(--m-border-dark)',
-              opacity: saving ? 0.7 : 1,
-              cursor: canSave ? 'pointer' : 'not-allowed',
-              marginTop: -8,
-            }}
-          >
-            + Save Another
-          </button>
+          {/* Secondary: save and add another (not shown in card-update mode) */}
+          {!isCardUpdate && (
+            <button
+              onClick={() => save(true)}
+              disabled={saving || !canSave}
+              style={{
+                width: '100%',
+                padding: '13px 0',
+                borderRadius: 14,
+                fontSize: 13,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: canSave ? accentColor : 'var(--m-border-dark)',
+                background: 'var(--card)',
+                border: `2px solid ${canSave ? accentColor : 'var(--m-border)'}`,
+                boxShadow: '0 3px 0 var(--m-border-dark)',
+                opacity: saving ? 0.7 : 1,
+                cursor: canSave ? 'pointer' : 'not-allowed',
+                marginTop: -8,
+              }}
+            >
+              + Save Another
+            </button>
+          )}
         </div>
       </div>
 
