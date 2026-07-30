@@ -243,77 +243,6 @@ export default function DashboardScreen() {
           />
         </div>
 
-        {/* Remarks */}
-        <div className="card-chunky p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: '#FFF3C4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                </svg>
-              </div>
-              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)' }}>
-                Remarks
-              </p>
-            </div>
-            {!editingRemark ? (
-              <button
-                onClick={() => { setRemarkInput(remark); setEditingRemark(true); }}
-                style={{ fontSize: 12, fontWeight: 700, color: 'var(--m-teal, #0D9488)' }}
-              >
-                {remark ? 'Edit' : '+ Add'}
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                <button
-                  onClick={saveRemark}
-                  className="px-3 py-1 rounded-lg text-xs font-bold text-white"
-                  style={{ background: 'var(--m-teal)', boxShadow: '0 2px 0 var(--m-teal-dark)' }}
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setEditingRemark(false)}
-                  className="px-3 py-1 rounded-lg text-xs font-semibold"
-                  style={{ border: '2px solid var(--m-border)', color: 'var(--m-slate)' }}
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
-
-          {editingRemark ? (
-            <textarea
-              value={remarkInput}
-              onChange={(e) => setRemarkInput(e.target.value)}
-              autoFocus
-              placeholder={"e.g. Splurged on flights ✈️, birthday dinner 🎂, gym membership renewed..."}
-              rows={4}
-              className="w-full outline-none resize-none"
-              style={{
-                fontSize: 13,
-                fontWeight: 500,
-                lineHeight: 1.6,
-                color: 'var(--fg)',
-                background: 'var(--bg)',
-                border: '2px solid var(--m-border)',
-                borderRadius: 12,
-                padding: '10px 12px',
-                boxShadow: '0 2px 0 var(--m-border-dark)',
-              }}
-            />
-          ) : remark ? (
-            <p style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.6, color: 'var(--fg)', whiteSpace: 'pre-wrap' }}>
-              {remark}
-            </p>
-          ) : (
-            <p style={{ fontSize: 12, color: 'var(--m-slate, #777777)', fontStyle: 'italic' }}>
-              No remarks yet — tap "+ Add" to note any highlights or surprises this month.
-            </p>
-          )}
-        </div>
-
         {/* Category breakdown */}
         {catSpend.length > 0 && (
           <div className="card-chunky p-5">
@@ -394,6 +323,77 @@ export default function DashboardScreen() {
                 </button>
               )}
             </>
+          )}
+        </div>
+
+        {/* Remarks */}
+        <div className="card-chunky p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: '#FFF3C4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+              </div>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)' }}>
+                Remarks
+              </p>
+            </div>
+            {!editingRemark ? (
+              <button
+                onClick={() => { setRemarkInput(remark); setEditingRemark(true); }}
+                style={{ fontSize: 12, fontWeight: 700, color: 'var(--m-teal, #0D9488)' }}
+              >
+                {remark ? 'Edit' : '+ Add'}
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  onClick={saveRemark}
+                  className="px-3 py-1 rounded-lg text-xs font-bold text-white"
+                  style={{ background: 'var(--m-teal)', boxShadow: '0 2px 0 var(--m-teal-dark)' }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setEditingRemark(false)}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold"
+                  style={{ border: '2px solid var(--m-border)', color: 'var(--m-slate)' }}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+
+          {editingRemark ? (
+            <textarea
+              value={remarkInput}
+              onChange={(e) => setRemarkInput(e.target.value)}
+              autoFocus
+              placeholder={"e.g. Splurged on flights ✈️, birthday dinner 🎂, gym membership renewed..."}
+              rows={4}
+              className="w-full outline-none resize-none"
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                lineHeight: 1.6,
+                color: 'var(--fg)',
+                background: 'var(--bg)',
+                border: '2px solid var(--m-border)',
+                borderRadius: 12,
+                padding: '10px 12px',
+                boxShadow: '0 2px 0 var(--m-border-dark)',
+              }}
+            />
+          ) : remark ? (
+            <p style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.6, color: 'var(--fg)', whiteSpace: 'pre-wrap' }}>
+              {remark}
+            </p>
+          ) : (
+            <p style={{ fontSize: 12, color: 'var(--m-slate, #777777)', fontStyle: 'italic' }}>
+              No remarks yet — tap "+ Add" to note any highlights or surprises this month.
+            </p>
           )}
         </div>
       </div>
