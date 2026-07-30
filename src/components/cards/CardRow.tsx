@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { CreditCard } from '@/types';
-import { fmtAmount } from '@/lib/currency';
+import { fmtCurrency } from '@/lib/currency';
 
 interface CardRowProps {
   card: CreditCard;
@@ -54,11 +54,11 @@ export default function CardRow({ card, currency, onClick, style, className }: C
 
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <p className="text-sm font-extrabold" style={{ color: 'var(--m-ink, #3C3C3C)' }}>
-          {currency} {fmtAmount(card.currentSpent, currency)}
+          {fmtCurrency(card.currentSpent, currency)}
         </p>
         {hasLimit && (
           <p className="text-[10px] mt-0.5" style={{ color: 'var(--m-slate)' }}>
-            of {currency} {fmtAmount(card.monthlyLimit, currency)}
+            of {fmtCurrency(card.monthlyLimit, currency)}
           </p>
         )}
       </div>

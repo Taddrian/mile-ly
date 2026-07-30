@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
+import { currencySymbol } from '@/lib/currency';
 
 interface AddEntrySheetProps {
   isOpen: boolean;
@@ -183,7 +184,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
           {!isCardUpdate && (
             <div style={{ textAlign: 'center', padding: '8px 0' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--m-slate)' }}>{currency}</span>
+                <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--m-slate)' }}>{currencySymbol(currency)}</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -277,7 +278,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                 Current Spent This Month
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', padding: '8px 0' }}>
-                <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--m-slate)' }}>{currency}</span>
+                <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--m-slate)' }}>{currencySymbol(currency)}</span>
                 <input
                   type="number"
                   inputMode="decimal"

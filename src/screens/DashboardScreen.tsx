@@ -3,7 +3,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
-import { fmtAmount, fmtShort } from '@/lib/currency';
+import { fmtShort, fmtCurrency, currencySymbol } from '@/lib/currency';
 import { useCountUp } from '@/lib/useCountUp';
 import DonutRing from '@/components/ui/DonutRing';
 import StatTile from '@/components/ui/StatTile';
@@ -190,7 +190,7 @@ export default function DashboardScreen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <DonutRing
               segments={ringSegments}
-              centerLabel={`${currency} ${fmtShort(Math.round(animatedSaved))}`}
+              centerLabel={`${currencySymbol(currency)} ${fmtShort(Math.round(animatedSaved))}`}
               centerSublabel="left to spend"
               trackColor="#EFF3F2"
               size={140}
@@ -211,7 +211,7 @@ export default function DashboardScreen() {
                     </span>
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--m-ink, #3C3C3C)' }}>
-                    {fmtAmount(value, currency)}
+                    {fmtCurrency(value, currency)}
                   </span>
                   {d !== null && (
                     <span style={{
@@ -236,13 +236,13 @@ export default function DashboardScreen() {
           <StatTile
             chipLabel="savings"
             label="Saved this month"
-            value={`${currency} ${fmtAmount(saved, currency)}`}
+            value={fmtCurrency(saved, currency)}
             caption={income > 0 ? `${Math.round((saved / income) * 100)}% of income` : 'No income yet'}
           />
           <StatTile
             chipLabel="calendar"
             label="Safe to spend / day"
-            value={perDay > 0 ? `${currency} ${fmtAmount(perDay, currency)}` : '—'}
+            value={perDay > 0 ? fmtCurrency(perDay, currency) : '—'}
             caption={daysLeft > 0 ? `${daysLeft} days left` : 'End of month'}
           />
         </div>
@@ -260,7 +260,7 @@ export default function DashboardScreen() {
                     <CategoryChip name={name} size={28} />
                     <div className="flex-1 flex justify-between text-xs">
                       <span style={{ fontWeight: 600, color: 'var(--m-ink, #3C3C3C)' }}>{name}</span>
-                      <span style={{ fontWeight: 700, color: 'var(--m-ink, #3C3C3C)' }}>{currency} {fmtAmount(amount, currency)}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--m-ink, #3C3C3C)' }}>{fmtCurrency(amount, currency)}</span>
                     </div>
                   </div>
                   {/* Mini progress bar */}

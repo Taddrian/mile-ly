@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
-import { fmtAmount } from '@/lib/currency';
+import { fmtCurrency } from '@/lib/currency';
 import CategoryChip from '@/components/ui/CategoryChip';
 import SwipeableRow from '@/components/transactions/SwipeableRow';
 import Sparkle from '@/components/decor/Sparkle';
@@ -74,7 +74,7 @@ export default function TransactionsScreen() {
               Income
             </p>
             <p style={{ fontSize: 18, fontWeight: 900, color: 'white', letterSpacing: '-0.01em' }}>
-              {fmtAmount(totalIncome, currency)}
+              {fmtCurrency(totalIncome, currency)}
             </p>
           </div>
           <div style={{ flex: 1, background: 'rgba(255,255,255,0.18)', borderRadius: 14, padding: '10px 14px', backdropFilter: 'blur(8px)' }}>
@@ -82,7 +82,7 @@ export default function TransactionsScreen() {
               Spent
             </p>
             <p style={{ fontSize: 18, fontWeight: 900, color: 'white', letterSpacing: '-0.01em' }}>
-              {fmtAmount(totalExpense, currency)}
+              {fmtCurrency(totalExpense, currency)}
             </p>
           </div>
         </div>
@@ -194,7 +194,7 @@ export default function TransactionsScreen() {
                         color: isIncome ? '#0D9488' : '#FF6B5E',
                         letterSpacing: '-0.01em',
                       }}>
-                        {isIncome ? '+' : '−'}{fmtAmount(entry.amount, currency)}
+                        {isIncome ? '+' : '−'}{fmtCurrency(entry.amount, currency)}
                       </p>
                       <span style={{
                         display: 'inline-block',
