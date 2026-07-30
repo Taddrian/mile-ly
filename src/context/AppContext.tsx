@@ -18,7 +18,7 @@ interface AppContextValue {
   deleteCard: (id: string) => Promise<void>;
   addTransaction: (txn: Omit<Transaction, 'id'>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
-  addCategory: (name: string, type: 'income' | 'expense') => Promise<void>;
+  addCategory: (name: string, type: 'income' | 'expense') => Promise<Category | undefined>;
   deleteCategory: (id: string) => Promise<void>;
   addEntry: (data: Omit<Entry, 'id' | 'userId'>) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
@@ -129,11 +129,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // --- Categories ---
   async function addCategory(name: string, type: 'income' | 'expense') {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) return undefined;
     const { data: row } = await supabase.from('categories').insert({
       user_id: user.id, name, type,
     }).select().single();
-    if (row) setCategories((prev) => [...prev, dbToCat(row)]);
+    if (!row) return undefined;
+    const cat = dbToCat(row);
+    setCategories((prev) => [...prev, cat]);
+    return cat;
   }
 
   async function deleteCategory(id: string) {
