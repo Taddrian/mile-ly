@@ -112,6 +112,49 @@
   .tab-bounce { animation: none; }
 }
 
+/* Milo mascot — Tamagotchi-style idle hop */
+@keyframes milo-hop {
+  0%   { transform: translateY(0) scale(1, 1); }
+  30%  { transform: translateY(-9px) scale(0.96, 1.05); }
+  55%  { transform: translateY(0) scale(1.06, 0.9); }
+  70%  { transform: translateY(0) scale(0.98, 1.02); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+.milo-hop {
+  animation: milo-hop 0.9s cubic-bezier(0.33, 0, 0.4, 1) infinite;
+  transform-origin: 47px 62px;
+}
+
+@keyframes milo-tail-wag {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(8deg); }
+}
+.milo-tail {
+  animation: milo-tail-wag 0.45s ease-in-out infinite;
+  transform-origin: 20px 41px;
+}
+
+@keyframes milo-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96%           { transform: scaleY(0.1); }
+}
+.milo-eye {
+  animation: milo-blink 4.5s ease-in-out infinite;
+  transform-origin: 59px 32px;
+}
+
+@keyframes milo-puff {
+  0%, 100% { opacity: var(--puff-o, 0.5); }
+  50%      { opacity: calc(var(--puff-o, 0.5) * 0.4); }
+}
+.milo-puff {
+  animation: milo-puff 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milo-hop, .milo-tail, .milo-eye, .milo-puff { animation: none; }
+}
+
 body {
   background: var(--bg);
   color: var(--fg);
