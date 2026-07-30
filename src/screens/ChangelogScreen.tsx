@@ -30,6 +30,7 @@ const CHANGELOG: Release[] = [
       { type: 'improved', text: 'Card fields (last 4 digits, monthly limit, miles rate) are now optional when adding a card' },
       { type: 'fix',      text: 'Add Entry sheet no longer gets stuck showing "Saved!" after saving' },
       { type: 'fix',      text: 'Typing a new card balance no longer prepends to the prefilled amount' },
+      { type: 'improved', text: 'Amounts now show proper currency symbols (S$, RM, Rp, ฿, ₱, ₫, K, B$, ៛, ₭) instead of 3-letter codes' },
     ],
   },
   {
