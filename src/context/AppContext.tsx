@@ -86,12 +86,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   async function loadEntriesFor(cycleStart: string) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('entries')
       .select('*')
       .gte('date', cycleStart)
       .lt('date', cycleEndExclusive(cycleStart))
       .order('date', { ascending: false });
+    if (error) {
+      console.error('Failed to load entries — has the "date" column migration been run on the entries table?', error);
+      return;
+    }
     if (data) setEntries(data.map(dbToEntry));
   }
 
