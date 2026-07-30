@@ -15,6 +15,15 @@ interface Release {
 
 const CHANGELOG: Release[] = [
   {
+    version: 'v0.8.0',
+    date: 'Jul 2026',
+    changes: [
+      { type: 'new', text: 'Custom billing cycle start day — set your card statement or salary period to start on any day (e.g. 25th), not just the 1st' },
+      { type: 'new', text: 'Cycle preference syncs across devices via your account, in Settings > Billing Cycle' },
+      { type: 'improved', text: 'Entries now remember their exact date instead of just the month, so month-over-month comparisons and cycle boundaries are accurate' },
+    ],
+  },
+  {
     version: 'v0.7.0',
     date: 'Jul 2026',
     changes: [
