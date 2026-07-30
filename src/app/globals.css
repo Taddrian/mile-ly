@@ -52,8 +52,8 @@
   --m-border-dark: #D9D9D9;
 
   /* Glass nav */
-  --glass-bg:      rgba(255, 255, 255, 0.65);
-  --glass-border:  rgba(255, 255, 255, 0.5);
+  --glass-bg:      rgba(255, 255, 255, 0.25);
+  --glass-border:  rgba(255, 255, 255, 0.4);
   --glass-icon:    #6B6B66;
 }
 
@@ -66,8 +66,8 @@
   --text-muted:    #666666;
 
   /* Glass nav */
-  --glass-bg:      rgba(28, 28, 30, 0.65);
-  --glass-border:  rgba(255, 255, 255, 0.08);
+  --glass-bg:      rgba(28, 28, 30, 0.3);
+  --glass-border:  rgba(255, 255, 255, 0.12);
   --glass-icon:    #B0B0B0;
 }
 
