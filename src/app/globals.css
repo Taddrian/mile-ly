@@ -120,18 +120,13 @@
   .tab-bounce { animation: none; }
 }
 
-/* Milo mascot — swims back and forth beside the donut ring */
-@keyframes milo-swim {
-  0%   { transform: translateX(0%)    translateY(0px)  scaleX(1); }
-  22%  { transform: translateX(58%)   translateY(-7px) scaleX(1); }
-  28%  { transform: translateX(58%)   translateY(-7px) scaleX(-1); }
-  50%  { transform: translateX(0%)    translateY(0px)  scaleX(-1); }
-  72%  { transform: translateX(-58%)  translateY(-7px) scaleX(-1); }
-  78%  { transform: translateX(-58%)  translateY(-7px) scaleX(1); }
-  100% { transform: translateX(0%)    translateY(0px)  scaleX(1); }
+/* Milo mascot — a static peek with a gentle idle bob, no swimming around */
+@keyframes milo-idle-bob {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-4px); }
 }
-.milo-swim {
-  animation: milo-swim 7s ease-in-out infinite;
+.milo-idle-bob {
+  animation: milo-idle-bob 3s ease-in-out infinite;
   transform-origin: 50% 50%;
 }
 
@@ -153,16 +148,8 @@
   transform-origin: 59px 32px;
 }
 
-@keyframes milo-puff {
-  0%, 100% { opacity: var(--puff-o, 0.5); }
-  50%      { opacity: calc(var(--puff-o, 0.5) * 0.4); }
-}
-.milo-puff {
-  animation: milo-puff 1.8s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .milo-swim, .milo-tail, .milo-eye, .milo-puff { animation: none; }
+  .milo-idle-bob, .milo-tail, .milo-eye { animation: none; }
 }
 
 /* Swipe-to-delete armed feedback */

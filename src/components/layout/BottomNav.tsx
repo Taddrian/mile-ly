@@ -48,6 +48,15 @@ const TABS: { id: Tab; label: string; Icon: React.FC }[] = [
   { id: 'more',         label: 'More',         Icon: MoreIcon         },
 ];
 
+// Distinct inactive-tab colors instead of uniform gray, matching the reference's
+// colorful icon strip. The active tab overrides this with the candy hue-flood.
+const TAB_COLORS: Record<Tab, string> = {
+  home: '#f4845f',
+  transactions: '#5fb2f2',
+  miles: '#b689ec',
+  more: '#f0b429',
+};
+
 export default function BottomNav({ activeTab, onTabChange, onAddPress }: BottomNavProps) {
   const { budgetState } = useApp();
   const activeColor = budgetState === 'coral' ? 'var(--hue-neg-deep)' : 'var(--hue-pos-deep)';
@@ -96,7 +105,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                   width: 40,
                   height: 40,
                   borderRadius: '50%',
-                  color: active ? '#fff' : 'var(--glass-icon)',
+                  color: active ? '#fff' : TAB_COLORS[id],
                   background: active ? undefined : 'transparent',
                   transition: 'background 0.15s, color 0.15s',
                   ...(active ? hueVars(budgetState) : {}),
@@ -137,7 +146,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                   width: 40,
                   height: 40,
                   borderRadius: '50%',
-                  color: active ? '#fff' : 'var(--glass-icon)',
+                  color: active ? '#fff' : TAB_COLORS[id],
                   background: active ? undefined : 'transparent',
                   transition: 'background 0.15s, color 0.15s',
                   ...(active ? hueVars(budgetState) : {}),
@@ -175,7 +184,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                   color: active ? activeColor : 'var(--text-secondary)',
                 }}
               >
-                <span style={{ color: active ? activeColor : 'var(--text-muted)' }}><Icon /></span>
+                <span style={{ color: active ? activeColor : TAB_COLORS[id] }}><Icon /></span>
                 {label}
               </button>
             );
@@ -209,7 +218,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                   color: active ? activeColor : 'var(--text-secondary)',
                 }}
               >
-                <span style={{ color: active ? activeColor : 'var(--text-muted)' }}><Icon /></span>
+                <span style={{ color: active ? activeColor : TAB_COLORS[id] }}><Icon /></span>
                 {label}
               </button>
             );

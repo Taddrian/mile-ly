@@ -8,22 +8,17 @@ export default function MiloMascot({ mood = 'happy' }: MiloMascotProps) {
   return (
     <div style={{ flex: 1, position: 'relative', height: 84, minWidth: 60 }}>
       <svg
-        className="milo-swim"
+        className="milo-idle-bob"
         width="96"
         height="84"
         viewBox="0 0 90 80"
         aria-hidden
         style={{
           position: 'absolute', left: 0, top: 0, display: 'block',
-          animationDuration: sad ? '13s' : '7s',
+          animationDuration: sad ? '5s' : '3s',
           opacity: sad ? 0.88 : 1,
         }}
       >
-        {/* Motion puffs behind */}
-        <ellipse className="milo-puff" style={{ '--puff-o': 0.55 } as React.CSSProperties} cx="10" cy="32" rx="5.5" ry="4" fill="white" />
-        <ellipse className="milo-puff" style={{ '--puff-o': 0.4, animationDelay: '0.6s' } as React.CSSProperties} cx="5" cy="43" rx="3.5" ry="2.8" fill="white" />
-        <ellipse className="milo-puff" style={{ '--puff-o': 0.48, animationDelay: '1.2s' } as React.CSSProperties} cx="13" cy="51" rx="4.5" ry="3.2" fill="white" />
-
         {/* Tail fins */}
         <g className="milo-tail" style={{ animationDuration: sad ? '1.1s' : '0.4s' }}>
           <path d="M 20 30 Q 4 21 6 38 Q 14 34 22 37 Z" fill="#0A6E63" />

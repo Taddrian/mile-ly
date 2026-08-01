@@ -38,6 +38,19 @@ export function daysLeftInCycle(cycleStartISO: string, cycleStartDay: number): n
   return Math.round((end.getTime() - now.setHours(0, 0, 0, 0)) / msPerDay);
 }
 
+// 1-based week number within the cycle if `cycleStartISO` is the cycle containing
+// today (e.g. day 1-7 → week 1); null if viewing a past/future cycle, where "week"
+// isn't a meaningful concept.
+export function weekOfCycle(cycleStartISO: string, cycleStartDay: number): number | null {
+  const now = new Date();
+  const currentCycleStart = cycleStartForDate(now, cycleStartDay);
+  if (currentCycleStart !== cycleStartISO) return null;
+  const start = new Date(cycleStartISO);
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const daysElapsed = Math.floor((now.setHours(0, 0, 0, 0) - start.setHours(0, 0, 0, 0)) / msPerDay);
+  return Math.floor(daysElapsed / 7) + 1;
+}
+
 function ordinalDay(d: Date): string {
   return d.toLocaleDateString('en-SG', { day: 'numeric', month: 'short' });
 }

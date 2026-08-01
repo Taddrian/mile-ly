@@ -5,7 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { fmtShort, fmtCurrency, currencySymbol } from '@/lib/currency';
 import { useCountUp } from '@/lib/useCountUp';
-import { addCycle, cycleEndExclusive, daysLeftInCycle } from '@/lib/cycle';
+import { addCycle, cycleEndExclusive, daysLeftInCycle, formatCycleLabel, weekOfCycle } from '@/lib/cycle';
 import { hueVars } from '@/lib/hue';
 import { layoutPathNodes, MAX_PATH_NODES } from '@/lib/pathLayout';
 import DonutRing from '@/components/ui/DonutRing';
@@ -35,6 +35,12 @@ const CardsGlyph = () => (
 const NoteGlyph = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+  </svg>
+);
+
+const SquareGlyph = ({ color }: { color: string }) => (
+  <svg width="16" height="16" viewBox="0 0 20 20" aria-hidden>
+    <rect x="3" y="3" width="14" height="14" rx="4" fill="none" stroke={color} strokeWidth="2.2" />
   </svg>
 );
 
@@ -156,14 +162,43 @@ export default function DashboardScreen() {
   const positions = useMemo(() => layoutPathNodes(useCompactList ? 0 : totalPathNodes), [useCompactList, totalPathNodes]);
   const pathHeight = positions.length > 0 ? positions[positions.length - 1].y + 150 : 0;
 
+  const week = weekOfCycle(selectedMonth, cycleStartDay);
+
+  // Same read-only formula PointsScreen uses for KrisFlyer earn — duplicated for
+  // display here rather than importing the screen, so this stays a pure reskin
+  // read of existing data with no change to the miles rules engine itself.
+  const milesBalance = useMemo(() =>
+    cards.filter((c) => c.milesProgram === 'KrisFlyer')
+      .reduce((s, c) => s + Math.floor(c.currentSpent * c.milesRate), 0),
+    [cards]
+  );
+  const pctSaved = income > 0 ? Math.round((saved / income) * 100) : 0;
+
+  const statStrip = [
+    { value: milesBalance.toLocaleString(), color: 'var(--node-deep)' },
+    { value: String(entries.length), color: '#e8a33f' },
+    { value: `${pctSaved}%`, color: '#b689ec' },
+    { value: daysLeft > 0 ? String(daysLeft) : '—', color: '#b8b2a8' },
+  ];
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={hueVars(budgetState)}>
+
+      {/* ── Stat strip ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px 4px' }}>
+        {statStrip.map((s, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <SquareGlyph color={s.color} />
+            <span className="font-display" style={{ fontSize: 16, fontWeight: 800, color: 'var(--m-ink)' }}>{s.value}</span>
+          </div>
+        ))}
+      </div>
 
       {/* ── Quest banner ── */}
-      <div className="quest-banner" style={{ margin: '14px 16px 0', padding: '16px 20px 18px', color: 'white', ...hueVars(budgetState) }}>
+      <div className="quest-banner" style={{ margin: '8px 16px 0', padding: '16px 20px 18px', color: 'white' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <p className="font-display" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.8)' }}>
-            This cycle
+            {week ? `Week ${week} of this cycle` : formatCycleLabel(selectedMonth, cycleStartDay)}
           </p>
           <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
         </div>
