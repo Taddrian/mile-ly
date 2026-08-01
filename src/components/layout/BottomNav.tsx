@@ -107,7 +107,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                   borderRadius: '50%',
                   color: active ? '#fff' : TAB_COLORS[id],
                   background: active ? undefined : 'transparent',
-                  transition: 'background 0.15s, color 0.15s',
+                  transition: 'color 0.15s, --node-deep 0.4s ease, --node-ring 0.4s ease, --node-shadow 0.4s ease, box-shadow 0.4s ease',
                   ...(active ? hueVars(budgetState) : {}),
                 }}
               >
@@ -148,7 +148,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                   borderRadius: '50%',
                   color: active ? '#fff' : TAB_COLORS[id],
                   background: active ? undefined : 'transparent',
-                  transition: 'background 0.15s, color 0.15s',
+                  transition: 'color 0.15s, --node-deep 0.4s ease, --node-ring 0.4s ease, --node-shadow 0.4s ease, box-shadow 0.4s ease',
                   ...(active ? hueVars(budgetState) : {}),
                 }}
               >

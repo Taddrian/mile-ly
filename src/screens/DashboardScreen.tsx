@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { fmtCurrency } from '@/lib/currency';
 import { useCountUp } from '@/lib/useCountUp';
@@ -119,6 +119,19 @@ export default function DashboardScreen() {
   const positions = useMemo(() => layoutPathNodes(useCompactList ? 0 : totalPathNodes), [useCompactList, totalPathNodes]);
   const pathHeight = positions.length > 0 ? positions[positions.length - 1].y + 150 : 0;
 
+  // Progressively reveals the dashed connector line (via a growing mask) instead
+  // of it snapping fully drawn — replays whenever the path reflows.
+  const connectorRef = useRef<SVGPolylineElement>(null);
+  const [connectorLen, setConnectorLen] = useState<number | null>(null);
+  const [connectorDrawn, setConnectorDrawn] = useState(false);
+  useEffect(() => {
+    if (!connectorRef.current) return;
+    setConnectorLen(connectorRef.current.getTotalLength());
+    setConnectorDrawn(false);
+    const id = requestAnimationFrame(() => setConnectorDrawn(true));
+    return () => cancelAnimationFrame(id);
+  }, [positions]);
+
   const week = weekOfCycle(selectedMonth, cycleStartDay);
 
   // Same read-only formula PointsScreen uses for KrisFlyer earn — duplicated for
@@ -131,11 +144,16 @@ export default function DashboardScreen() {
   );
   const pctSaved = income > 0 ? Math.round((saved / income) * 100) : 0;
 
+  const animatedMiles = useCountUp(milesBalance);
+  const animatedEntries = useCountUp(entries.length);
+  const animatedPctSaved = useCountUp(pctSaved);
+  const animatedDaysLeft = useCountUp(daysLeft);
+
   const statStrip = [
-    { value: milesBalance.toLocaleString(), color: 'var(--node-deep)' },
-    { value: String(entries.length), color: '#e8a33f' },
-    { value: `${pctSaved}%`, color: '#b689ec' },
-    { value: daysLeft > 0 ? String(daysLeft) : '—', color: '#b8b2a8' },
+    { value: Math.round(animatedMiles).toLocaleString(), color: 'var(--node-deep)' },
+    { value: String(Math.round(animatedEntries)), color: '#e8a33f' },
+    { value: `${Math.round(animatedPctSaved)}%`, color: '#b689ec' },
+    { value: daysLeft > 0 ? String(Math.round(animatedDaysLeft)) : '—', color: '#b8b2a8' },
   ];
 
   const monthAbbrev = new Date(selectedMonth).toLocaleDateString('en-SG', { month: 'short' }).toUpperCase();
@@ -255,7 +273,23 @@ export default function DashboardScreen() {
                 preserveAspectRatio="none"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: pathHeight, zIndex: 0 }}
               >
+                <defs>
+                  <mask id="path-reveal-mask" maskUnits="userSpaceOnUse">
+                    <polyline
+                      points={positions.map((p) => `${p.xPct},${p.y + 51}`).join(' ')}
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth={20}
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                      strokeDasharray={connectorLen !== null ? `${connectorLen} ${connectorLen}` : undefined}
+                      strokeDashoffset={connectorLen !== null ? (connectorDrawn ? 0 : connectorLen) : 0}
+                      style={{ transition: connectorLen !== null ? 'stroke-dashoffset 0.9s cubic-bezier(0.22,1,0.36,1)' : 'none' }}
+                    />
+                  </mask>
+                </defs>
                 <polyline
+                  ref={connectorRef}
                   points={positions.map((p) => `${p.xPct},${p.y + 51}`).join(' ')}
                   fill="none"
                   stroke="var(--m-border)"
@@ -263,11 +297,12 @@ export default function DashboardScreen() {
                   strokeDasharray="1 5"
                   strokeLinecap="round"
                   vectorEffect="non-scaling-stroke"
+                  mask="url(#path-reveal-mask)"
                 />
               </svg>
 
               {/* Cards node always leads the path */}
-              <div style={{ position: 'absolute', left: `${positions[0].xPct}%`, top: positions[0].y, transform: 'translateX(-50%)', zIndex: 1 }}>
+              <div style={{ position: 'absolute', left: `${positions[0].xPct}%`, top: positions[0].y, transform: 'translateX(-50%)', zIndex: 1, transition: 'left 0.5s cubic-bezier(0.22,1,0.36,1), top 0.5s cubic-bezier(0.22,1,0.36,1)' }}>
                 <PathNode
                   label="Cards"
                   amount={fmtCurrency(cardsTotal, currency)}
@@ -284,7 +319,7 @@ export default function DashboardScreen() {
               {catSpend.map((c, i) => {
                 const pos = positions[i + 1];
                 return (
-                  <div key={c.name} style={{ position: 'absolute', left: `${pos.xPct}%`, top: pos.y, transform: 'translateX(-50%)', zIndex: 1 }}>
+                  <div key={c.name} style={{ position: 'absolute', left: `${pos.xPct}%`, top: pos.y, transform: 'translateX(-50%)', zIndex: 1, transition: 'left 0.5s cubic-bezier(0.22,1,0.36,1), top 0.5s cubic-bezier(0.22,1,0.36,1)' }}>
                     <PathNode
                       label={c.name}
                       amount={fmtCurrency(c.amount, currency)}

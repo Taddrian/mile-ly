@@ -115,7 +115,7 @@ export default function PathNode({
       </p>
       {subLabel && (
         <p
-          className="font-display"
+          className="font-display you-are-here-in"
           style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#a9b3af', marginTop: 2 }}
         >
           {subLabel}
