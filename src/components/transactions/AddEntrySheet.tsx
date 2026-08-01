@@ -59,7 +59,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
       if (isNaN(newTotal) || newTotal < 0) return;
       setSaving(true);
       try {
-        await updateCardSpent(cardId, newTotal);
+        await updateCardSpent(cardId, newTotal, date);
         setJustSaved(true);
         onClose();
         // Safety net: re-enable the button if the sheet somehow doesn't close
@@ -285,6 +285,14 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               <p style={{ fontSize: 11, color: 'var(--m-slate)', textAlign: 'center' }}>
                 Just type the latest total from your statement — we&rsquo;ll work out the difference for you.
               </p>
+            </div>
+          )}
+
+          {/* Date (card-update mode only — regular entries show it further down) */}
+          {isCardUpdate && (
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Date</p>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
             </div>
           )}
 

@@ -25,7 +25,7 @@ interface AppContextValue {
   deleteCategory: (id: string) => Promise<void>;
   addEntry: (data: Omit<Entry, 'id' | 'userId'>) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
-  updateCardSpent: (cardId: string, newTotal: number) => Promise<void>;
+  updateCardSpent: (cardId: string, newTotal: number, date?: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -191,7 +191,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Maintains a single replaceable entry per card per month so users can
   // type in the latest statement total instead of logging every transaction.
-  async function updateCardSpent(cardId: string, newTotal: number) {
+  async function updateCardSpent(cardId: string, newTotal: number, date?: string) {
     const cardEntries = entries.filter((e) => e.cardId === cardId);
     const quickEntry = cardEntries.find((e) => e.note === CARD_UPDATE_NOTE);
     const itemizedTotal = cardEntries
@@ -204,9 +204,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (neededQuickAmount > 0) {
       let cat = categories.find((c) => c.name === 'Credit Card' && c.type === 'expense');
       if (!cat) cat = await addCategory('Credit Card', 'expense');
+      const entryDate = date ?? selectedMonth;
       await addEntry({
-        month: selectedMonth,
-        date: selectedMonth,
+        month: entryDate.slice(0, 7) + '-01',
+        date: entryDate,
         amount: neededQuickAmount,
         categoryId: cat?.id,
         cardId,
