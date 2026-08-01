@@ -12,6 +12,8 @@ interface PathNodeProps {
   budgetState: 'teal' | 'coral';
   icon?: ReactNode;
   showCheck?: boolean;
+  /** Small caption under the label, e.g. "YOU ARE HERE" for the most recently active node. */
+  subLabel?: string;
   onClick?: () => void;
   size?: number;
   style?: React.CSSProperties;
@@ -25,6 +27,7 @@ export default function PathNode({
   budgetState,
   icon,
   showCheck,
+  subLabel,
   onClick,
   size = 82,
   style,
@@ -110,6 +113,14 @@ export default function PathNode({
         {label}
         {amount && <span style={{ color: 'var(--m-slate)', fontWeight: 600 }}> · {amount}</span>}
       </p>
+      {subLabel && (
+        <p
+          className="font-display"
+          style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#a9b3af', marginTop: 2 }}
+        >
+          {subLabel}
+        </p>
+      )}
     </Wrapper>
   );
 }

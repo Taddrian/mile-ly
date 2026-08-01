@@ -2,14 +2,11 @@
 
 import { useMemo, useEffect, useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { supabase } from '@/lib/supabase';
-import { fmtShort, fmtCurrency, currencySymbol } from '@/lib/currency';
+import { fmtCurrency } from '@/lib/currency';
 import { useCountUp } from '@/lib/useCountUp';
-import { addCycle, cycleEndExclusive, daysLeftInCycle, formatCycleLabel, weekOfCycle } from '@/lib/cycle';
+import { daysLeftInCycle, weekOfCycle } from '@/lib/cycle';
 import { hueVars } from '@/lib/hue';
 import { layoutPathNodes, MAX_PATH_NODES } from '@/lib/pathLayout';
-import DonutRing from '@/components/ui/DonutRing';
-import StatTile from '@/components/ui/StatTile';
 import MonthPicker from '@/components/ui/MonthPicker';
 import CategoryChip from '@/components/ui/CategoryChip';
 import AddCardForm from '@/components/cards/AddCardForm';
@@ -17,29 +14,16 @@ import EditCardForm from '@/components/cards/EditCardForm';
 import CardRow from '@/components/cards/CardRow';
 import Modal from '@/components/ui/Modal';
 import MiloMascot from '@/components/decor/MiloMascot';
-import OnTrackBadge from '@/components/decor/OnTrackBadge';
 import PathNode from '@/components/dashboard/PathNode';
 
-function delta(current: number, previous: number) {
-  if (previous === 0) return null;
-  return Math.round(((current - previous) / previous) * 100);
-}
-
-const CardsGlyph = () => (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="6" width="16" height="11" rx="2.5" />
-    <path d="M6 2h16v11" />
-  </svg>
-);
-
-const NoteGlyph = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+const NoteGlyph = ({ color = '#D97706' }: { color?: string }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
   </svg>
 );
 
-const SquareGlyph = ({ color }: { color: string }) => (
-  <svg width="16" height="16" viewBox="0 0 20 20" aria-hidden>
+const SquareGlyph = ({ color, size = 16 }: { color: string; size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" aria-hidden>
     <rect x="3" y="3" width="14" height="14" rx="4" fill="none" stroke={color} strokeWidth="2.2" />
   </svg>
 );
@@ -70,27 +54,6 @@ export default function DashboardScreen() {
     setEditingRemark(false);
   }
 
-  const [prevIncome, setPrevIncome] = useState(0);
-  const [prevExpenses, setPrevExpenses] = useState(0);
-
-  useEffect(() => {
-    const prevCycleStart = addCycle(selectedMonth, -1);
-    supabase.from('entries').select('amount, category_id')
-      .gte('date', prevCycleStart)
-      .lt('date', cycleEndExclusive(prevCycleStart))
-      .then(({ data }) => {
-        if (!data) return;
-        let inc = 0, exp = 0;
-        data.forEach((r) => {
-          const cat = categories.find((c) => c.id === r.category_id);
-          if (cat?.type === 'income') inc += Number(r.amount);
-          else exp += Number(r.amount);
-        });
-        setPrevIncome(inc);
-        setPrevExpenses(exp);
-      });
-  }, [selectedMonth, categories]);
-
   const income = useMemo(() =>
     entries.filter((e) => categories.find((c) => c.id === e.categoryId)?.type === 'income')
       .reduce((s, e) => s + e.amount, 0),
@@ -106,7 +69,6 @@ export default function DashboardScreen() {
   const saved = Math.max(0, income - expenses);
   const animatedSaved = useCountUp(saved);
   const daysLeft = daysLeftInCycle(selectedMonth, cycleStartDay);
-  const perDay = daysLeft > 0 && saved > 0 ? saved / daysLeft : 0;
 
   const catSpend = useMemo(() => {
     const map: Record<string, { name: string; amount: number }> = {};
@@ -138,20 +100,15 @@ export default function DashboardScreen() {
     return [...cards].sort((a, b) => lastActivity(b.id) - lastActivity(a.id));
   }, [cards, entries]);
 
-  // teal = saved, coral = spent  (matches reference design)
-  const ringSegments = [
-    { value: saved,    color: '#0D9488' },
-    { value: expenses, color: '#FF6B5E' },
-  ];
-
-  const posTint = 'rgba(18,156,140,0.12)';
-  const negTint = 'rgba(232,115,79,0.14)';
-
-  const legendItems = [
-    { dot: '#0D9488', label: 'SAVED',  value: saved,    prev: null         },
-    { dot: '#FF6B5E', label: 'SPENT',  value: expenses, prev: prevExpenses },
-    { dot: '#E4E9E8', label: 'INCOME', value: income,   prev: prevIncome   },
-  ];
+  // The node touching whichever expense entry has the most recent date this cycle
+  // gets a real "YOU ARE HERE" caption — '__cards' if that entry was card-tied.
+  const currentNodeKey = useMemo(() => {
+    const expenseEntries = entries.filter((e) => categories.find((c) => c.id === e.categoryId)?.type === 'expense');
+    if (expenseEntries.length === 0) return null;
+    const latest = expenseEntries.reduce((a, b) => (b.date > a.date ? b : a));
+    if (latest.cardId) return '__cards';
+    return categories.find((c) => c.id === latest.categoryId)?.name ?? null;
+  }, [entries, categories]);
 
   // The "Cards" node always leads the path; category nodes follow, one per
   // expense category that has spend this cycle. Fits within MAX_PATH_NODES,
@@ -181,6 +138,8 @@ export default function DashboardScreen() {
     { value: daysLeft > 0 ? String(daysLeft) : '—', color: '#b8b2a8' },
   ];
 
+  const monthAbbrev = new Date(selectedMonth).toLocaleDateString('en-SG', { month: 'short' }).toUpperCase();
+
   return (
     <div className="min-h-screen" style={hueVars(budgetState)}>
 
@@ -195,168 +154,81 @@ export default function DashboardScreen() {
       </div>
 
       {/* ── Quest banner ── */}
-      <div className="quest-banner" style={{ margin: '8px 16px 0', padding: '16px 20px 18px', color: 'white' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      <div className="quest-banner" style={{ position: 'relative', margin: '8px 16px 0', padding: '16px 20px 18px', color: 'white' }}>
+        <button
+          onClick={() => { setRemarkInput(remark); setEditingRemark((v) => !v); }}
+          aria-label="Trail notes"
+          style={{
+            position: 'absolute', top: 14, right: 14, width: 30, height: 30, borderRadius: 8,
+            background: 'rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <NoteGlyph color="#ffffff" />
+          {remark && (
+            <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', background: '#FFC800', border: '1.5px solid var(--node-deep)' }} />
+          )}
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingRight: 36 }}>
           <p className="font-display" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.8)' }}>
-            {week ? `Week ${week} of this cycle` : formatCycleLabel(selectedMonth, cycleStartDay)}
+            {week ? `Week ${week} of this cycle` : 'This cycle'}
           </p>
+        </div>
+        <div style={{ marginTop: 2 }}>
           <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
         </div>
         <p className="font-display" style={{ fontSize: 25, fontWeight: 800, color: '#ffffff', marginTop: 6, lineHeight: 1.15 }}>
-          {fmtCurrency(saved, currency)} left to spend
+          {fmtCurrency(animatedSaved, currency)} left to spend
         </p>
       </div>
 
-      {/* ── Trail notes (Remarks) ── */}
-      <div style={{ margin: '10px 16px 0' }}>
-        {!editingRemark ? (
-          <button
-            onClick={() => { setRemarkInput(remark); setEditingRemark(true); }}
-            className="w-full flex items-center gap-2.5 text-left"
-            style={{
-              background: 'var(--card)',
-              border: '2px solid var(--m-border)',
-              borderRadius: 14,
-              boxShadow: '0 2px 0 var(--m-border-dark)',
-              padding: '9px 12px',
-            }}
-          >
-            <div style={{ width: 26, height: 26, borderRadius: 8, background: '#FFF3C4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <NoteGlyph />
-            </div>
-            <p style={{ fontSize: 12, fontWeight: 600, color: remark ? 'var(--fg)' : 'var(--m-slate)', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {remark || 'Trail notes — tap to jot down highlights or surprises this cycle'}
+      {/* ── Trail notes editor (only shown while open) ── */}
+      {editingRemark && (
+        <div className="card-chunky p-4" style={{ margin: '10px 16px 0' }}>
+          <div className="flex items-center justify-between mb-3">
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)' }}>
+              Trail notes
             </p>
-          </button>
-        ) : (
-          <div className="card-chunky p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div style={{ width: 26, height: 26, borderRadius: 8, background: '#FFF3C4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <NoteGlyph />
-                </div>
-                <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)' }}>
-                  Trail notes
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={saveRemark}
-                  className="px-3 py-1 rounded-lg text-xs font-bold text-white"
-                  style={{ background: 'var(--m-teal)', boxShadow: '0 2px 0 var(--m-teal-dark)' }}
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setEditingRemark(false)}
-                  className="px-3 py-1 rounded-lg text-xs font-semibold"
-                  style={{ border: '2px solid var(--m-border)', color: 'var(--m-slate)' }}
-                >
-                  ✕
-                </button>
-              </div>
+            <div className="flex gap-2">
+              <button
+                onClick={saveRemark}
+                className="px-3 py-1 rounded-lg text-xs font-bold text-white"
+                style={{ background: 'var(--m-teal)', boxShadow: '0 2px 0 var(--m-teal-dark)' }}
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditingRemark(false)}
+                className="px-3 py-1 rounded-lg text-xs font-semibold"
+                style={{ border: '2px solid var(--m-border)', color: 'var(--m-slate)' }}
+              >
+                ✕
+              </button>
             </div>
-            <textarea
-              value={remarkInput}
-              onChange={(e) => setRemarkInput(e.target.value)}
-              autoFocus
-              placeholder="e.g. Splurged on flights ✈️, birthday dinner 🎂, gym membership renewed..."
-              rows={4}
-              className="w-full outline-none resize-none"
-              style={{
-                fontSize: 13,
-                fontWeight: 500,
-                lineHeight: 1.6,
-                color: 'var(--fg)',
-                background: 'var(--bg)',
-                border: '2px solid var(--m-border)',
-                borderRadius: 12,
-                padding: '10px 12px',
-                boxShadow: '0 2px 0 var(--m-border-dark)',
-              }}
-            />
           </div>
-        )}
-      </div>
+          <textarea
+            value={remarkInput}
+            onChange={(e) => setRemarkInput(e.target.value)}
+            autoFocus
+            placeholder="e.g. Splurged on flights ✈️, birthday dinner 🎂, gym membership renewed..."
+            rows={4}
+            className="w-full outline-none resize-none"
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              lineHeight: 1.6,
+              color: 'var(--fg)',
+              background: 'var(--bg)',
+              border: '2px solid var(--m-border)',
+              borderRadius: 12,
+              padding: '10px 12px',
+              boxShadow: '0 2px 0 var(--m-border-dark)',
+            }}
+          />
+        </div>
+      )}
 
       {/* ── Content ── */}
       <div className="px-4 space-y-3 pb-6 pt-3">
-
-        {/* Balance ring card */}
-        <div className="card-chunky p-5" style={{ position: 'relative', overflow: 'visible' }}>
-          {/* OnTrackBadge overlapping top-right */}
-          {income > 0 && saved > 0 && (
-            <div style={{ position: 'absolute', top: -14, right: 14, zIndex: 10 }}>
-              <OnTrackBadge />
-            </div>
-          )}
-
-          <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', color: 'var(--m-slate, #777777)', marginBottom: 14 }}>
-            Balance
-          </p>
-
-          {/* DonutRing + Mascot row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <DonutRing
-              segments={ringSegments}
-              currencyPart={currencySymbol(currency)}
-              numberPart={fmtShort(Math.round(animatedSaved))}
-              centerSublabel="left to spend"
-              trackColor="#EFF3F2"
-              size={140}
-            />
-            <MiloMascot mood={income > 0 && saved <= 0 ? 'sad' : 'happy'} />
-          </div>
-
-          {/* Horizontal legend */}
-          <div style={{ borderTop: '1.5px solid var(--m-border, #E5E5E5)', marginTop: 16, paddingTop: 14, display: 'flex', justifyContent: 'space-around' }}>
-            {legendItems.map(({ dot, label, value, prev }) => {
-              const d = prev !== null ? delta(value, prev) : null;
-              const dGood = label === 'SPENT' ? (d !== null && d < 0) : (d !== null && d > 0);
-              return (
-                <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, display: 'inline-block', flexShrink: 0 }} />
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--m-slate, #777777)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {label}
-                    </span>
-                  </div>
-                  <span className="font-display" style={{ fontSize: 13, fontWeight: 800, color: 'var(--m-ink, #3C3C3C)' }}>
-                    {fmtCurrency(value, currency)}
-                  </span>
-                  {d !== null && (
-                    <span style={{
-                      fontSize: 10,
-                      fontWeight: 600,
-                      padding: '2px 5px',
-                      borderRadius: 6,
-                      background: dGood ? posTint : negTint,
-                      color: dGood ? 'var(--hue-pos-deep)' : 'var(--hue-neg-deep)',
-                    }}>
-                      {d > 0 ? '+' : ''}{d}%
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Stat tiles */}
-        <div className="flex gap-3">
-          <StatTile
-            chipLabel="savings"
-            label="Saved this month"
-            value={fmtCurrency(saved, currency)}
-            caption={income > 0 ? `${Math.round((saved / income) * 100)}% of income` : 'No income yet'}
-          />
-          <StatTile
-            chipLabel="calendar"
-            label="Safe to spend / day"
-            value={perDay > 0 ? fmtCurrency(perDay, currency) : '—'}
-            caption={daysLeft > 0 ? `${daysLeft} days left` : 'End of month'}
-          />
-        </div>
 
         {/* Empty state */}
         {income === 0 && expenses === 0 && cards.length === 0 && (
@@ -401,7 +273,9 @@ export default function DashboardScreen() {
                   amount={fmtCurrency(cardsTotal, currency)}
                   active={cards.length > 0}
                   budgetState={budgetState}
-                  icon={<CardsGlyph />}
+                  icon={<SquareGlyph color="#ffffff" size={26} />}
+                  showCheck={cards.length > 0}
+                  subLabel={currentNodeKey === '__cards' ? 'You are here' : undefined}
                   onClick={() => setShowAllCards(true)}
                   style={{ animationDelay: '0ms' }}
                 />
@@ -417,7 +291,8 @@ export default function DashboardScreen() {
                       fraction={expenses > 0 ? c.amount / expenses : 0}
                       active
                       budgetState={budgetState}
-                      icon={<span className="font-display" style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>{c.name.charAt(0).toUpperCase()}</span>}
+                      icon={<SquareGlyph color="#ffffff" size={26} />}
+                      subLabel={c.name === currentNodeKey ? 'You are here' : undefined}
                       style={{ animationDelay: `${(i + 1) * 90}ms` }}
                     />
                   </div>
@@ -426,6 +301,19 @@ export default function DashboardScreen() {
             </div>
           </div>
         )}
+
+        {/* Milo peeks in near the path, with the cycle's month */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <div style={{ width: 60, height: 52 }}>
+            <MiloMascot mood={income > 0 && saved <= 0 ? 'sad' : 'happy'} />
+          </div>
+          <span
+            className="font-display"
+            style={{ background: 'var(--node-deep)', color: 'white', fontSize: 12, fontWeight: 800, padding: '4px 12px', borderRadius: 10, ...hueVars(budgetState) }}
+          >
+            {monthAbbrev}
+          </span>
+        </div>
 
         {/* Compact fallback: Cards keeps its own tappable row since it isn't in the path here */}
         {useCompactList && (
@@ -441,7 +329,7 @@ export default function DashboardScreen() {
             }}
           >
             <div className="node-candy" style={{ width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...hueVars(budgetState) }}>
-              <CardsGlyph />
+              <SquareGlyph color="#ffffff" size={18} />
             </div>
             <span className="font-display" style={{ fontSize: 13, fontWeight: 700, color: 'var(--m-ink)', flex: 1 }}>Cards</span>
             <span className="font-display" style={{ fontSize: 13, fontWeight: 800, color: 'var(--m-ink)' }}>{fmtCurrency(cardsTotal, currency)}</span>
