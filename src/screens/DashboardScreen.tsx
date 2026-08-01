@@ -87,15 +87,16 @@ export default function DashboardScreen() {
   const catSpend = useMemo(() => {
     const map: Record<string, { name: string; amount: number }> = {};
     entries.forEach((e) => {
-      // Any entry tied to a card (itemized or quick balance-update) counts
-      // toward total card spend, regardless of what category it's tagged with.
+      const cat = categories.find((c) => c.id === e.categoryId);
+      if (!cat || cat.type !== 'expense') return;
+      // Any expense entry tied to a card (itemized or quick balance-update) rolls
+      // into one Credit Card total, regardless of which category it's tagged with,
+      // so this always sums to exactly the same "Spent" figure shown up top.
       if (e.cardId) {
         if (!map['__card_total']) map['__card_total'] = { name: 'Credit Card', amount: 0 };
         map['__card_total'].amount += e.amount;
         return;
       }
-      const cat = categories.find((c) => c.id === e.categoryId);
-      if (!cat || cat.type !== 'expense') return;
       if (!map[cat.id]) map[cat.id] = { name: cat.name, amount: 0 };
       map[cat.id].amount += e.amount;
     });

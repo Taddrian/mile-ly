@@ -195,7 +195,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const cardEntries = entries.filter((e) => e.cardId === cardId);
     const quickEntry = cardEntries.find((e) => e.note === CARD_UPDATE_NOTE);
     const itemizedTotal = cardEntries
-      .filter((e) => e.note !== CARD_UPDATE_NOTE)
+      .filter((e) => e.note !== CARD_UPDATE_NOTE && categories.find((c) => c.id === e.categoryId)?.type === 'expense')
       .reduce((s, e) => s + e.amount, 0);
     const neededQuickAmount = Math.round((newTotal - itemizedTotal) * 100) / 100;
 
@@ -215,15 +215,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Derive currentSpent per card from selected month's entries
+  // Derive currentSpent per card from selected month's entries. Only expense-type
+  // entries count as "spend" — an income entry tied to a card (e.g. a refund or
+  // cashback credit) shouldn't inflate the balance, keeping this aligned with the
+  // "Credit Card" total shown in Spending by Category.
   const cardsWithSpent = useMemo(() =>
     cards.map((card) => ({
       ...card,
       currentSpent: entries
-        .filter((e) => e.cardId === card.id)
+        .filter((e) => e.cardId === card.id && categories.find((c) => c.id === e.categoryId)?.type === 'expense')
         .reduce((s, e) => s + e.amount, 0),
     })),
-    [cards, entries]
+    [cards, entries, categories]
   );
 
   return (
