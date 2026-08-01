@@ -1,5 +1,18 @@
 import type { Metadata, Viewport } from 'next';
+import { Baloo_2, Nunito } from 'next/font/google';
 import './globals.css';
+
+const baloo2 = Baloo_2({
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800'],
+  variable: '--font-display-baloo',
+});
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  variable: '--font-body-nunito',
+});
 
 export const metadata: Metadata = {
   title: 'Mile-ly',
@@ -23,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="h-full antialiased font-sans">{children}</body>
+      <body className={`h-full antialiased font-sans ${baloo2.variable} ${nunito.variable}`}>{children}</body>
     </html>
   );
 }

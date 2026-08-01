@@ -36,7 +36,7 @@ export default function StatTile({ label, value, caption, chipLabel }: StatTileP
           {label}
         </span>
       </div>
-      <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--m-ink, #3C3C3C)', lineHeight: 1.1 }}>
+      <p className="font-display" style={{ fontSize: 20, fontWeight: 800, color: 'var(--m-ink, #3C3C3C)', lineHeight: 1.1 }}>
         {value}
       </p>
       {caption && (

@@ -12,6 +12,7 @@ interface AppContextValue {
   entries: Entry[];
   selectedMonth: string;
   setSelectedMonth: (month: string) => void;
+  budgetState: 'teal' | 'coral';
   currency: string;
   setCurrency: (c: string) => void;
   cycleStartDay: number;
@@ -230,10 +231,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [cards, entries, categories]
   );
 
+  // Single hue that floods the whole UI's themed accents this cycle: teal while
+  // spending stays within income, coral once expenses outpace it.
+  const budgetState = useMemo<'teal' | 'coral'>(() => {
+    const income = entries
+      .filter((e) => categories.find((c) => c.id === e.categoryId)?.type === 'income')
+      .reduce((s, e) => s + e.amount, 0);
+    const expenses = entries
+      .filter((e) => categories.find((c) => c.id === e.categoryId)?.type === 'expense')
+      .reduce((s, e) => s + e.amount, 0);
+    return expenses > income ? 'coral' : 'teal';
+  }, [entries, categories]);
+
   return (
     <AppContext.Provider value={{
       cards: cardsWithSpent, transactions, categories, entries, selectedMonth, setSelectedMonth,
-      currency, setCurrency, cycleStartDay, setCycleStartDay,
+      budgetState, currency, setCurrency, cycleStartDay, setCycleStartDay,
       addCard, updateCard, deleteCard, addTransaction, deleteTransaction,
       addCategory, deleteCategory, addEntry, deleteEntry, updateCardSpent,
     }}>

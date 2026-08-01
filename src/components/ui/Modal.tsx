@@ -25,18 +25,23 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl max-h-[92vh] overflow-y-auto sheet-pop-in"
+        className="w-full max-w-md rounded-t-3xl shadow-2xl max-h-[92vh] overflow-y-auto sheet-pop-in"
+        style={{ background: 'var(--card)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Pull handle */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+          <div style={{ width: 40, height: 5, borderRadius: 999, background: 'var(--m-border)' }} />
         </div>
-        <div className="flex items-center justify-between px-5 pt-3 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{title}</h2>
+        <div
+          className="flex items-center justify-between px-5 pt-3 pb-4"
+          style={{ borderBottom: '2px solid var(--m-border)' }}
+        >
+          <h2 className="font-display" style={{ fontSize: 17, fontWeight: 700, color: 'var(--fg)' }}>{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-lg leading-none"
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-colors text-lg leading-none"
+            style={{ background: 'var(--bg)', border: '2px solid var(--m-border)', color: 'var(--m-slate)' }}
           >
             ×
           </button>

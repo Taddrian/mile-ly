@@ -15,7 +15,10 @@ interface Segment {
 
 interface DonutRingProps {
   segments: Segment[];
-  centerLabel: string;
+  /** e.g. "SGD" — rendered as a small uppercase line above the number. Omit for no currency line. */
+  currencyPart?: string;
+  /** e.g. "2,448" — the main number. */
+  numberPart: string;
   centerSublabel?: string;
   trackColor?: string;
   size?: number;
@@ -33,7 +36,8 @@ function star5Points(cx: number, cy: number, outer: number, inner: number): stri
 
 export default function DonutRing({
   segments,
-  centerLabel,
+  currencyPart,
+  numberPart,
   centerSublabel,
   trackColor = '#EFF3F2',
   size = 140,
@@ -147,11 +151,7 @@ export default function DonutRing({
         const innerR = (R - SW / 2) * scale;
         const usableW = innerR * 2 * 0.78;
 
-        // Split "SGD 2,448.07" → currencyPart + numberPart for better sizing
-        const spaceIdx = centerLabel.indexOf(' ');
-        const hasCurrency = spaceIdx !== -1;
-        const currencyPart = hasCurrency ? centerLabel.slice(0, spaceIdx) : '';
-        const numberPart   = hasCurrency ? centerLabel.slice(spaceIdx + 1) : centerLabel;
+        const hasCurrency = !!currencyPart;
 
         // Auto-size the number based on character count
         const charRatio = 0.58; // avg char width / fontSize for weight-800 numeric

@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { Tab } from '@/types';
+import { useApp } from '@/context/AppContext';
+import { hueVars } from '@/lib/hue';
 
 interface BottomNavProps {
   activeTab: Tab;
@@ -46,10 +48,10 @@ const TABS: { id: Tab; label: string; Icon: React.FC }[] = [
   { id: 'more',         label: 'More',         Icon: MoreIcon         },
 ];
 
-const ACTIVE_COLOR  = '#0D9488';
-const INACTIVE_COLOR = '#777777';
-
 export default function BottomNav({ activeTab, onTabChange, onAddPress }: BottomNavProps) {
+  const { budgetState } = useApp();
+  const activeColor = budgetState === 'coral' ? 'var(--hue-neg-deep)' : 'var(--hue-pos-deep)';
+  const activeTint = budgetState === 'coral' ? 'rgba(232,115,79,0.12)' : 'var(--m-teal-xl)';
   const [bouncing, setBouncing] = useState<Tab | null>(null);
 
   function handleTabPress(id: Tab) {
@@ -89,14 +91,15 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                 key={id}
                 onClick={() => handleTabPress(id)}
                 aria-label={TABS.find((t) => t.id === id)?.label}
-                className={`flex items-center justify-center ${bouncing === id ? 'tab-bounce' : ''}`}
+                className={`flex items-center justify-center ${bouncing === id ? 'tab-bounce' : ''} ${active ? 'node-candy' : ''}`}
                 style={{
                   width: 40,
                   height: 40,
                   borderRadius: '50%',
                   color: active ? '#fff' : 'var(--glass-icon)',
-                  background: active ? ACTIVE_COLOR : 'transparent',
+                  background: active ? undefined : 'transparent',
                   transition: 'background 0.15s, color 0.15s',
+                  ...(active ? hueVars(budgetState) : {}),
                 }}
               >
                 <Icon />
@@ -107,14 +110,12 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
           {/* Center Add button */}
           <button
             onClick={onAddPress}
-            className="flex items-center justify-center active:scale-95 transition-transform"
+            className="node-candy flex items-center justify-center active:scale-95 transition-transform"
             style={{
               width: 44,
               height: 44,
-              borderRadius: '50%',
-              background: ACTIVE_COLOR,
-              boxShadow: '0 4px 12px rgba(13,148,136,0.4)',
               flexShrink: 0,
+              ...hueVars(budgetState),
             }}
             aria-label="Add entry"
           >
@@ -131,14 +132,15 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                 key={id}
                 onClick={() => handleTabPress(id)}
                 aria-label={TABS.find((t) => t.id === id)?.label}
-                className={`flex items-center justify-center ${bouncing === id ? 'tab-bounce' : ''}`}
+                className={`flex items-center justify-center ${bouncing === id ? 'tab-bounce' : ''} ${active ? 'node-candy' : ''}`}
                 style={{
                   width: 40,
                   height: 40,
                   borderRadius: '50%',
                   color: active ? '#fff' : 'var(--glass-icon)',
-                  background: active ? ACTIVE_COLOR : 'transparent',
+                  background: active ? undefined : 'transparent',
                   transition: 'background 0.15s, color 0.15s',
+                  ...(active ? hueVars(budgetState) : {}),
                 }}
               >
                 <Icon />
@@ -148,13 +150,13 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
         </div>
       </div>
 
-      {/* Desktop sidebar — unchanged */}
+      {/* Desktop sidebar */}
       <div
         className="hidden md:flex md:flex-col md:h-full md:py-6 md:px-3"
         style={{ borderRight: '0.5px solid var(--border)' }}
       >
         <div className="flex items-center gap-2.5 px-2 pb-8">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: ACTIVE_COLOR }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: activeColor }}>
             <span className="text-white font-medium text-sm">M</span>
           </div>
           <span className="font-medium text-sm" style={{ color: 'var(--fg)' }}>Mile-ly</span>
@@ -169,11 +171,11 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                 onClick={() => onTabChange(id)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left"
                 style={{
-                  backgroundColor: active ? 'var(--m-teal-xl)' : 'transparent',
-                  color: active ? ACTIVE_COLOR : 'var(--text-secondary)',
+                  backgroundColor: active ? activeTint : 'transparent',
+                  color: active ? activeColor : 'var(--text-secondary)',
                 }}
               >
-                <span style={{ color: active ? ACTIVE_COLOR : 'var(--text-muted)' }}><Icon /></span>
+                <span style={{ color: active ? activeColor : 'var(--text-muted)' }}><Icon /></span>
                 {label}
               </button>
             );
@@ -186,7 +188,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
           >
             <span
               className="w-6 h-6 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: ACTIVE_COLOR }}
+              style={{ backgroundColor: activeColor }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M12 5v14M5 12h14" />
@@ -203,11 +205,11 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
                 onClick={() => onTabChange(id)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left"
                 style={{
-                  backgroundColor: active ? 'var(--m-teal-xl)' : 'transparent',
-                  color: active ? ACTIVE_COLOR : 'var(--text-secondary)',
+                  backgroundColor: active ? activeTint : 'transparent',
+                  color: active ? activeColor : 'var(--text-secondary)',
                 }}
               >
-                <span style={{ color: active ? ACTIVE_COLOR : 'var(--text-muted)' }}><Icon /></span>
+                <span style={{ color: active ? activeColor : 'var(--text-muted)' }}><Icon /></span>
                 {label}
               </button>
             );

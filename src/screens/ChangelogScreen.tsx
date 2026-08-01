@@ -15,6 +15,17 @@ interface Release {
 
 const CHANGELOG: Release[] = [
   {
+    version: 'v0.9.0',
+    date: 'Aug 2026',
+    changes: [
+      { type: 'new',      text: 'Home redesigned as an "adventure path" — a trail of candy-style nodes for your cards and each spending category this cycle, with a quest-banner hero showing how much is left to spend' },
+      { type: 'new',      text: 'The whole app now shifts between teal ("on track") and coral ("overspending") based on how this cycle is going — the balance ring, bottom nav, and path all reflect it' },
+      { type: 'improved', text: 'Trail Notes (formerly Remarks) is now a compact tappable chip instead of an always-open box' },
+      { type: 'improved', text: 'Tapping the Cards node opens your full card list in one step, so adding, editing, or updating a balance is always just one tap away' },
+      { type: 'fix',      text: 'Fixed a bug where a card\'s balance could render as $0.00 the moment its modal opened, before snapping to the right number' },
+    ],
+  },
+  {
     version: 'v0.8.0',
     date: 'Jul 2026',
     changes: [

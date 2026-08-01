@@ -17,18 +17,20 @@ export default function MonthPicker({ value, onChange, cycleStartDay, className 
   }
 
   return (
-    <div className={`flex items-center gap-1 ${className}`}>
+    <div className={`flex items-center gap-1.5 ${className}`}>
       <button
         onClick={() => shift(-1)}
-        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors text-base leading-none"
+        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors text-base leading-none"
+        style={{ background: 'rgba(255,255,255,0.22)' }}
         aria-label="Previous cycle"
       >
         ‹
       </button>
-      <span className="text-sm font-medium px-1 min-w-[110px] text-center">{label}</span>
+      <span className="font-display text-sm font-bold px-1 min-w-[110px] text-center">{label}</span>
       <button
         onClick={() => shift(1)}
-        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors text-base leading-none"
+        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors text-base leading-none"
+        style={{ background: 'rgba(255,255,255,0.22)' }}
         aria-label="Next cycle"
       >
         ›

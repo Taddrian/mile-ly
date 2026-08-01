@@ -36,11 +36,20 @@ export default function CardRow({ card, currency, onClick, style, className }: C
         ...style,
       }}
     >
-      <div style={{ width: 12, height: 12, borderRadius: '50%', background: card.color, flexShrink: 0 }} />
+      <div
+        style={{
+          width: 14,
+          height: 14,
+          borderRadius: '50%',
+          background: `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.85), ${card.color} 55%)`,
+          boxShadow: `inset 0 -2px 0 rgba(0,0,0,0.18)`,
+          flexShrink: 0,
+        }}
+      />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="flex items-center gap-1.5">
-          <p className="text-sm font-bold truncate" style={{ color: 'var(--m-ink, #3C3C3C)' }}>{card.name}</p>
+          <p className="font-display text-sm font-bold truncate" style={{ color: 'var(--m-ink, #3C3C3C)' }}>{card.name}</p>
           {card.last4 && (
             <span className="text-xs font-mono shrink-0" style={{ color: 'var(--m-slate)' }}>•• {card.last4}</span>
           )}
@@ -55,7 +64,7 @@ export default function CardRow({ card, currency, onClick, style, className }: C
       </div>
 
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <p className="text-sm font-extrabold" style={{ color: 'var(--m-ink, #3C3C3C)' }}>
+        <p className="font-display text-sm font-extrabold" style={{ color: 'var(--m-ink, #3C3C3C)' }}>
           {fmtCurrency(Math.round(animatedSpent), currency)}
         </p>
         {hasLimit && (

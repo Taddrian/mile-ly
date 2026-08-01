@@ -30,8 +30,8 @@ export default function CategoryChip({ name, size = 36 }: CategoryChipProps) {
   const fontSize = Math.round(size * 0.4);
   return (
     <div
-      className="flex items-center justify-center rounded-xl shrink-0 font-medium select-none"
-      style={{ width: size, height: size, backgroundColor: bg, color, fontSize }}
+      className="font-display flex items-center justify-center rounded-2xl shrink-0 select-none"
+      style={{ width: size, height: size, backgroundColor: bg, color, fontSize, fontWeight: 700 }}
     >
       {initial}
     </div>

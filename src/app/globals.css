@@ -56,6 +56,18 @@
   --glass-border:  rgba(255, 255, 255, 0.5);
   --glass-highlight: rgba(255, 255, 255, 0.7);
   --glass-icon:    #6B6B66;
+
+  /* Adventure-path candy tokens — budget-state hue flood */
+  --hue-pos-deep:   #129C8C;
+  --hue-pos-ring:   #3CC4B0;
+  --hue-pos-shadow: rgba(18, 156, 140, 0.3);
+  --hue-neg-deep:   #E8734F;
+  --hue-neg-ring:   #FF9A70;
+  --hue-neg-shadow: rgba(232, 115, 79, 0.35);
+
+  --node-locked-from: #EFEDE8;
+  --node-locked-to:   #D5D1C8;
+  --node-locked-text: #B3AEA5;
 }
 
 .dark {
@@ -71,6 +83,11 @@
   --glass-border:  rgba(255, 255, 255, 0.14);
   --glass-highlight: rgba(255, 255, 255, 0.18);
   --glass-icon:    #B0B0B0;
+
+  /* Adventure-path candy tokens — budget-state hue flood */
+  --node-locked-from: #333331;
+  --node-locked-to:   #232321;
+  --node-locked-text: #7A7A75;
 }
 
 /* Chunky 3D card — the Duolingo signature */
@@ -86,19 +103,8 @@
   box-shadow: 0 3px 0 #3a3a3a;
 }
 
-/* Chunky button */
-.btn-chunky {
-  background: var(--m-teal);
-  border-radius: 16px;
-  box-shadow: 0 4px 0 var(--m-teal-dark);
-  color: #fff;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  transition: transform 0.06s, box-shadow 0.06s;
-}
-.btn-chunky:active {
-  transform: translateY(4px);
-  box-shadow: 0 0 0 var(--m-teal-dark);
+.font-display {
+  font-family: var(--font-display-baloo), 'Baloo 2', system-ui, sans-serif;
 }
 
 /* Tab bounce animation */
@@ -228,7 +234,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .list-item-in, .sheet-pop-in, .backdrop-fade-in, .badge-pulse, .save-check-pop, .tab-fade-in, .delete-armed-pulse {
+  .list-item-in, .sheet-pop-in, .backdrop-fade-in, .badge-pulse, .save-check-pop, .tab-fade-in, .delete-armed-pulse, .path-node-in {
     animation: none;
     opacity: 1;
   }
@@ -237,6 +243,69 @@
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  font-family: var(--font-body-nunito), -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Candy-gradient circular node (adventure path) */
+.node-candy {
+  position: relative;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--node-ring, var(--hue-pos-ring)), var(--node-deep, var(--hue-pos-deep)));
+  box-shadow:
+    inset 0 -7px 0 rgba(0, 0, 0, 0.18),
+    0 6px 14px -2px var(--node-shadow, var(--hue-pos-shadow));
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.node-candy::before {
+  content: '';
+  position: absolute;
+  top: 12%;
+  left: 12%;
+  width: 62%;
+  height: 30%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+.node-candy--locked {
+  background: linear-gradient(180deg, var(--node-locked-from), var(--node-locked-to));
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.08);
+  opacity: 0.85;
+}
+.node-check-badge {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+/* Path node spring-in entrance */
+@keyframes path-node-in {
+  0%   { opacity: 0; transform: scale(0.4); }
+  60%  { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.path-node-in {
+  opacity: 0;
+  animation: path-node-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Quest banner hero */
+.quest-banner {
+  position: relative;
+  background: linear-gradient(135deg, var(--node-ring, var(--hue-pos-ring)) 0%, var(--node-deep, var(--hue-pos-deep)) 100%);
+  border-radius: 20px;
+  box-shadow:
+    inset 0 -6px 0 rgba(0, 0, 0, 0.18),
+    0 8px 20px -8px var(--node-shadow, var(--hue-pos-shadow));
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
