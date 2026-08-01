@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { fmtCurrency } from '@/lib/currency';
+import { fmtCurrency, fmtShort, currencySymbol } from '@/lib/currency';
 import { useCountUp } from '@/lib/useCountUp';
 import { daysLeftInCycle, weekOfCycle } from '@/lib/cycle';
 import { hueVars } from '@/lib/hue';
@@ -124,24 +124,15 @@ export default function DashboardScreen() {
 
   const week = weekOfCycle(selectedMonth, cycleStartDay);
 
-  // Same read-only formula PointsScreen uses for KrisFlyer earn — duplicated for
-  // display here rather than importing the screen, so this stays a pure reskin
-  // read of existing data with no change to the miles rules engine itself.
-  const milesBalance = useMemo(() =>
-    cards.filter((c) => c.milesProgram === 'KrisFlyer')
-      .reduce((s, c) => s + Math.floor(c.currentSpent * c.milesRate), 0),
-    [cards]
-  );
   const pctSaved = income > 0 ? Math.round((saved / income) * 100) : 0;
 
-  const animatedMiles = useCountUp(milesBalance);
-  const animatedEntries = useCountUp(entries.length);
+  const animatedIncome = useCountUp(income);
   const animatedPctSaved = useCountUp(pctSaved);
   const animatedDaysLeft = useCountUp(daysLeft);
 
   const statStrip = [
-    { value: Math.round(animatedMiles).toLocaleString(), color: 'var(--node-deep)' },
-    { value: String(Math.round(animatedEntries)), color: '#e8a33f' },
+    { value: `${currencySymbol(currency)}${fmtShort(Math.round(animatedIncome))}`, color: 'var(--node-deep)' },
+    { value: `${currencySymbol(currency)}${fmtShort(Math.round(animatedSaved))}`, color: '#e8a33f' },
     { value: `${Math.round(animatedPctSaved)}%`, color: '#b689ec' },
     { value: daysLeft > 0 ? String(Math.round(animatedDaysLeft)) : '—', color: '#b8b2a8' },
   ];
