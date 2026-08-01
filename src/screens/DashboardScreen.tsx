@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect, useState, useRef } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { fmtCurrency } from '@/lib/currency';
 import { useCountUp } from '@/lib/useCountUp';
@@ -100,12 +100,15 @@ export default function DashboardScreen() {
     return [...cards].sort((a, b) => lastActivity(b.id) - lastActivity(a.id));
   }, [cards, entries]);
 
-  // The node touching whichever expense entry has the most recent date this cycle
-  // gets a real "YOU ARE HERE" caption — '__cards' if that entry was card-tied.
+  // The node touching whichever expense entry was most recently CREATED (not the
+  // one with the latest transaction date — those can tie/be backdated) gets a
+  // real "YOU ARE HERE" caption, i.e. the user's newest edit. '__cards' if that
+  // entry was card-tied.
   const currentNodeKey = useMemo(() => {
     const expenseEntries = entries.filter((e) => categories.find((c) => c.id === e.categoryId)?.type === 'expense');
     if (expenseEntries.length === 0) return null;
-    const latest = expenseEntries.reduce((a, b) => (b.date > a.date ? b : a));
+    const recency = (e: typeof expenseEntries[number]) => e.createdAt ?? e.date;
+    const latest = expenseEntries.reduce((a, b) => (recency(b) > recency(a) ? b : a));
     if (latest.cardId) return '__cards';
     return categories.find((c) => c.id === latest.categoryId)?.name ?? null;
   }, [entries, categories]);
@@ -118,19 +121,6 @@ export default function DashboardScreen() {
   const useCompactList = totalPathNodes > MAX_PATH_NODES;
   const positions = useMemo(() => layoutPathNodes(useCompactList ? 0 : totalPathNodes), [useCompactList, totalPathNodes]);
   const pathHeight = positions.length > 0 ? positions[positions.length - 1].y + 150 : 0;
-
-  // Progressively reveals the dashed connector line (via a growing mask) instead
-  // of it snapping fully drawn — replays whenever the path reflows.
-  const connectorRef = useRef<SVGPolylineElement>(null);
-  const [connectorLen, setConnectorLen] = useState<number | null>(null);
-  const [connectorDrawn, setConnectorDrawn] = useState(false);
-  useEffect(() => {
-    if (!connectorRef.current) return;
-    setConnectorLen(connectorRef.current.getTotalLength());
-    setConnectorDrawn(false);
-    const id = requestAnimationFrame(() => setConnectorDrawn(true));
-    return () => cancelAnimationFrame(id);
-  }, [positions]);
 
   const week = weekOfCycle(selectedMonth, cycleStartDay);
 
@@ -273,23 +263,9 @@ export default function DashboardScreen() {
                 preserveAspectRatio="none"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: pathHeight, zIndex: 0 }}
               >
-                <defs>
-                  <mask id="path-reveal-mask" maskUnits="userSpaceOnUse">
-                    <polyline
-                      points={positions.map((p) => `${p.xPct},${p.y + 51}`).join(' ')}
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth={20}
-                      strokeLinecap="round"
-                      vectorEffect="non-scaling-stroke"
-                      strokeDasharray={connectorLen !== null ? `${connectorLen} ${connectorLen}` : undefined}
-                      strokeDashoffset={connectorLen !== null ? (connectorDrawn ? 0 : connectorLen) : 0}
-                      style={{ transition: connectorLen !== null ? 'stroke-dashoffset 0.9s cubic-bezier(0.22,1,0.36,1)' : 'none' }}
-                    />
-                  </mask>
-                </defs>
                 <polyline
-                  ref={connectorRef}
+                  key={positions.length}
+                  className="connector-fade-in"
                   points={positions.map((p) => `${p.xPct},${p.y + 51}`).join(' ')}
                   fill="none"
                   stroke="var(--m-border)"
@@ -297,7 +273,6 @@ export default function DashboardScreen() {
                   strokeDasharray="1 5"
                   strokeLinecap="round"
                   vectorEffect="non-scaling-stroke"
-                  mask="url(#path-reveal-mask)"
                 />
               </svg>
 
