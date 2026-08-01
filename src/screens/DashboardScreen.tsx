@@ -272,7 +272,7 @@ export default function DashboardScreen() {
                   label="Cards"
                   amount={fmtCurrency(cardsTotal, currency)}
                   active={cards.length > 0}
-                  budgetState={budgetState}
+                  colorIndex={0}
                   icon={<SquareGlyph color="#ffffff" size={26} />}
                   showCheck={cards.length > 0}
                   subLabel={currentNodeKey === '__cards' ? 'You are here' : undefined}
@@ -290,7 +290,7 @@ export default function DashboardScreen() {
                       amount={fmtCurrency(c.amount, currency)}
                       fraction={expenses > 0 ? c.amount / expenses : 0}
                       active
-                      budgetState={budgetState}
+                      colorIndex={i + 1}
                       icon={<SquareGlyph color="#ffffff" size={26} />}
                       subLabel={c.name === currentNodeKey ? 'You are here' : undefined}
                       style={{ animationDelay: `${(i + 1) * 90}ms` }}

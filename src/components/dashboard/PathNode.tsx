@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { hueVars } from '@/lib/hue';
+import { nodeHueVars } from '@/lib/nodeColors';
 
 interface PathNodeProps {
   label: string;
@@ -9,7 +9,8 @@ interface PathNodeProps {
   /** Share of this cycle's total expenses (0-1). Drawn as a progress ring when active. */
   fraction?: number;
   active: boolean;
-  budgetState: 'teal' | 'coral';
+  /** Position along the path, used to pick this node's candy color from the palette. */
+  colorIndex: number;
   icon?: ReactNode;
   showCheck?: boolean;
   /** Small caption under the label, e.g. "YOU ARE HERE" for the most recently active node. */
@@ -24,7 +25,7 @@ export default function PathNode({
   amount,
   fraction = 0,
   active,
-  budgetState,
+  colorIndex,
   icon,
   showCheck,
   subLabel,
@@ -57,7 +58,7 @@ export default function PathNode({
         ...style,
       }}
     >
-      <div style={{ position: 'relative', width: ringSize, height: ringSize, flexShrink: 0 }}>
+      <div style={{ position: 'relative', width: ringSize, height: ringSize, flexShrink: 0, ...(active ? nodeHueVars(colorIndex) : {}) }}>
         {active && pct > 0 && (
           <svg viewBox={`0 0 ${ringSize} ${ringSize}`} width={ringSize} height={ringSize} style={{ position: 'absolute', inset: 0 }}>
             <circle
@@ -83,7 +84,6 @@ export default function PathNode({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            ...(active ? hueVars(budgetState) : {}),
           }}
         >
           <div style={{ position: 'relative', zIndex: 1, color: active ? '#fff' : 'var(--node-locked-text)' }}>{icon}</div>
