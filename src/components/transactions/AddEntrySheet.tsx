@@ -288,14 +288,6 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
             </div>
           )}
 
-          {/* Date (card-update mode only — regular entries show it further down) */}
-          {isCardUpdate && (
-            <div>
-              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Date</p>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
-            </div>
-          )}
-
           {/* Category (hidden in card-update mode) */}
           {!isCardUpdate && <div>
             <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 8 }}>
@@ -374,23 +366,17 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
             )}
           </div>}
 
-          {/* Date + Remark in a row (hidden in card-update mode) */}
+          {/* Remark (hidden in card-update mode) — date is logged automatically */}
           {!isCardUpdate && (
-            <div style={{ display: 'flex', gap: 10 }}>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Date</p>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Remark</p>
-                <input
-                  type="text"
-                  value={remark}
-                  onChange={(e) => setRemark(e.target.value)}
-                  placeholder="Optional"
-                  style={inputStyle}
-                />
-              </div>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 6 }}>Remark</p>
+              <input
+                type="text"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                placeholder="Optional"
+                style={inputStyle}
+              />
             </div>
           )}
 
