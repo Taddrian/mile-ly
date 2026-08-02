@@ -20,6 +20,7 @@ const CHANGELOG: Release[] = [
     changes: [
       { type: 'new',      text: 'Milo now free-roams the whole Home path card as a pixel-sprite fairy instead of pacing a small strip at the bottom' },
       { type: 'improved', text: 'Settings, Feedback, and What\'s New restyled to match the adventure-path look — candy-gradient buttons, icon badges, chunky cards' },
+      { type: 'improved', text: 'Transactions header now shifts teal/coral with the rest of the app instead of a fixed blue' },
       { type: 'fix',      text: 'Fixed poor text contrast in dark mode on the Home stat strip and path node labels' },
       { type: 'removed',  text: 'Removed two unused legacy screens left over from earlier redesigns' },
     ],
