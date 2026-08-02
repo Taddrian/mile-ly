@@ -9,8 +9,8 @@ export interface PathNodePosition {
 
 export const MAX_PATH_NODES = 5;
 
-const DEFAULT_AMPLITUDE_PCT = 30;
-const DEFAULT_Y_SPACING = 116;
+const DEFAULT_AMPLITUDE_PCT = 25;
+const DEFAULT_Y_SPACING = 74;
 
 export function layoutPathNodes(
   n: number,

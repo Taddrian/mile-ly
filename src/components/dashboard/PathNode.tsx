@@ -13,6 +13,8 @@ interface PathNodeProps {
   colorIndex: number;
   icon?: ReactNode;
   showCheck?: boolean;
+  /** Draws the faint double-stroke progress ring behind the node (skipped for the lead "Cards" node). */
+  showRing?: boolean;
   /** Small caption under the label, e.g. "YOU ARE HERE" for the most recently active node. */
   subLabel?: string;
   onClick?: () => void;
@@ -28,9 +30,10 @@ export default function PathNode({
   colorIndex,
   icon,
   showCheck,
+  showRing,
   subLabel,
   onClick,
-  size = 82,
+  size = 68,
   style,
 }: PathNodeProps) {
   const pct = Math.round(Math.min(Math.max(fraction, 0), 1) * 100);
@@ -39,6 +42,7 @@ export default function PathNode({
   const ringCirc = 2 * Math.PI * ringR;
   // Cap the visible arc a touch short of a full circle so there's always a gap, like the reference.
   const arcLen = ringCirc * Math.min(pct / 100, 0.9);
+  const hueVars = active ? nodeHueVars(colorIndex) : undefined;
 
   const Wrapper = onClick ? 'button' : 'div';
 
@@ -50,7 +54,7 @@ export default function PathNode({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        width: 150,
+        width: 130,
         background: 'none',
         border: 'none',
         padding: 0,
@@ -58,19 +62,23 @@ export default function PathNode({
         ...style,
       }}
     >
-      <div style={{ position: 'relative', width: ringSize, height: ringSize, flexShrink: 0, ...(active ? nodeHueVars(colorIndex) : {}) }}>
-        {active && pct > 0 && (
+      <div style={{ position: 'relative', width: ringSize, height: ringSize, flexShrink: 0, ...hueVars }}>
+        {/* Soft contact shadow beneath the node */}
+        <div style={{ position: 'absolute', left: '18%', bottom: -6, width: '64%', height: 8, borderRadius: '50%', background: 'rgba(43,59,56,0.10)', filter: 'blur(3px)' }} />
+
+        {active && showRing && (
           <svg viewBox={`0 0 ${ringSize} ${ringSize}`} width={ringSize} height={ringSize} style={{ position: 'absolute', inset: 0 }}>
+            <circle cx={ringSize / 2} cy={ringSize / 2} r={ringR} fill="none" stroke="var(--node-ring)" strokeWidth={5} opacity={0.18} />
             <circle
               cx={ringSize / 2}
               cy={ringSize / 2}
               r={ringR}
               fill="none"
-              stroke="var(--node-deep)"
-              strokeWidth={6}
+              stroke="var(--node-ring)"
+              strokeWidth={5}
               strokeLinecap="round"
               strokeDasharray={`${arcLen} ${ringCirc}`}
-              opacity={0.55}
+              opacity={0.85}
               transform={`rotate(-90 ${ringSize / 2} ${ringSize / 2})`}
               style={{ transition: 'stroke-dasharray 0.6s cubic-bezier(0.22,1,0.36,1)' }}
             />
@@ -99,10 +107,10 @@ export default function PathNode({
       <p
         className="font-display"
         style={{
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 700,
           color: active ? 'var(--m-ink)' : 'var(--node-locked-text)',
-          marginTop: 10,
+          marginTop: 6,
           textAlign: 'center',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
@@ -116,7 +124,19 @@ export default function PathNode({
       {subLabel && (
         <p
           className="font-display you-are-here-in"
-          style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#a9b3af', marginTop: 2 }}
+          style={{
+            fontSize: 9.5,
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            color: 'var(--node-deep)',
+            background: 'color-mix(in srgb, var(--node-ring) 16%, white)',
+            border: '1.5px solid var(--node-ring)',
+            borderRadius: 12,
+            padding: '2px 9px',
+            marginTop: 4,
+            ...hueVars,
+          }}
         >
           {subLabel}
         </p>

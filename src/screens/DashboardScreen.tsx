@@ -14,19 +14,27 @@ import EditCardForm from '@/components/cards/EditCardForm';
 import CardRow from '@/components/cards/CardRow';
 import Modal from '@/components/ui/Modal';
 import MiloMascot from '@/components/decor/MiloMascot';
+import AmbientScene from '@/components/decor/AmbientScene';
+import { CoinsIcon, WalletIcon, PiggyIcon, CalendarIcon, nodeIconFor } from '@/components/decor/icons';
 import PathNode from '@/components/dashboard/PathNode';
 
-const NoteGlyph = ({ color = '#D97706' }: { color?: string }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+const EditGlyph = ({ color = '#ffffff' }: { color?: string }) => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" />
   </svg>
 );
 
-const SquareGlyph = ({ color, size = 16 }: { color: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 20 20" aria-hidden>
-    <rect x="3" y="3" width="14" height="14" rx="4" fill="none" stroke={color} strokeWidth="2.2" />
-  </svg>
-);
+// Smooth cubic-bezier through a sequence of points (centers of each path node).
+function smoothPath(points: { x: number; y: number }[]): string {
+  if (points.length === 0) return '';
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1];
+    const b = points[i];
+    d += ` C ${a.x} ${a.y + 36}, ${b.x} ${b.y - 36}, ${b.x} ${b.y}`;
+  }
+  return d;
+}
 
 export default function DashboardScreen() {
   const {
@@ -120,7 +128,13 @@ export default function DashboardScreen() {
   const totalPathNodes = 1 + catSpend.length;
   const useCompactList = totalPathNodes > MAX_PATH_NODES;
   const positions = useMemo(() => layoutPathNodes(useCompactList ? 0 : totalPathNodes), [useCompactList, totalPathNodes]);
-  const pathHeight = positions.length > 0 ? positions[positions.length - 1].y + 150 : 0;
+  // Milo gets his own reserved lane below the last node's label/pill, so his swim
+  // range can never overlap a node's "You are here" caption on short paths.
+  const NODE_FOOTPRINT = 110;
+  const MILO_ZONE = 90;
+  const lastNodeY = positions.length > 0 ? positions[positions.length - 1].y : 0;
+  const miloTop = positions.length > 0 ? lastNodeY + NODE_FOOTPRINT : 0;
+  const pathHeight = positions.length > 0 ? miloTop + MILO_ZONE : 0;
 
   const week = weekOfCycle(selectedMonth, cycleStartDay);
 
@@ -131,48 +145,75 @@ export default function DashboardScreen() {
   const animatedDaysLeft = useCountUp(daysLeft);
 
   const statStrip = [
-    { value: `${currencySymbol(currency)}${fmtShort(Math.round(animatedIncome))}`, color: 'var(--node-deep)' },
-    { value: `${currencySymbol(currency)}${fmtShort(Math.round(animatedSaved))}`, color: '#e8a33f' },
-    { value: `${Math.round(animatedPctSaved)}%`, color: '#b689ec' },
-    { value: daysLeft > 0 ? String(Math.round(animatedDaysLeft)) : '—', color: '#b8b2a8' },
+    { value: `${currencySymbol(currency)}${fmtShort(Math.round(animatedIncome))}`, color: 'var(--node-deep)', Icon: CoinsIcon },
+    { value: `${currencySymbol(currency)}${fmtShort(Math.round(animatedSaved))}`, color: '#e8a33f', Icon: WalletIcon },
+    { value: `${Math.round(animatedPctSaved)}%`, color: '#b689ec', Icon: PiggyIcon },
+    { value: daysLeft > 0 ? String(Math.round(animatedDaysLeft)) : '—', color: '#b8b2a8', Icon: CalendarIcon },
   ];
 
   const monthAbbrev = new Date(selectedMonth).toLocaleDateString('en-SG', { month: 'short' }).toUpperCase();
 
+  // Milo's swim span inside the path card, scaled to however tall the path is this cycle.
+  const spanX = 190;
+  const spanY = Math.min(30, MILO_ZONE - 56); // stay within Milo's own reserved lane
+  const miloVars = {
+    '--sx1': `${Math.round(spanX * 0.5)}px`, '--sy1': `${-Math.round(spanY * 0.4)}px`,
+    '--sx2': `${Math.round(spanX * 0.1)}px`, '--sy2': `${-Math.round(spanY * 0.75)}px`,
+    '--sx3': `${Math.round(spanX * 0.6)}px`, '--sy3': `${-Math.round(spanY * 0.15)}px`,
+  } as React.CSSProperties;
+
   return (
-    <div className="min-h-screen" style={hueVars(budgetState)}>
+    <div className="min-h-screen" style={{ position: 'relative', ...hueVars(budgetState) }}>
+      <AmbientScene variant="page" />
+
+      <div style={{ position: 'relative', zIndex: 1 }}>
 
       {/* ── Stat strip ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px 4px' }}>
         {statStrip.map((s, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            <SquareGlyph color={s.color} />
+            <div style={{ width: 26, height: 26, borderRadius: 9, background: `color-mix(in srgb, ${s.color} 13%, transparent)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <s.Icon size={15} color={s.color} />
+            </div>
             <span className="font-display" style={{ fontSize: 16, fontWeight: 800, color: 'var(--m-ink)' }}>{s.value}</span>
           </div>
         ))}
       </div>
 
       {/* ── Quest banner ── */}
-      <div className="quest-banner" style={{ position: 'relative', margin: '8px 16px 0', padding: '16px 20px 18px', color: 'white' }}>
+      <div className="quest-banner" style={{ position: 'relative', margin: '8px 16px 0', padding: '16px 20px 18px', color: 'white', overflow: 'hidden' }}>
+        {/* Faint decorative route doodle */}
+        <svg viewBox="0 0 200 110" style={{ position: 'absolute', right: 0, bottom: 0, width: '55%', height: '100%', opacity: 0.14, pointerEvents: 'none' }} preserveAspectRatio="none">
+          <path d="M -10 95 C 40 45, 80 100, 120 55 S 180 15, 215 45" fill="none" stroke="#ffffff" strokeWidth="3" strokeDasharray="2 8" strokeLinecap="round" />
+          <path d="M 150 32 l 15 -7 -4 15 -5.5 -4 z" fill="#ffffff" />
+        </svg>
+
         <button
           onClick={() => { setRemarkInput(remark); setEditingRemark((v) => !v); }}
           aria-label="Trail notes"
           style={{
-            position: 'absolute', top: 14, right: 14, width: 30, height: 30, borderRadius: 8,
+            position: 'absolute', top: 14, right: 16, width: 30, height: 30, borderRadius: '50%',
             background: 'rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
-          <NoteGlyph color="#ffffff" />
+          <EditGlyph color="#ffffff" />
           {remark && (
             <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', background: '#FFC800', border: '1.5px solid var(--node-deep)' }} />
           )}
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingRight: 36 }}>
-          <p className="font-display" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.8)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, paddingRight: 40 }}>
+          <p className="font-display" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.85)' }}>
             {week ? `Week ${week} of this cycle` : 'This cycle'}
           </p>
+          {week && (
+            <div style={{ display: 'flex', gap: 4 }}>
+              {[1, 2, 3, 4].map((w) => (
+                <div key={w} style={{ width: 6, height: 6, borderRadius: 3, background: w <= week ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.35)' }} />
+              ))}
+            </div>
+          )}
         </div>
-        <div style={{ marginTop: 2 }}>
+        <div style={{ marginTop: 8 }}>
           <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
         </div>
         <p className="font-display" style={{ fontSize: 25, fontWeight: 800, color: '#ffffff', marginTop: 6, lineHeight: 1.15 }}>
@@ -244,20 +285,32 @@ export default function DashboardScreen() {
 
         {/* Adventure path — one node per expense category, plus a Cards node */}
         {!useCompactList && totalPathNodes > 0 && (
-          <div className="card-chunky p-5" style={{ position: 'relative', overflow: 'visible' }}>
-            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)', marginBottom: 6 }}>
+          <div
+            style={{
+              position: 'relative',
+              overflow: 'hidden',
+              border: '2px solid #e8e5dd',
+              borderRadius: 22,
+              boxShadow: '0 3px 0 #e0dcd2',
+              padding: '18px 0 16px',
+              background: 'linear-gradient(180deg, color-mix(in srgb, var(--node-ring) 4%, var(--card)), color-mix(in srgb, var(--node-ring) 9%, var(--card)))',
+              transition: 'background 0.4s ease',
+            }}
+          >
+            <AmbientScene variant="card" />
+            <p style={{ position: 'relative', zIndex: 1, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate, #777777)', padding: '0 22px', marginBottom: 6 }}>
               Your path this cycle
             </p>
-            <div style={{ position: 'relative', height: pathHeight }}>
+            <div style={{ position: 'relative', height: pathHeight, zIndex: 1 }}>
               <svg
                 viewBox={`0 0 100 ${pathHeight}`}
                 preserveAspectRatio="none"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: pathHeight, zIndex: 0 }}
               >
-                <polyline
+                <path
                   key={positions.length}
                   className="connector-fade-in"
-                  points={positions.map((p) => `${p.xPct},${p.y + 51}`).join(' ')}
+                  d={smoothPath(positions.map((p) => ({ x: p.xPct, y: p.y + 44 })))}
                   fill="none"
                   stroke="var(--m-border)"
                   strokeWidth={2}
@@ -274,7 +327,7 @@ export default function DashboardScreen() {
                   amount={fmtCurrency(cardsTotal, currency)}
                   active={cards.length > 0}
                   colorIndex={0}
-                  icon={<SquareGlyph color="#ffffff" size={26} />}
+                  icon={nodeIconFor(0)}
                   showCheck={cards.length > 0}
                   subLabel={currentNodeKey === '__cards' ? 'You are here' : undefined}
                   onClick={() => setShowAllCards(true)}
@@ -291,30 +344,33 @@ export default function DashboardScreen() {
                       amount={fmtCurrency(c.amount, currency)}
                       fraction={expenses > 0 ? c.amount / expenses : 0}
                       active
+                      showRing
                       colorIndex={i + 1}
-                      icon={<SquareGlyph color="#ffffff" size={26} />}
+                      icon={nodeIconFor(i + 1)}
                       subLabel={c.name === currentNodeKey ? 'You are here' : undefined}
                       style={{ animationDelay: `${(i + 1) * 90}ms` }}
                     />
                   </div>
                 );
               })}
+
+              {/* Milo free-roams inside the path card */}
+              <div className="milo-swim-path" style={{ position: 'absolute', left: 20, top: miloTop, zIndex: 2, ...miloVars }}>
+                <div className="milo-idle-bob" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 60, height: 52 }}>
+                    <MiloMascot mood={income > 0 && saved <= 0 ? 'sad' : 'happy'} />
+                  </div>
+                  <span
+                    className="font-display"
+                    style={{ background: 'var(--node-deep)', color: 'white', fontSize: 12, fontWeight: 800, padding: '4px 12px', borderRadius: 10, whiteSpace: 'nowrap' }}
+                  >
+                    {monthAbbrev}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}
-
-        {/* Milo peeks in near the path, with the cycle's month */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <div style={{ width: 60, height: 52 }}>
-            <MiloMascot mood={income > 0 && saved <= 0 ? 'sad' : 'happy'} />
-          </div>
-          <span
-            className="font-display"
-            style={{ background: 'var(--node-deep)', color: 'white', fontSize: 12, fontWeight: 800, padding: '4px 12px', borderRadius: 10, ...hueVars(budgetState) }}
-          >
-            {monthAbbrev}
-          </span>
-        </div>
 
         {/* Compact fallback: Cards keeps its own tappable row since it isn't in the path here */}
         {useCompactList && (
@@ -330,7 +386,7 @@ export default function DashboardScreen() {
             }}
           >
             <div className="node-candy" style={{ width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...hueVars(budgetState) }}>
-              <SquareGlyph color="#ffffff" size={18} />
+              {nodeIconFor(0, 18)}
             </div>
             <span className="font-display" style={{ fontSize: 13, fontWeight: 700, color: 'var(--m-ink)', flex: 1 }}>Cards</span>
             <span className="font-display" style={{ fontSize: 13, fontWeight: 800, color: 'var(--m-ink)' }}>{fmtCurrency(cardsTotal, currency)}</span>
@@ -418,6 +474,7 @@ export default function DashboardScreen() {
           );
         })()}
       </Modal>
+      </div>
     </div>
   );
 }

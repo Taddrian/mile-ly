@@ -27,9 +27,7 @@ const TransactionsIcon = () => (
 
 const MilesIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 16.5a2.5 2.5 0 0 1-2.5 2.5H4a2 2 0 0 1-2-2v-1l2-6h14l2 4.5" />
-    <path d="M12 7V4" /><path d="M8 7l-2-3" /><path d="M16 7l2-3" />
-    <circle cx="19" cy="17" r="1" />
+    <path d="M17 20l-1.4-6.9L21 8.5c1.2-1.2 1.5-2.7 1-3.5-.8-.5-2.3-.2-3.5 1L13.4 10 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2z" />
   </svg>
 );
 

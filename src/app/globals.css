@@ -171,6 +171,65 @@
   .milo-idle-bob, .milo-tail, .milo-eye { animation: none; }
 }
 
+/* Milo free-roaming inside the path card — translate-only (no scaleX mirror) between
+   3 waypoints supplied via --sx1/--sy1/--sx2/--sy2/--sx3/--sy3 custom properties. */
+@keyframes milo-swim-path {
+  0%   { transform: translate(0,0); }
+  22%  { transform: translate(var(--sx1), var(--sy1)); }
+  50%  { transform: translate(var(--sx2), var(--sy2)); }
+  72%  { transform: translate(var(--sx3), var(--sy3)); }
+  100% { transform: translate(0,0); }
+}
+.milo-swim-path {
+  animation: milo-swim-path 16s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .milo-swim-path { animation: none; }
+}
+
+/* Ambient scene decoration — soft pulsing glows + a slowly drifting dot-grid,
+   used behind the whole screen and, more subtly, inside the path card. */
+@keyframes ambient-glow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 0.6; transform: scale(1.08); }
+}
+.ambient-glow {
+  animation: ambient-glow 9s ease-in-out infinite;
+}
+@keyframes ambient-dot-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(26px, 26px); }
+}
+.ambient-dot-drift {
+  animation: ambient-dot-drift 14s linear infinite;
+}
+@keyframes ambient-cloud-drift {
+  from { transform: translateX(-160px); }
+  to   { transform: translateX(480px); }
+}
+.ambient-cloud-drift {
+  animation: ambient-cloud-drift 60s linear infinite;
+}
+@keyframes ambient-sun-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.ambient-sun-bob {
+  animation: ambient-sun-bob 7s ease-in-out infinite;
+}
+@keyframes ambient-twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%      { opacity: 0.95; transform: scale(1.15); }
+}
+.ambient-twinkle {
+  animation: ambient-twinkle 3.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambient-glow, .ambient-dot-drift, .ambient-cloud-drift, .ambient-sun-bob, .ambient-twinkle {
+    animation: none;
+  }
+}
+
 /* Swipe-to-delete armed feedback */
 @keyframes delete-armed-pulse {
   0%, 100% { transform: scale(1); }
