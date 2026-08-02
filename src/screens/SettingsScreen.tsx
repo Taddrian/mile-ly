@@ -5,7 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { Category } from '@/types';
 import { SEA_CURRENCIES } from '@/lib/currency';
-import { WalletIcon, CalendarIcon, LayersIcon } from '@/components/decor/icons';
+import { WalletIcon, CalendarIcon } from '@/components/decor/icons';
 
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
@@ -76,92 +76,6 @@ function SectionCard({ icon, iconBg, title, children }: { icon: React.ReactNode;
       </div>
       {children}
     </div>
-  );
-}
-
-const inputClass = 'flex-1 rounded-xl px-3 py-2 text-sm focus:outline-none';
-
-function CategoriesSection() {
-  const { categories, addCategory, deleteCategory } = useApp();
-  const [tab, setTab] = useState<'expense' | 'income'>('expense');
-  const [newName, setNewName] = useState('');
-  const [adding, setAdding] = useState(false);
-
-  const filtered = categories.filter((c) => c.type === tab);
-
-  async function handleAdd() {
-    const name = newName.trim();
-    if (!name) return;
-    await addCategory(name, tab);
-    setNewName('');
-    setAdding(false);
-  }
-
-  return (
-    <SectionCard icon={<LayersIcon size={17} color="#8F5FD6" />} iconBg="#F1E9FB" title="Categories">
-      <div style={{ display: 'flex', borderRadius: 12, overflow: 'hidden', marginBottom: 12, marginTop: 8 }}>
-        {(['expense', 'income'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className="font-display"
-            style={{
-              flex: 1,
-              padding: '8px 0',
-              fontSize: 12,
-              fontWeight: 700,
-              transition: 'all 0.15s ease',
-              background: tab === t
-                ? t === 'expense' ? 'linear-gradient(180deg, #FF9A70, #E8734F)' : 'linear-gradient(180deg, var(--node-ring), var(--node-deep))'
-                : 'color-mix(in srgb, var(--m-border) 40%, white)',
-              color: tab === t ? '#fff' : 'var(--m-slate)',
-            }}
-          >
-            {t === 'expense' ? 'Expense' : 'Income'}
-          </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <p style={{ fontSize: 12, color: 'var(--m-slate)', paddingBottom: 12 }}>No {tab} categories yet.</p>
-      )}
-
-      <div style={{ marginBottom: 12 }}>
-        {filtered.map((cat) => (
-          <div key={cat.id} className="border-b border-[var(--m-border,#E5E5E5)] last:border-b-0" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--m-ink, #3C3C3C)' }}>{cat.name}</span>
-            <button onClick={() => deleteCategory(cat.id)} style={{ fontSize: 11, fontWeight: 700, color: '#E04E42' }}>Remove</button>
-          </div>
-        ))}
-      </div>
-
-      {adding ? (
-        <div style={{ display: 'flex', gap: 8, paddingBottom: 4 }}>
-          <input
-            type="text"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Category name"
-            className={inputClass}
-            style={{ background: 'color-mix(in srgb, var(--m-border) 30%, white)', color: 'var(--m-ink)' }}
-            autoFocus
-            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          />
-          <button
-            onClick={handleAdd}
-            className="font-display"
-            style={{ padding: '8px 14px', borderRadius: 10, background: 'linear-gradient(180deg, var(--node-ring), var(--node-deep))', color: '#fff', fontSize: 12, fontWeight: 700 }}
-          >
-            Add
-          </button>
-          <button onClick={() => setAdding(false)} style={{ padding: '8px 12px', borderRadius: 10, border: '1.5px solid var(--m-border)', fontSize: 12, color: 'var(--m-slate)' }}>✕</button>
-        </div>
-      ) : (
-        <button onClick={() => setAdding(true)} className="font-display" style={{ fontSize: 12, fontWeight: 700, color: 'var(--node-deep)', paddingBottom: 4, display: 'block' }}>
-          + New category
-        </button>
-      )}
-    </SectionCard>
   );
 }
 
@@ -274,8 +188,6 @@ export default function SettingsScreen() {
             <ToggleSwitch checked={darkMode} onChange={toggleDarkMode} />
           </SettingRow>
         </SectionCard>
-
-        <CategoriesSection />
 
         <SectionCard
           icon={

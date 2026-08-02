@@ -22,6 +22,7 @@ const CHANGELOG: Release[] = [
       { type: 'improved', text: 'Settings, Feedback, and What\'s New restyled to match the adventure-path look — candy-gradient buttons, icon badges, chunky cards' },
       { type: 'improved', text: 'Transactions header now shifts teal/coral with the rest of the app instead of a fixed blue' },
       { type: 'fix',      text: 'Fixed poor text contrast in dark mode on the Home stat strip and path node labels' },
+      { type: 'removed',  text: 'Removed the Categories manager from Settings — categories are already managed inline from the "+" entry sheet, so this was a duplicate control surface' },
       { type: 'removed',  text: 'Removed two unused legacy screens left over from earlier redesigns' },
     ],
   },
