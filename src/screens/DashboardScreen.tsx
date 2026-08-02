@@ -129,13 +129,12 @@ export default function DashboardScreen() {
   const totalPathNodes = 1 + catSpend.length;
   const useCompactList = totalPathNodes > MAX_PATH_NODES;
   const positions = useMemo(() => layoutPathNodes(useCompactList ? 0 : totalPathNodes), [useCompactList, totalPathNodes]);
-  // Milo gets his own reserved lane below the last node's label/pill, so his swim
-  // range can never overlap a node's "You are here" caption on short paths.
-  const NODE_FOOTPRINT = 145; // covers the taller "you are here" pill variant
-  const MILO_ZONE = 90;
+  // 145 covers the tallest node variant (one carrying the "You are here" pill);
+  // Milo roams the full card at a lower z-index than the nodes (see below), so
+  // this is just bottom breathing room now, not a reserved lane for him.
+  const NODE_FOOTPRINT = 145;
   const lastNodeY = positions.length > 0 ? positions[positions.length - 1].y : 0;
-  const miloTop = positions.length > 0 ? lastNodeY + NODE_FOOTPRINT : 0;
-  const pathHeight = positions.length > 0 ? miloTop + MILO_ZONE : 0;
+  const pathHeight = positions.length > 0 ? lastNodeY + NODE_FOOTPRINT + 24 : 0;
 
   const week = weekOfCycle(selectedMonth, cycleStartDay);
 
@@ -153,15 +152,6 @@ export default function DashboardScreen() {
   ];
 
   const monthAbbrev = new Date(selectedMonth).toLocaleDateString('en-SG', { month: 'short' }).toUpperCase();
-
-  // Milo's swim span inside the path card, scaled to however tall the path is this cycle.
-  const spanX = 190;
-  const spanY = Math.min(30, MILO_ZONE - 56); // stay within Milo's own reserved lane
-  const miloVars = {
-    '--sx1': `${Math.round(spanX * 0.5)}px`, '--sy1': `${-Math.round(spanY * 0.4)}px`,
-    '--sx2': `${Math.round(spanX * 0.1)}px`, '--sy2': `${-Math.round(spanY * 0.75)}px`,
-    '--sx3': `${Math.round(spanX * 0.6)}px`, '--sy3': `${-Math.round(spanY * 0.15)}px`,
-  } as React.CSSProperties;
 
   return (
     <div className="min-h-screen" style={{ position: 'relative', ...hueVars(budgetState) }}>
@@ -355,8 +345,9 @@ export default function DashboardScreen() {
                 );
               })}
 
-              {/* Milo free-roams inside the path card */}
-              <div className="milo-swim-path" style={{ position: 'absolute', left: 20, top: miloTop, zIndex: 2, ...miloVars }}>
+              {/* Milo free-roams the whole path card behind the nodes (zIndex 0 < nodes' 1),
+                  so any brief crossing never covers a label or the "You are here" pill. */}
+              <div className="milo-roam" style={{ position: 'absolute', zIndex: 0 }}>
                 <div className="milo-idle-bob" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <MiloFairy />
                   <span

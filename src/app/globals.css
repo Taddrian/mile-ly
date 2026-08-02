@@ -171,20 +171,23 @@
   .milo-idle-bob, .milo-tail, .milo-eye { animation: none; }
 }
 
-/* Milo free-roaming inside the path card — translate-only (no scaleX mirror) between
-   3 waypoints supplied via --sx1/--sy1/--sx2/--sy2/--sx3/--sy3 custom properties. */
-@keyframes milo-swim-path {
-  0%   { transform: translate(0,0); }
-  22%  { transform: translate(var(--sx1), var(--sy1)); }
-  50%  { transform: translate(var(--sx2), var(--sy2)); }
-  72%  { transform: translate(var(--sx3), var(--sy3)); }
-  100% { transform: translate(0,0); }
+/* Milo free-roams the entire path card (not just a bottom strip) — left/top are
+   percentages of the card's own box, so this works regardless of node count or
+   viewport width. He sits at a lower z-index than the nodes, so any moment he
+   drifts near/behind one, the node's own artwork or label still reads on top. */
+@keyframes milo-roam {
+  0%   { left: 4%;  top: 4%; }
+  20%  { left: 58%; top: 14%; }
+  40%  { left: 12%; top: 42%; }
+  60%  { left: 64%; top: 60%; }
+  80%  { left: 20%; top: 82%; }
+  100% { left: 4%;  top: 4%; }
 }
-.milo-swim-path {
-  animation: milo-swim-path 16s ease-in-out infinite;
+.milo-roam {
+  animation: milo-roam 28s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .milo-swim-path { animation: none; }
+  .milo-roam { animation: none; left: 20%; top: 82%; }
 }
 
 /* Milo the pixel fairy — alive pulse, sparkles, rising bubbles */
