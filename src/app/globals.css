@@ -97,6 +97,11 @@
   --text-secondary:#999999;
   --text-muted:    #666666;
 
+  /* Playful palette text tokens — unset in dark mode these stayed the light-mode
+     dark-gray (#3C3C3C/#777777), unreadable against dark cards/backgrounds. */
+  --m-ink:         #F2F1EC;
+  --m-slate:       #ABAAA4;
+
   /* Glass nav */
   --glass-bg:      rgba(28, 28, 30, 0.02);
   --glass-border:  rgba(255, 255, 255, 0.14);
