@@ -14,6 +14,7 @@ import EditCardForm from '@/components/cards/EditCardForm';
 import CardRow from '@/components/cards/CardRow';
 import Modal from '@/components/ui/Modal';
 import MiloMascot from '@/components/decor/MiloMascot';
+import MiloFairy from '@/components/decor/MiloFairy';
 import AmbientScene from '@/components/decor/AmbientScene';
 import { CoinsIcon, WalletIcon, PiggyIcon, CalendarIcon, nodeIconFor } from '@/components/decor/icons';
 import PathNode from '@/components/dashboard/PathNode';
@@ -130,7 +131,7 @@ export default function DashboardScreen() {
   const positions = useMemo(() => layoutPathNodes(useCompactList ? 0 : totalPathNodes), [useCompactList, totalPathNodes]);
   // Milo gets his own reserved lane below the last node's label/pill, so his swim
   // range can never overlap a node's "You are here" caption on short paths.
-  const NODE_FOOTPRINT = 110;
+  const NODE_FOOTPRINT = 145; // covers the taller "you are here" pill variant
   const MILO_ZONE = 90;
   const lastNodeY = positions.length > 0 ? positions[positions.length - 1].y : 0;
   const miloTop = positions.length > 0 ? lastNodeY + NODE_FOOTPRINT : 0;
@@ -357,9 +358,7 @@ export default function DashboardScreen() {
               {/* Milo free-roams inside the path card */}
               <div className="milo-swim-path" style={{ position: 'absolute', left: 20, top: miloTop, zIndex: 2, ...miloVars }}>
                 <div className="milo-idle-bob" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 60, height: 52 }}>
-                    <MiloMascot mood={income > 0 && saved <= 0 ? 'sad' : 'happy'} />
-                  </div>
+                  <MiloFairy />
                   <span
                     className="font-display"
                     style={{ background: 'var(--node-deep)', color: 'white', fontSize: 12, fontWeight: 800, padding: '4px 12px', borderRadius: 10, whiteSpace: 'nowrap' }}

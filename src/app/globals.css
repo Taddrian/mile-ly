@@ -187,6 +187,44 @@
   .milo-swim-path { animation: none; }
 }
 
+/* Milo the pixel fairy — alive pulse, sparkles, rising bubbles */
+@keyframes milo-fairy-alive {
+  0%, 100% { transform: scale(1) rotate(-2deg); }
+  50%      { transform: scale(1.045) rotate(2deg); }
+}
+.milo-fairy-alive {
+  animation: milo-fairy-alive 2.4s ease-in-out infinite;
+}
+
+@keyframes milo-fairy-sparkle {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50%      { opacity: 1; transform: scale(1.15); }
+}
+.milo-fairy-sparkle {
+  animation: milo-fairy-sparkle 2.6s ease-in-out infinite;
+}
+.milo-fairy-sparkle-2 {
+  animation-delay: -1.3s;
+}
+
+@keyframes milo-fairy-bubble {
+  0%   { transform: translateY(0); opacity: 0; }
+  25%  { opacity: 0.8; }
+  100% { transform: translateY(-26px); opacity: 0; }
+}
+.milo-fairy-bubble {
+  animation: milo-fairy-bubble 2.4s ease-in infinite;
+}
+.milo-fairy-bubble-2 {
+  animation-delay: 1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milo-fairy-alive, .milo-fairy-sparkle, .milo-fairy-sparkle-2, .milo-fairy-bubble, .milo-fairy-bubble-2 {
+    animation: none;
+  }
+}
+
 /* Ambient scene decoration — soft pulsing glows + a slowly drifting dot-grid,
    used behind the whole screen and, more subtly, inside the path card. */
 @keyframes ambient-glow {
