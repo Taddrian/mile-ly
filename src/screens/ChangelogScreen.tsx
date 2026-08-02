@@ -15,6 +15,16 @@ interface Release {
 
 const CHANGELOG: Release[] = [
   {
+    version: 'v0.10.0',
+    date: 'Aug 2026',
+    changes: [
+      { type: 'new',      text: 'Milo now free-roams the whole Home path card as a pixel-sprite fairy instead of pacing a small strip at the bottom' },
+      { type: 'improved', text: 'Settings, Feedback, and What\'s New restyled to match the adventure-path look — candy-gradient buttons, icon badges, chunky cards' },
+      { type: 'fix',      text: 'Fixed poor text contrast in dark mode on the Home stat strip and path node labels' },
+      { type: 'removed',  text: 'Removed two unused legacy screens left over from earlier redesigns' },
+    ],
+  },
+  {
     version: 'v0.9.0',
     date: 'Aug 2026',
     changes: [
@@ -132,49 +142,56 @@ const CHANGELOG: Release[] = [
 ];
 
 const TYPE_STYLES: Record<ChangeType, { label: string; bg: string; color: string }> = {
-  new:      { label: 'New',      bg: '#E1F5EE', color: '#0F6E56' },
-  improved: { label: 'Improved', bg: '#EBF5FF', color: '#1E5FA5' },
-  fix:      { label: 'Fix',      bg: '#FFF8E6', color: '#A07800' },
-  removed:  { label: 'Removed',  bg: '#FEE8E8', color: '#C0392B' },
+  new:      { label: 'New',      bg: '#DFF3EF', color: '#129C8C' },
+  improved: { label: 'Improved', bg: '#E5F0FB', color: '#3D7FD1' },
+  fix:      { label: 'Fix',      bg: '#FBF0DB', color: '#C99318' },
+  removed:  { label: 'Removed',  bg: '#FBE0DB', color: '#E8734F' },
 };
 
 export default function ChangelogScreen() {
   return (
     <div className="min-h-screen">
-      <div className="px-5 pt-14 pb-4 md:pt-6">
-        <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Release notes</p>
-        <h1 className="text-2xl font-medium" style={{ color: 'var(--fg)' }}>What's New</h1>
+      <div style={{ padding: '52px 20px 20px' }}>
+        <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--m-slate)', marginBottom: 4 }}>
+          Release notes
+        </p>
+        <h1 className="font-display" style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--m-ink)' }}>
+          What's New
+        </h1>
       </div>
 
-      <div className="px-4 pb-8 space-y-4">
+      <div className="px-4 pb-8 space-y-3">
         {CHANGELOG.map((release) => (
-          <div
-            key={release.version}
-            className="rounded-[16px] overflow-hidden"
-            style={{ backgroundColor: 'var(--card)', border: '0.5px solid var(--border)' }}
-          >
+          <div key={release.version} className="card-chunky" style={{ overflow: 'hidden' }}>
             {/* Version header */}
             <div
-              className="px-4 py-3 flex items-center justify-between"
-              style={{ borderBottom: '0.5px solid var(--border)' }}
+              style={{
+                padding: '14px 18px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                borderBottom: '1px solid var(--m-border, #E5E5E5)',
+              }}
             >
-              <span className="text-sm font-semibold" style={{ color: 'var(--fg)' }}>{release.version}</span>
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{release.date}</span>
+              <span className="font-display" style={{ fontSize: 14, fontWeight: 800, color: 'var(--m-ink)' }}>{release.version}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--m-slate)' }}>{release.date}</span>
             </div>
 
             {/* Changes */}
-            <div className="px-4 py-3 space-y-3">
+            <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
               {release.changes.map((change, i) => {
                 const style = TYPE_STYLES[change.type];
                 return (
-                  <div key={i} className="flex items-start gap-2.5">
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                     <span
-                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5"
-                      style={{ backgroundColor: style.bg, color: style.color }}
+                      className="font-display"
+                      style={{
+                        fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6,
+                        flexShrink: 0, marginTop: 2,
+                        background: style.bg, color: style.color,
+                      }}
                     >
                       {style.label}
                     </span>
-                    <p className="text-sm leading-snug" style={{ color: 'var(--fg)' }}>{change.text}</p>
+                    <p style={{ fontSize: 13, lineHeight: 1.45, color: 'var(--m-ink)' }}>{change.text}</p>
                   </div>
                 );
               })}

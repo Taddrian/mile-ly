@@ -52,19 +52,26 @@ export default function FeedbackScreen() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-8 pb-24 text-center">
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mb-4"
-          style={{ backgroundColor: '#E1F5EE' }}
+          style={{
+            width: 64, height: 64, borderRadius: 20,
+            background: 'linear-gradient(180deg, var(--node-ring), var(--node-deep))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 28, marginBottom: 16,
+            boxShadow: 'inset 0 -5px 0 rgba(0,0,0,0.18)',
+          }}
         >
-          ✓
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12.5l5 5L20 6" />
+          </svg>
         </div>
-        <p className="text-base font-semibold mb-1" style={{ color: 'var(--fg)' }}>Thanks for your feedback!</p>
-        <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
+        <p className="font-display" style={{ fontSize: 16, fontWeight: 800, color: 'var(--m-ink)', marginBottom: 4 }}>Thanks for your feedback!</p>
+        <p style={{ fontSize: 13, color: 'var(--m-slate)', marginBottom: 28 }}>
           We read every message and use it to improve Mile-ly.
         </p>
         <button
           onClick={() => { setSent(false); setType('Suggestion'); }}
-          className="text-sm font-medium"
-          style={{ color: '#0F6E56' }}
+          className="font-display"
+          style={{ fontSize: 13, fontWeight: 700, color: 'var(--node-deep)' }}
         >
           Send another
         </button>
@@ -74,28 +81,43 @@ export default function FeedbackScreen() {
 
   return (
     <div className="min-h-screen">
-      <div className="px-5 pt-14 pb-4 md:pt-6">
-        <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Help us improve</p>
-        <h1 className="text-2xl font-medium" style={{ color: 'var(--fg)' }}>Feedback</h1>
+      <div style={{ padding: '52px 20px 20px' }}>
+        <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--m-slate)', marginBottom: 4 }}>
+          Help us improve
+        </p>
+        <h1 className="font-display" style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--m-ink)' }}>
+          Feedback
+        </h1>
       </div>
 
-      <div className="px-4 space-y-5 pb-8">
+      <div className="px-4 pb-8" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Type selector */}
         <div>
-          <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Type</p>
-          <div className="flex gap-2">
+          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 8 }}>Type</p>
+          <div style={{ display: 'flex', gap: 8 }}>
             {TYPES.map((t) => (
               <button
                 key={t}
                 onClick={() => setType(t)}
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-colors flex flex-col items-center gap-1"
+                className="font-display"
                 style={{
-                  backgroundColor: type === t ? '#0F6E56' : 'var(--card)',
-                  color: type === t ? '#fff' : 'var(--text-secondary)',
-                  border: `0.5px solid ${type === t ? '#0F6E56' : 'var(--border)'}`,
+                  flex: 1,
+                  padding: '10px 0',
+                  borderRadius: 14,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                  transition: 'all 0.15s ease',
+                  background: type === t ? 'linear-gradient(180deg, var(--node-ring), var(--node-deep))' : 'var(--card)',
+                  color: type === t ? '#fff' : 'var(--m-slate)',
+                  border: type === t ? 'none' : '2px solid var(--m-border)',
+                  boxShadow: type === t ? 'inset 0 -4px 0 rgba(0,0,0,0.18)' : 'none',
                 }}
               >
-                <span className="text-base">{TYPE_ICONS[t]}</span>
+                <span style={{ fontSize: 17 }}>{TYPE_ICONS[t]}</span>
                 {t}
               </button>
             ))}
@@ -104,7 +126,7 @@ export default function FeedbackScreen() {
 
         {/* Message */}
         <div>
-          <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Message</p>
+          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--m-slate)', marginBottom: 8 }}>Message</p>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -116,32 +138,47 @@ export default function FeedbackScreen() {
                 : 'Anything on your mind…'
             }
             rows={6}
-            className="w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#0F6E56] resize-none"
+            className="w-full resize-none"
             style={{
-              backgroundColor: 'var(--card)',
-              color: 'var(--fg)',
-              border: '0.5px solid var(--border)',
+              borderRadius: 16,
+              padding: '14px 16px',
+              fontSize: 14,
+              outline: 'none',
+              background: 'var(--card)',
+              color: 'var(--m-ink)',
+              border: '2px solid var(--m-border)',
             }}
           />
-          <p className="text-xs mt-1 text-right" style={{ color: 'var(--text-muted)' }}>
+          <p style={{ fontSize: 11, marginTop: 4, textAlign: 'right', color: 'var(--m-slate)' }}>
             {message.length} chars
           </p>
         </div>
 
         {error && (
-          <p className="text-xs text-center" style={{ color: '#E24B4A' }}>{error}</p>
+          <p style={{ fontSize: 12, textAlign: 'center', color: '#E04E42' }}>{error}</p>
         )}
 
         <button
           onClick={handleSend}
           disabled={sending || !message.trim()}
-          className="w-full py-3.5 rounded-xl text-sm font-medium text-white transition-opacity disabled:opacity-40"
-          style={{ backgroundColor: '#0F6E56' }}
+          className="font-display"
+          style={{
+            width: '100%',
+            padding: '15px 0',
+            borderRadius: 16,
+            fontSize: 14,
+            fontWeight: 800,
+            color: '#fff',
+            background: 'linear-gradient(180deg, var(--node-ring), var(--node-deep))',
+            boxShadow: 'inset 0 -5px 0 rgba(0,0,0,0.18)',
+            opacity: sending || !message.trim() ? 0.4 : 1,
+            transition: 'opacity 0.15s ease',
+          }}
         >
           {sending ? 'Sending…' : 'Send feedback'}
         </button>
 
-        <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+        <p style={{ fontSize: 11, textAlign: 'center', color: 'var(--m-slate)' }}>
           Your email is included so we can follow up if needed.
         </p>
       </div>
