@@ -39,13 +39,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [cycleStartDay, setCycleStartDayState] = useState(1);
-  const [selectedMonth, setSelectedMonthState] = useState(() => cycleStartForDate(new Date(), 1));
+  const [selectedMonth, setSelectedMonth] = useState(() => cycleStartForDate(new Date(), 1));
   const [currency, setCurrencyState] = useState('SGD');
-
-  function setSelectedMonth(month: string) {
-    setSelectedMonthState(month);
-    localStorage.setItem('milely_selected_month', month);
-  }
 
   useEffect(() => {
     const stored = localStorage.getItem('milely_currency');
@@ -82,16 +77,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const day = settingsRes.data ? Number(settingsRes.data.cycle_start_day) : 1;
     setCycleStartDayState(day);
+    setSelectedMonth(cycleStartForDate(new Date(), day));
 
-    // Resume on whichever cycle the user last had open — refreshing or reopening
-    // the tab should never bump you back to "today" out from under a cycle you
-    // navigated to on purpose. Only a fresh browser (no stored value yet) or an
-    // explicit cycleStartDay change falls back to today's cycle.
-    const storedMonth = localStorage.getItem('milely_selected_month');
-    const month = storedMonth ?? cycleStartForDate(new Date(), day);
-    setSelectedMonth(month);
-
-    await loadEntriesFor(month);
+    await loadEntriesFor(cycleStartForDate(new Date(), day));
   }
 
   async function loadEntries() {
