@@ -5,20 +5,6 @@ import { CreditCard, Transaction, Category, Entry } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { cycleStartForDate, cycleEndExclusive } from '@/lib/cycle';
 
-// `new Date("YYYY-MM-DD")` parses as UTC midnight, not local — comparing that
-// directly against local "now" misclassifies the boundary day by the local UTC
-// offset. Parse from components instead, matching how cycleStartForDate builds
-// these strings in the first place.
-function parseLocalISODate(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function isWithinCycle(cycleStartISO: string): boolean {
-  const now = new Date();
-  return now >= parseLocalISODate(cycleStartISO) && now < parseLocalISODate(cycleEndExclusive(cycleStartISO));
-}
-
 interface AppContextValue {
   cards: CreditCard[];
   transactions: Transaction[];
@@ -97,11 +83,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const day = settingsRes.data ? Number(settingsRes.data.cycle_start_day) : 1;
     setCycleStartDayState(day);
 
-    // Resume wherever the user last was, as long as "now" still falls within that
-    // cycle — only jump to today's cycle if real time has actually moved past it
-    // (e.g. they last had the app open a cycle or more ago).
+    // Resume on whichever cycle the user last had open — refreshing or reopening
+    // the tab should never bump you back to "today" out from under a cycle you
+    // navigated to on purpose. Only a fresh browser (no stored value yet) or an
+    // explicit cycleStartDay change falls back to today's cycle.
     const storedMonth = localStorage.getItem('milely_selected_month');
-    const month = storedMonth && isWithinCycle(storedMonth) ? storedMonth : cycleStartForDate(new Date(), day);
+    const month = storedMonth ?? cycleStartForDate(new Date(), day);
     setSelectedMonth(month);
 
     await loadEntriesFor(month);
