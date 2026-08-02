@@ -7,6 +7,7 @@ import CategoryChip from '@/components/ui/CategoryChip';
 import SwipeableRow from '@/components/transactions/SwipeableRow';
 import Sparkle from '@/components/decor/Sparkle';
 import MiloMascot from '@/components/decor/MiloMascot';
+import { hueVars } from '@/lib/hue';
 
 function fmtDate(iso?: string) {
   if (!iso) return '';
@@ -14,7 +15,7 @@ function fmtDate(iso?: string) {
 }
 
 export default function TransactionsScreen() {
-  const { entries, categories, cards, deleteEntry, currency } = useApp();
+  const { entries, categories, cards, deleteEntry, currency, budgetState } = useApp();
   const [search, setSearch] = useState('');
 
   const totalIncome = useMemo(() =>
@@ -41,12 +42,12 @@ export default function TransactionsScreen() {
   }, [entries, categories, search]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ position: 'relative', ...hueVars(budgetState) }}>
 
       {/* ── Header band ── */}
       <div style={{
         position: 'relative',
-        background: 'linear-gradient(135deg, #1D4ED8 0%, #38BDF8 100%)',
+        background: 'linear-gradient(135deg, var(--node-ring) 0%, var(--node-deep) 100%)',
         paddingTop: 52,
         paddingBottom: 36,
         paddingLeft: 20,
@@ -194,7 +195,7 @@ export default function TransactionsScreen() {
                       <p style={{
                         fontSize: 15,
                         fontWeight: 800,
-                        color: isIncome ? '#0D9488' : '#FF6B5E',
+                        color: isIncome ? 'var(--m-teal)' : 'var(--m-coral)',
                         letterSpacing: '-0.01em',
                       }}>
                         {isIncome ? '+' : '−'}{fmtCurrency(entry.amount, currency)}
@@ -208,8 +209,8 @@ export default function TransactionsScreen() {
                         letterSpacing: '0.05em',
                         padding: '2px 7px',
                         borderRadius: 999,
-                        background: isIncome ? '#CCFBF1' : '#FFE4E1',
-                        color: isIncome ? '#0D9488' : '#FF6B5E',
+                        background: isIncome ? 'var(--m-teal-xl)' : 'var(--m-coral-xl)',
+                        color: isIncome ? 'var(--m-teal)' : 'var(--m-coral)',
                       }}>
                         {isIncome ? 'IN' : 'OUT'}
                       </span>
