@@ -13,7 +13,7 @@ interface AddEntrySheetProps {
 type EntryType = 'income' | 'expense' | 'card';
 
 export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
-  const { categories, cards, addEntry, addCategory, deleteCategory, updateCardSpent, selectedMonth, cycleStartDay, currency } = useApp();
+  const { categories, cards, addEntry, addCategory, deleteCategory, deleteCard, updateCardSpent, selectedMonth, cycleStartDay, currency } = useApp();
 
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
@@ -27,6 +27,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingDeleteCardId, setPendingDeleteCardId] = useState<string | null>(null);
 
   const filtered = categories.filter((c) => c.type === type);
   const selectedCard = cards.find((c) => c.id === cardId);
@@ -231,25 +232,41 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                 Card
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {cards.map((card) => (
-                  <button
-                    key={card.id}
-                    onClick={() => setCardId(isCardUpdate ? card.id : (cardId === card.id ? '' : card.id))}
-                    style={{
-                      padding: '7px 14px',
-                      borderRadius: 999,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      border: `2px solid ${cardId === card.id ? card.color : 'var(--m-border)'}`,
-                      boxShadow: cardId === card.id ? `0 3px 0 rgba(0,0,0,0.2)` : '0 2px 0 var(--m-border-dark)',
-                      background: cardId === card.id ? card.color : 'var(--card)',
-                      color: cardId === card.id ? '#fff' : 'var(--m-slate)',
-                      transition: 'all 0.1s',
-                    }}
-                  >
-                    {card.name}
-                  </button>
-                ))}
+                {cards.map((card) => {
+                  const selected = cardId === card.id;
+                  return (
+                    <div
+                      key={card.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        borderRadius: 999,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        border: `2px solid ${selected ? card.color : 'var(--m-border)'}`,
+                        boxShadow: selected ? `0 3px 0 rgba(0,0,0,0.2)` : '0 2px 0 var(--m-border-dark)',
+                        background: selected ? card.color : 'var(--card)',
+                        color: selected ? '#fff' : 'var(--m-slate)',
+                        overflow: 'hidden',
+                        transition: 'all 0.1s',
+                      }}
+                    >
+                      <button
+                        onClick={() => setCardId(isCardUpdate ? card.id : (cardId === card.id ? '' : card.id))}
+                        style={{ padding: '7px 10px 7px 14px', background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer' }}
+                      >
+                        {card.name}
+                      </button>
+                      <button
+                        onClick={() => setPendingDeleteCardId(card.id)}
+                        style={{ padding: '7px 12px 7px 2px', background: 'none', border: 'none', opacity: 0.6, cursor: 'pointer', fontSize: 11, color: 'inherit' }}
+                        aria-label={`Delete ${card.name}`}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -475,6 +492,51 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               </button>
               <button
                 onClick={() => setPendingDeleteId(null)}
+                style={{
+                  width: '100%', padding: '14px', borderRadius: 14,
+                  fontSize: 14, fontWeight: 700, color: 'var(--m-slate)',
+                  background: 'var(--card)', border: '2px solid var(--m-border)', boxShadow: '0 3px 0 var(--m-border-dark)',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        );
+      })()}
+
+      {/* Card delete action sheet */}
+      {pendingDeleteCardId && (() => {
+        const card = cards.find((c) => c.id === pendingDeleteCardId);
+        return (
+          <>
+            <div className="fixed inset-0 z-[60] bg-black/50" onClick={() => setPendingDeleteCardId(null)} />
+            <div
+              className="fixed bottom-0 left-0 right-0 z-[70] max-w-md mx-auto"
+              style={{ background: 'var(--card)', borderRadius: '20px 20px 0 0', padding: '24px 20px' }}
+            >
+              <p style={{ fontSize: 15, fontWeight: 800, textAlign: 'center', color: 'var(--m-ink)', marginBottom: 6 }}>
+                Remove card?
+              </p>
+              <p style={{ fontSize: 13, textAlign: 'center', color: 'var(--m-slate)', marginBottom: 24 }}>
+                "{card?.name}" will be permanently deleted.
+              </p>
+              <button
+                onClick={() => {
+                  if (cardId === pendingDeleteCardId) setCardId('');
+                  deleteCard(pendingDeleteCardId);
+                  setPendingDeleteCardId(null);
+                }}
+                style={{
+                  width: '100%', padding: '15px', borderRadius: 14, marginBottom: 10,
+                  fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em',
+                  color: 'white', background: '#FF6B5E', border: '2px solid #FF6B5E', boxShadow: '0 4px 0 #E04E42',
+                }}
+              >
+                Remove
+              </button>
+              <button
+                onClick={() => setPendingDeleteCardId(null)}
                 style={{
                   width: '100%', padding: '14px', borderRadius: 14,
                   fontSize: 14, fontWeight: 700, color: 'var(--m-slate)',
