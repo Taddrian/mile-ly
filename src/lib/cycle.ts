@@ -1,4 +1,4 @@
-// Billing-cycle math shared across AppContext, AddEntrySheet, MonthPicker, and DashboardScreen.
+// Billing-cycle math shared across AppContext, AddEntrySheet, MonthPicker, and RoomScreen.
 // A "cycle" is identified by its start date (ISO "YYYY-MM-DD") where the day-of-month equals
 // the user's cycleStartDay. With cycleStartDay = 1, this is identical to a calendar month.
 

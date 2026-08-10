@@ -88,6 +88,21 @@
   --node-locked-from: #EFEDE8;
   --node-locked-to:   #D5D1C8;
   --node-locked-text: #B3AEA5;
+
+  /* Milo's Room — HUD/dock/scrim chrome overlaid on the fixed-palette room
+     scene. Exact values from the Claude Design handoff (design-handoff/), not
+     reused from --glass-* — the room's own glass recipe is a touch heavier
+     (meant to sit over busy pixel-art, not a plain page). */
+  --room-scrim-top:    linear-gradient(to bottom, rgba(45, 28, 10, 0.38), rgba(45, 28, 10, 0));
+  --room-scrim-bottom: linear-gradient(to top, rgba(30, 18, 8, 0.30), transparent 26%);
+  --room-hud-bg:       rgba(255, 255, 255, 0.24);
+  --room-hud-border:   rgba(255, 255, 255, 0.4);
+  --room-hud-shadow:   0 2px 8px rgba(0, 0, 0, 0.12);
+  --room-dock-bg:      rgba(255, 255, 255, 0.24);
+  --room-dock-border:  rgba(255, 255, 255, 0.4);
+  --room-dock-shadow:  0 4px 16px rgba(0, 0, 0, 0.16);
+  --room-chip-bg:      rgba(255, 255, 255, 0.22);
+  --room-chip-border:  rgba(255, 255, 255, 0.35);
 }
 
 .dark {
@@ -113,6 +128,20 @@
   --node-locked-from: #333331;
   --node-locked-to:   #232321;
   --node-locked-text: #7A7A75;
+
+  /* Milo's Room chrome — opaque-black tint swapped in for the frosted white
+     so it still separates from a dark page background (the room scene card
+     itself stays the same fixed warm palette either way). */
+  --room-scrim-top:    linear-gradient(to bottom, rgba(20, 12, 4, 0.5), rgba(20, 12, 4, 0));
+  --room-scrim-bottom: linear-gradient(to top, rgba(10, 6, 2, 0.42), transparent 26%);
+  --room-hud-bg:       rgba(0, 0, 0, 0.32);
+  --room-hud-border:   rgba(255, 255, 255, 0.18);
+  --room-hud-shadow:   none;
+  --room-dock-bg:      rgba(0, 0, 0, 0.34);
+  --room-dock-border:  rgba(255, 255, 255, 0.18);
+  --room-dock-shadow:  none;
+  --room-chip-bg:      rgba(255, 255, 255, 0.14);
+  --room-chip-border:  rgba(255, 255, 255, 0.22);
 }
 
 /* Chunky 3D card — the Duolingo signature */
@@ -454,4 +483,56 @@ body {
     inset 0 -6px 0 rgba(0, 0, 0, 0.18),
     0 8px 20px -8px var(--node-shadow, var(--hue-pos-shadow));
   transition: --node-deep 0.4s ease, --node-ring 0.4s ease, --node-shadow 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* ── Milo's Room — scene ambience + orb recipe (Claude Design handoff) ── */
+@keyframes room-twinkle {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+@keyframes room-glow {
+  0%, 100% { opacity: 0.22; }
+  50%      { opacity: 0.36; }
+}
+@keyframes room-clock-tick {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes room-leaf-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50%      { transform: rotate(4deg); }
+}
+@keyframes room-float-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .room-twinkle, .room-glow, .room-clock-tick, .room-leaf-sway, .room-float-bob { animation: none; }
+}
+
+/* One glossy-sphere recipe + a single --c custom property gives a correctly
+   shaded orb for any hex — no per-category gradient authoring. */
+.orb {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  position: relative;
+  box-shadow:
+    inset -6px -8px 14px color-mix(in srgb, var(--c) 55%, black 45%),
+    inset 4px 6px 10px color-mix(in srgb, var(--c) 25%, white 75%),
+    0 4px 10px rgba(0, 0, 0, 0.45);
+  background: radial-gradient(circle at 32% 28%,
+    color-mix(in srgb, var(--c) 45%, white 55%) 0%, var(--c) 55%,
+    color-mix(in srgb, var(--c) 78%, black 40%) 100%);
+}
+.orb::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 11px;
+  width: 16px;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  filter: blur(2px);
 }

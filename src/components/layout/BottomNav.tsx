@@ -25,14 +25,6 @@ const TransactionsIcon = () => (
   </svg>
 );
 
-const RoomIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 12v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6" />
-    <path d="M5 12a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3" />
-    <path d="M8 19v-3M16 19v-3" />
-  </svg>
-);
-
 const MilesIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 20l-1.4-6.9L21 8.5c1.2-1.2 1.5-2.7 1-3.5-.8-.5-2.3-.2-3.5 1L13.4 10 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2z" />
@@ -50,7 +42,6 @@ const MoreIcon = () => (
 const TABS: { id: Tab; label: string; Icon: React.FC }[] = [
   { id: 'home',         label: 'Home',         Icon: HomeIcon         },
   { id: 'transactions', label: 'Transactions', Icon: TransactionsIcon },
-  { id: 'room',         label: 'Room',         Icon: RoomIcon         },
   { id: 'miles',        label: 'Miles',        Icon: MilesIcon        },
   { id: 'more',         label: 'More',         Icon: MoreIcon         },
 ];
@@ -60,7 +51,6 @@ const TABS: { id: Tab; label: string; Icon: React.FC }[] = [
 const TAB_COLORS: Record<Tab, string> = {
   home: '#f4845f',
   transactions: '#5fb2f2',
-  room: '#f2a6cf',
   miles: '#b689ec',
   more: '#f0b429',
 };
@@ -100,8 +90,8 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
             WebkitBackdropFilter: 'blur(14px) saturate(1.4)',
           }}
         >
-          {/* Left three tabs */}
-          {TABS.slice(0, 3).map(({ id, Icon }) => {
+          {/* Left two tabs */}
+          {TABS.slice(0, 2).map(({ id, Icon }) => {
             const active = activeTab === id;
             return (
               <button
@@ -142,7 +132,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
           </button>
 
           {/* Right two tabs */}
-          {TABS.slice(3).map(({ id, Icon }) => {
+          {TABS.slice(2).map(({ id, Icon }) => {
             const active = activeTab === id;
             return (
               <button
@@ -180,7 +170,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
         </div>
 
         <div className="flex flex-col gap-1">
-          {TABS.slice(0, 3).map(({ id, label, Icon }) => {
+          {TABS.slice(0, 2).map(({ id, label, Icon }) => {
             const active = activeTab === id;
             return (
               <button
@@ -214,7 +204,7 @@ export default function BottomNav({ activeTab, onTabChange, onAddPress }: Bottom
             Add entry
           </button>
 
-          {TABS.slice(3).map(({ id, label, Icon }) => {
+          {TABS.slice(2).map(({ id, label, Icon }) => {
             const active = activeTab === id;
             return (
               <button

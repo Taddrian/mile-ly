@@ -15,6 +15,16 @@ interface Release {
 
 const CHANGELOG: Release[] = [
   {
+    version: 'v0.13.0',
+    date: 'Aug 2026',
+    changes: [
+      { type: 'new', text: 'Milo\'s Room is now the Home tab — a full isometric room scene with a level/XP + Sparks HUD and a Decor/Wardrobe/Pet/Budget dock, redesigned end-to-end with Claude Design' },
+      { type: 'new', text: 'Budget — everything the old Home dashboard showed (cycle headline, days left, % saved, spend by category, cards) now lives in one card over the room, with a scrollable row of glossy category orbs instead of a snaking path' },
+      { type: 'improved', text: 'Furniture and Milo\'s wardrobe are now true isometric SVG art with a proper recolor system, replacing the earlier hand-authored pixel sprites' },
+      { type: 'removed', text: 'Removed the separate adventure-path Home dashboard and the standalone Room tab — both are unified into the one Home screen above' },
+    ],
+  },
+  {
     version: 'v0.12.0',
     date: 'Aug 2026',
     changes: [

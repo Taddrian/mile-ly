@@ -1,6 +1,9 @@
-// Static catalog for Milo's Room (idle-game Phase 1) — same "config lives in code,
-// not the database" pattern as SEA_CURRENCIES in src/lib/currency.ts. Extending the
-// room later just means adding rows here.
+// Static catalog for Milo's Room — same "config lives in code, not the
+// database" pattern as SEA_CURRENCIES in src/lib/currency.ts. Items/pricing
+// match the Claude Design handoff (design-handoff/Milos Room Scene.dc.html)
+// verbatim — `colors` keys are the exact CSS custom-property suffixes the
+// shared SVG symbols in roomSprites.tsx expect (e.g. `f1` → `--f1`), so a
+// shop variant is purely a var swap on the <use> wrapper, never new geometry.
 
 export type RoomSlot = 'bed' | 'rug' | 'plant';
 
@@ -9,7 +12,6 @@ export interface FurnitureItem {
   slot: RoomSlot;
   name: string;
   cost: number;
-  // Full letter->hex color set for this item's shape (src/components/decor/roomSprites.tsx).
   colors: Record<string, string>;
 }
 
@@ -22,32 +24,68 @@ export interface WardrobeItem {
   colorOverrides: Record<string, string>;
 }
 
-// Free — every room starts furnished with these so it's never blank; Sparks buy
-// upgrades/swaps on top, not the basics.
+// Free — every room starts furnished with these so it's never blank; Sparks
+// buy upgrades/swaps on top, not the basics.
 export const STARTER_ITEM_IDS: Record<RoomSlot, string> = {
-  bed: 'bed_starter',
-  rug: 'rug_starter',
-  plant: 'plant_starter',
+  bed: 'bed_pine',
+  rug: 'rug_jute',
+  plant: 'plant_sprout',
 };
 
 export const FURNITURE_ITEMS: FurnitureItem[] = [
-  { id: 'bed_starter',     slot: 'bed',   name: 'Simple Bed',     cost: 0,  colors: { W: '#8b5e3c', P: '#ffffff', B: '#d98c54', F: '#4a3324' } },
-  { id: 'bed_cozy_teal',   slot: 'bed',   name: 'Cozy Teal Bed',  cost: 40, colors: { W: '#7a5c42', P: '#f5f0e6', B: '#0d9488', F: '#4a3324' } },
-  { id: 'bed_cloud_white', slot: 'bed',   name: 'Cloud Bed',      cost: 90, colors: { W: '#d7cbb5', P: '#ffffff', B: '#f5f7fb', F: '#a99b7a' } },
+  // Bed — one shared shape, frame (f1/f2/f3) + blanket (b1/b2/b3) + pillow (p/psh) recolors.
+  { id: 'bed_pine',     slot: 'bed', name: 'Pine Bed',     cost: 0,   colors: {} },
+  {
+    id: 'bed_tidepool', slot: 'bed', name: 'Tidepool Bed', cost: 240,
+    colors: { b1: '#e0f2ee', b2: '#a8dcd3', b3: '#7fc6ba', p: '#eef7f2', psh: '#cfe6dd' },
+  },
+  {
+    id: 'bed_cloud',    slot: 'bed', name: 'Cloud Bed',    cost: 320,
+    colors: {
+      f1: '#c1c9dc', f2: '#dde3f0', f3: '#a3aec9',
+      b1: '#f6f7fb', b2: '#dbe1f0', b3: '#c9d2ea', p: '#ffffff', psh: '#dfe5f1',
+    },
+  },
 
-  { id: 'rug_starter',     slot: 'rug',   name: 'Plain Rug',      cost: 0,  colors: { R: '#8a9bb0', r: '#c3d1e0' } },
-  { id: 'rug_stripe',      slot: 'rug',   name: 'Striped Rug',    cost: 30, colors: { R: '#e0568c', r: '#f2a6cf' } },
-  { id: 'rug_round_gold',  slot: 'rug',   name: 'Round Gold Rug', cost: 70, colors: { R: '#c99318', r: '#f0b429' } },
+  // Rug — field (r1) + border (r2); "Honey Round" reuses the same symbol with
+  // an alternate round-rug overlay toggled on via `show-round`.
+  { id: 'rug_jute',    slot: 'rug', name: 'Jute Rug',     cost: 0,   colors: {} },
+  {
+    id: 'rug_berry',    slot: 'rug', name: 'Berry Stripe', cost: 120,
+    colors: { r1: '#f6d9d4', r2: '#c56b70', r3: '#e08f92' },
+  },
+  {
+    id: 'rug_honey',    slot: 'rug', name: 'Honey Round',  cost: 180,
+    colors: { r1: '#f6dfa3', r2: '#cf9a3a', 'show-round': 'inline' },
+  },
 
-  { id: 'plant_starter',   slot: 'plant', name: 'Small Plant',    cost: 0,  colors: { g: '#8fbfa0', P: '#a99b7a' } },
-  { id: 'plant_fern',      slot: 'plant', name: 'Little Fern',    cost: 25, colors: { g: '#5c9a5c', P: '#c98a5a' } },
-  { id: 'plant_cactus',    slot: 'plant', name: 'Potted Cactus',  cost: 60, colors: { g: '#7db87d', P: '#b06a4a' } },
+  // Plant — same pot always; fern/cactus swap which foliage layer is shown,
+  // each layer carries its own baked-in color (no per-item overrides needed).
+  { id: 'plant_sprout', slot: 'plant', name: "Lil' Sprout", cost: 0,   colors: {} },
+  {
+    id: 'plant_fern',   slot: 'plant', name: 'Window Fern', cost: 90,
+    colors: { 'pl-plant': 'none', 'pl-fern': 'inline' },
+  },
+  {
+    id: 'plant_cactus', slot: 'plant', name: 'Desert Pal',  cost: 140,
+    colors: { 'pl-plant': 'none', 'pl-cactus': 'inline' },
+  },
 ];
 
+// Wardrobe overrides key onto MiloFairy's real SPRITE_COLORS letters, not the
+// design handoff's semantic names — mapping: hood → H + D (both currently
+// plain white, recolor together so the hood reads as one region), hood
+// shadow → N, outer/inner wing → W / w.
 export const WARDROBE_ITEMS: WardrobeItem[] = [
-  { id: 'raincoat_yellow', category: 'outfit', name: 'Yellow Raincoat', cost: 80,  colorOverrides: { S: '#ffd166', B: '#f0b429' } },
-  { id: 'party_pink',      category: 'outfit', name: 'Party Pink',      cost: 80,  colorOverrides: { S: '#ff8fc8', B: '#e85fa8' } },
-  { id: 'night_navy',      category: 'outfit', name: 'Night Cape',      cost: 120, colorOverrides: { W: '#4a5db8', w: '#2f3d8f', S: '#dfe3f5' } },
+  { id: 'outfit_classic', category: 'outfit', name: 'Classic', cost: 0,   colorOverrides: {} },
+  {
+    id: 'outfit_seafoam', category: 'outfit', name: 'Seafoam', cost: 200,
+    colorOverrides: { H: '#bfe6dd', D: '#bfe6dd', N: '#96cabd', W: '#57b3a8', w: '#2f7f76' },
+  },
+  {
+    id: 'outfit_sunset',  category: 'outfit', name: 'Sunset',  cost: 200,
+    colorOverrides: { H: '#f0a894', D: '#f0a894', N: '#d88a76', W: '#e5b04c', w: '#c98a2e' },
+  },
 ];
 
 export const ROOM_SLOT_LABELS: Record<RoomSlot, string> = {

@@ -40,7 +40,7 @@ export type Entry = {
   createdAt?: string;
 };
 
-export type Tab = 'home' | 'transactions' | 'room' | 'miles' | 'more';
+export type Tab = 'home' | 'transactions' | 'miles' | 'more';
 export type MoreSection = 'changelog' | 'settings' | 'feedback' | null;
 
 // Milo's Room (idle game) — an owned item, keyed by the static catalog id in
