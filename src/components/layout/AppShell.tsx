@@ -6,6 +6,7 @@ import { AppProvider } from '@/context/AppContext';
 import BottomNav from '@/components/layout/BottomNav';
 import DashboardScreen from '@/screens/DashboardScreen';
 import TransactionsScreen from '@/screens/TransactionsScreen';
+import RoomScreen from '@/screens/RoomScreen';
 import PointsScreen from '@/screens/PointsScreen';
 import MoreScreen from '@/screens/MoreScreen';
 import AddEntrySheet from '@/components/transactions/AddEntrySheet';
@@ -22,6 +23,7 @@ function ScreenContent({
   switch (activeTab) {
     case 'home':         return <DashboardScreen />;
     case 'transactions': return <TransactionsScreen />;
+    case 'room':         return <RoomScreen />;
     case 'miles':        return <PointsScreen />;
     case 'more':         return <MoreScreen section={moreSection} onSection={onMoreSection} />;
   }
