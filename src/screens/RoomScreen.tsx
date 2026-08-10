@@ -216,9 +216,15 @@ export default function RoomScreen() {
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 150, background: 'var(--room-scrim-top)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'var(--room-scrim-bottom)' }} />
 
+        {/* Walking, not floating — a faster 2-beat bob + a ground shadow that
+            shrinks in sync (lifted foot), rather than the slow single idle
+            bob used when Milo's just standing still elsewhere in the app. */}
         <div className="milo-roam" style={{ position: 'absolute', zIndex: 2 }}>
-          <div className="milo-idle-bob">
-            <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} />
+          <div style={{ position: 'relative' }}>
+            <div className="room-milo-walk-bob">
+              <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} />
+            </div>
+            <div className="room-milo-walk-shadow" style={{ position: 'absolute', left: '50%', bottom: -3, width: 24, height: 7, borderRadius: '50%', background: 'rgba(50,32,16,0.4)', filter: 'blur(0.5px)' }} />
           </div>
         </div>
 
