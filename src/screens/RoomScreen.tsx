@@ -206,7 +206,7 @@ export default function RoomScreen() {
           warm palette regardless of app theme (intentional — this screen
           stays cozy/neutral); only the HUD/dock chrome swaps for dark mode
           via the --room-* tokens in globals.css. ── */}
-      <div style={{ position: 'relative', minHeight: '100dvh', marginBottom: -96, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', height: '100dvh', overflow: 'hidden' }}>
         <svg viewBox={SCENE_VIEWBOX} preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style={{ position: 'absolute', inset: 0, display: 'block', background: '#f4e8cd' }}>
           <use href="#sym-scene-bg" />
           {(Object.keys(FURNITURE_PLACEMENT) as RoomSlot[]).map((slot) => {
@@ -271,7 +271,7 @@ export default function RoomScreen() {
             cards) lives here now, consolidated into one panel with the node
             shelf scrolling inside it rather than floating separately. ── */}
         {showBudget && (
-          <div style={{ position: 'absolute', top: 74, left: 14, width: 238, maxWidth: 'calc(100% - 82px)', zIndex: 4, background: 'linear-gradient(160deg, #2e2145, #1c1430)', border: '1px solid rgba(214,168,255,0.22)', borderRadius: 20, padding: '14px 16px 16px', boxShadow: '0 8px 22px rgba(20,10,35,0.4)' }}>
+          <div style={{ position: 'absolute', top: 74, left: 14, width: 238, maxWidth: 'calc(100% - 82px)', maxHeight: 'calc(100dvh - 170px)', overflowY: 'auto', zIndex: 4, background: 'linear-gradient(160deg, #2e2145, #1c1430)', border: '1px solid rgba(214,168,255,0.22)', borderRadius: 20, padding: '14px 16px 16px', boxShadow: '0 8px 22px rgba(20,10,35,0.4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
               <span className="font-display" style={{ fontSize: 12, fontWeight: 800, color: '#f0eef7' }}>Budget</span>
               <button onClick={() => setShowBudget(false)} aria-label="Close" style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

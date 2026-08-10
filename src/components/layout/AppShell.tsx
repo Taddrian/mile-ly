@@ -42,7 +42,13 @@ export default function AppShell() {
       <div className="relative min-h-screen md:flex" style={{ backgroundColor: 'var(--bg)' }}>
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} onAddPress={() => setShowAdd(true)} />
 
-        <main className="pb-24 md:pb-0 min-h-screen overflow-y-auto flex-1 md:ml-56">
+        {/* Home is a locked, non-scrolling full-bleed screen (the room fits
+            whatever the device's viewport is, via its own dvh sizing +
+            "slice" scene cropping, instead of scrolling) — every other tab
+            keeps the normal scrollable page treatment. */}
+        <main className={`flex-1 md:ml-56 md:pb-0 md:h-[100dvh] md:overflow-y-auto ${
+          activeTab === 'home' ? 'h-[100dvh] overflow-hidden' : 'min-h-screen overflow-y-auto pb-24'
+        }`}>
           <div className="max-w-md mx-auto md:max-w-2xl">
             <div key={activeTab} className="tab-fade-in">
               <ScreenContent
