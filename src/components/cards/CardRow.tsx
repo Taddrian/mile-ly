@@ -65,7 +65,7 @@ export default function CardRow({ card, currency, onClick, style, className }: C
 
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <p className="font-display text-sm font-extrabold" style={{ color: 'var(--m-ink, #3C3C3C)' }}>
-          {fmtCurrency(Math.round(animatedSpent), currency)}
+          {fmtCurrency(animatedSpent, currency)}
         </p>
         {hasLimit && (
           <p className="text-[10px] mt-0.5" style={{ color: 'var(--m-slate)' }}>
