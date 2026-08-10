@@ -206,7 +206,7 @@ export default function RoomScreen() {
           warm palette regardless of app theme (intentional — this screen
           stays cozy/neutral); only the HUD/dock chrome swaps for dark mode
           via the --room-* tokens in globals.css. ── */}
-      <div style={{ position: 'relative', minHeight: 'calc(100dvh - 96px)', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', minHeight: '100dvh', marginBottom: -96, overflow: 'hidden' }}>
         <svg viewBox={SCENE_VIEWBOX} preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style={{ position: 'absolute', inset: 0, display: 'block', background: '#f4e8cd' }}>
           <use href="#sym-scene-bg" />
           {(Object.keys(FURNITURE_PLACEMENT) as RoomSlot[]).map((slot) => {
@@ -255,7 +255,7 @@ export default function RoomScreen() {
         </div>
 
         {/* ── Vertical dock ── */}
-        <div style={{ position: 'absolute', top: 150, right: -6, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, background: 'var(--room-dock-bg)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid var(--room-dock-border)', borderRadius: 999, padding: '16px 10px', boxShadow: 'var(--room-dock-shadow)' }}>
+        <div style={{ position: 'absolute', top: 150, right: 10, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, background: 'var(--room-dock-bg)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid var(--room-dock-border)', borderRadius: 999, padding: '16px 10px', boxShadow: 'var(--room-dock-shadow)' }}>
           {DOCK_ITEMS.map(({ key, label, Icon, onClick }) => (
             <button key={key} onClick={onClick} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }} aria-label={label}>
               <span style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--room-chip-bg)', border: '1px solid var(--room-chip-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
