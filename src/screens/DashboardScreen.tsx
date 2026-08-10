@@ -145,8 +145,8 @@ export default function DashboardScreen() {
   const animatedDaysLeft = useCountUp(daysLeft);
 
   const statStrip = [
-    { value: `${currencySymbol(currency)}${fmtShort(Math.round(animatedIncome))}`, color: 'var(--node-deep)', Icon: CoinsIcon },
-    { value: `${currencySymbol(currency)}${fmtShort(Math.round(animatedSaved))}`, color: '#e8a33f', Icon: WalletIcon },
+    { value: `${currencySymbol(currency)}${fmtShort(animatedIncome, currency)}`, color: 'var(--node-deep)', Icon: CoinsIcon },
+    { value: `${currencySymbol(currency)}${fmtShort(animatedSaved, currency)}`, color: '#e8a33f', Icon: WalletIcon },
     { value: `${Math.round(animatedPctSaved)}%`, color: '#b689ec', Icon: PiggyIcon },
     { value: daysLeft > 0 ? String(Math.round(animatedDaysLeft)) : '—', color: '#b8b2a8', Icon: CalendarIcon },
   ];

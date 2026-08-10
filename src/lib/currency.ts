@@ -33,8 +33,10 @@ export function fmtCurrency(n: number, code: string): string {
 }
 
 // Compact formatter for small display spaces (DonutRing center, stat tiles, etc.)
-// Rounds to 3 significant digits and appends K / M / B suffix.
-export function fmtShort(n: number): string {
+// Rounds to 3 significant digits and appends K / M / B suffix — only for numbers
+// actually large enough to need it. Below that threshold, keeps the currency's
+// real decimal places instead of collapsing to a whole number.
+export function fmtShort(n: number, code: string): string {
   const abs = Math.abs(n);
   if (abs >= 1_000_000_000) {
     const v = n / 1_000_000_000;
@@ -48,6 +50,5 @@ export function fmtShort(n: number): string {
     const v = n / 1_000;
     return `${+v.toPrecision(3)}K`;
   }
-  // Below 10K — return plain integer (no locale separators needed, fits fine)
-  return String(Math.round(n));
+  return fmtAmount(n, code);
 }
