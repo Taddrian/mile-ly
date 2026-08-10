@@ -21,6 +21,7 @@ const CHANGELOG: Release[] = [
       { type: 'new', text: 'Milo\'s Room — a new tab where logging entries and staying under budget earns Sparks, spendable on furniture and outfits for Milo\'s own cozy room' },
       { type: 'new', text: 'Earn Sparks for every entry you log, plus a bonus once a cycle closes if you stayed on track' },
       { type: 'new', text: 'Decor shop and Wardrobe let you buy and equip items — wardrobe pieces visibly recolor Milo' },
+      { type: 'improved', text: 'Room furniture is now real pixel art (matching Milo\'s own sprite style) instead of flat color swatches, and every room starts furnished with free starter pieces instead of blank slots' },
     ],
   },
   {

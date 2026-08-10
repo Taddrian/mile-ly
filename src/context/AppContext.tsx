@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useMemo, ReactNode } fr
 import { CreditCard, Transaction, Category, Entry, InventoryItem } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { cycleStartForDate, cycleEndExclusive } from '@/lib/cycle';
-import { findFurniture, findWardrobe } from '@/lib/roomCatalog';
+import { findFurniture, findWardrobe, STARTER_ITEM_IDS } from '@/lib/roomCatalog';
 
 const XP_PER_LEVEL = 200;
 const DAILY_ENTRY_CAP = 10;
@@ -106,7 +106,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCycleStartDayState(day);
     setSelectedMonth(cycleStartForDate(new Date(), day));
 
-    setRoomSlots((settingsRes.data?.room_slots as Record<string, string> | null) ?? {});
+    // Every slot without a saved choice defaults to its free starter item, so
+    // the room is never blank on first load — Sparks buy swaps/upgrades on top,
+    // not the basics.
+    const savedRoomSlots = (settingsRes.data?.room_slots as Record<string, string> | null) ?? {};
+    setRoomSlots({ ...STARTER_ITEM_IDS, ...savedRoomSlots });
     setEquippedWardrobe((settingsRes.data?.equipped_wardrobe as Record<string, string> | null) ?? {});
     await settleBudgetBonus(user.id, settingsRes.data, day, loadedCategories);
 

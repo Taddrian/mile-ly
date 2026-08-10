@@ -5,6 +5,8 @@ import { useApp } from '@/context/AppContext';
 import { useCountUp } from '@/lib/useCountUp';
 import { CoinsIcon } from '@/components/decor/icons';
 import MiloFairy from '@/components/decor/MiloFairy';
+import FurnitureSprite from '@/components/decor/roomSprites';
+import AmbientScene from '@/components/decor/AmbientScene';
 import Modal from '@/components/ui/Modal';
 import {
   FURNITURE_ITEMS, WARDROBE_ITEMS, ROOM_SLOT_LABELS,
@@ -16,9 +18,9 @@ type ShopKind = 'decor' | 'wardrobe' | 'pet' | null;
 // Anchors for the 3 fixed Phase 1 slots within the room diorama (percentage-
 // based, so it scales with the card regardless of viewport width).
 const SLOT_POSITIONS: Record<RoomSlot, React.CSSProperties> = {
-  bed: { left: '14%', top: '20%' },
-  plant: { right: '10%', top: '18%' },
-  rug: { left: '50%', bottom: '14%', transform: 'translateX(-50%)' },
+  bed: { left: '12%', top: '16%' },
+  plant: { right: '8%', top: '14%' },
+  rug: { left: '50%', bottom: '10%', transform: 'translateX(-50%)' },
 };
 
 export default function RoomScreen() {
@@ -48,8 +50,10 @@ export default function RoomScreen() {
   }
 
   const catalog = openShop === 'wardrobe' ? WARDROBE_ITEMS : openShop === 'decor' ? FURNITURE_ITEMS : [];
-  const shopItems = catalog.filter((i) => !ownedIds.has(i.id));
-  const ownedItems = catalog.filter((i) => ownedIds.has(i.id));
+  // Free starter items are always available — they only ever show under "My
+  // Items" (as the fallback you can switch back to), never in "Shop".
+  const shopItems = catalog.filter((i) => i.cost > 0 && !ownedIds.has(i.id));
+  const ownedItems = catalog.filter((i) => i.cost === 0 || ownedIds.has(i.id));
 
   return (
     <div className="min-h-screen">
@@ -85,20 +89,21 @@ export default function RoomScreen() {
           background: 'linear-gradient(180deg, #fdf6ec 0%, #f3ead9 62%, #e8ddc8 100%)',
         }}
       >
+        <AmbientScene variant="card" />
+
         {(Object.keys(SLOT_POSITIONS) as RoomSlot[]).map((slot) => {
           const itemId = roomSlots[slot];
           const item = itemId ? findFurniture(itemId) : undefined;
           return (
-            <div key={slot} style={{ position: 'absolute', ...SLOT_POSITIONS[slot] }}>
+            <div key={slot} style={{ position: 'absolute', zIndex: 1, ...SLOT_POSITIONS[slot] }}>
               {item ? (
                 <button
-                  onClick={() => unequipSlot(slot)}
-                  aria-label={`${item.name} — tap to remove`}
-                  style={{
-                    width: 56, height: 56, borderRadius: 16, background: item.color,
-                    boxShadow: 'inset 0 -6px 0 rgba(0,0,0,0.15), 0 3px 8px rgba(0,0,0,0.1)',
-                  }}
-                />
+                  onClick={() => openShopSheet('decor')}
+                  aria-label={`${item.name} — tap to swap`}
+                  style={{ borderRadius: 16, filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.12))' }}
+                >
+                  <FurnitureSprite slot={slot} colors={item.colors} />
+                </button>
               ) : (
                 <button
                   onClick={() => openShopSheet('decor')}
@@ -116,7 +121,7 @@ export default function RoomScreen() {
           );
         })}
 
-        <div className="milo-roam" style={{ position: 'absolute', zIndex: 0 }}>
+        <div className="milo-roam" style={{ position: 'absolute', zIndex: 2 }}>
           <div className="milo-idle-bob">
             <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} />
           </div>
@@ -176,10 +181,15 @@ export default function RoomScreen() {
             const equipped = isWardrobe
               ? equippedWardrobe.outfit === item.id
               : roomSlots[item.slot] === item.id;
-            const swatchColor = isWardrobe ? (item.colorOverrides.S ?? item.colorOverrides.W ?? '#e0568c') : item.color;
             return (
               <div key={item.id} className="card-chunky" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: swatchColor, flexShrink: 0 }} />
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: 'color-mix(in srgb, var(--m-border) 30%, white)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  {isWardrobe ? (
+                    <div style={{ transform: 'scale(0.55)' }}><MiloFairy colorOverrides={item.colorOverrides} /></div>
+                  ) : (
+                    <div style={{ transform: 'scale(0.68)' }}><FurnitureSprite slot={item.slot} colors={item.colors} size={40} /></div>
+                  )}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p className="font-display" style={{ fontSize: 13, fontWeight: 700, color: 'var(--m-ink)' }}>{item.name}</p>
                   {shopMode === 'shop' ? (
@@ -188,7 +198,7 @@ export default function RoomScreen() {
                     </p>
                   ) : (
                     <p style={{ fontSize: 11, color: 'var(--m-slate)', marginTop: 2 }}>
-                      {isWardrobe ? 'Outfit' : ROOM_SLOT_LABELS[item.slot]}
+                      {isWardrobe ? 'Outfit' : ROOM_SLOT_LABELS[item.slot]}{item.cost === 0 ? ' · Free' : ''}
                     </p>
                   )}
                 </div>
@@ -207,7 +217,8 @@ export default function RoomScreen() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => (equipped ? unequipSlot(isWardrobe ? 'outfit' : item.slot) : equipItem(item.id))}
+                    onClick={() => (equipped ? isWardrobe && unequipSlot('outfit') : equipItem(item.id))}
+                    disabled={equipped && !isWardrobe}
                     className="font-display"
                     style={{
                       padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700,
@@ -216,7 +227,7 @@ export default function RoomScreen() {
                       border: `2px solid ${equipped ? 'var(--node-ring)' : 'var(--m-border)'}`,
                     }}
                   >
-                    {equipped ? '✓ Equipped' : 'Equip'}
+                    {equipped ? '✓ Equipped' : isWardrobe ? 'Equip' : 'Place'}
                   </button>
                 )}
               </div>

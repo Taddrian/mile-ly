@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { buildPixelBoxShadow } from '@/lib/pixelSprite';
 
 // Pixel-sprite fairy Milo, ported verbatim from the Claude Design handoff's
 // SPRITE/SPRITE_COLORS table (box-shadow pixel grid, mirrored L/R halves per row).
@@ -44,17 +45,6 @@ const rows = SPRITE.length;
 const spriteW = cols * PIXEL;
 const spriteH = rows * PIXEL;
 
-function buildBoxShadow(colors: Record<string, string>): string {
-  const shadows: string[] = [];
-  SPRITE.forEach((row, y) => {
-    for (let x = 0; x < row.length; x++) {
-      const c = row[x];
-      if (c !== '.') shadows.push(`${x * PIXEL}px ${y * PIXEL}px 0 ${colors[c]}`);
-    }
-  });
-  return shadows.join(', ');
-}
-
 interface MiloFairyProps {
   // Wardrobe recolor — merged onto the base SPRITE_COLORS letter->hex map. Omit
   // for the default look (every existing call site does this — output is then
@@ -64,7 +54,7 @@ interface MiloFairyProps {
 
 export default function MiloFairy({ colorOverrides }: MiloFairyProps) {
   const boxShadow = useMemo(
-    () => buildBoxShadow(colorOverrides ? { ...SPRITE_COLORS, ...colorOverrides } : SPRITE_COLORS),
+    () => buildPixelBoxShadow(SPRITE, colorOverrides ? { ...SPRITE_COLORS, ...colorOverrides } : SPRITE_COLORS, PIXEL),
     [colorOverrides]
   );
 

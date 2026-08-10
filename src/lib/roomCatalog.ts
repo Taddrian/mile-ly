@@ -9,7 +9,8 @@ export interface FurnitureItem {
   slot: RoomSlot;
   name: string;
   cost: number;
-  color: string;
+  // Full letter->hex color set for this item's shape (src/components/decor/roomSprites.tsx).
+  colors: Record<string, string>;
 }
 
 export interface WardrobeItem {
@@ -21,13 +22,26 @@ export interface WardrobeItem {
   colorOverrides: Record<string, string>;
 }
 
+// Free — every room starts furnished with these so it's never blank; Sparks buy
+// upgrades/swaps on top, not the basics.
+export const STARTER_ITEM_IDS: Record<RoomSlot, string> = {
+  bed: 'bed_starter',
+  rug: 'rug_starter',
+  plant: 'plant_starter',
+};
+
 export const FURNITURE_ITEMS: FurnitureItem[] = [
-  { id: 'bed_cozy_teal',   slot: 'bed',   name: 'Cozy Teal Bed',  cost: 40, color: '#0d9488' },
-  { id: 'bed_cloud_white', slot: 'bed',   name: 'Cloud Bed',      cost: 90, color: '#f5f7fb' },
-  { id: 'rug_stripe',      slot: 'rug',   name: 'Striped Rug',    cost: 30, color: '#f2a6cf' },
-  { id: 'rug_round_gold',  slot: 'rug',   name: 'Round Gold Rug', cost: 70, color: '#f0b429' },
-  { id: 'plant_fern',      slot: 'plant', name: 'Little Fern',    cost: 25, color: '#5c9a5c' },
-  { id: 'plant_cactus',    slot: 'plant', name: 'Potted Cactus',  cost: 60, color: '#7db87d' },
+  { id: 'bed_starter',     slot: 'bed',   name: 'Simple Bed',     cost: 0,  colors: { W: '#8b5e3c', P: '#ffffff', B: '#d98c54', F: '#4a3324' } },
+  { id: 'bed_cozy_teal',   slot: 'bed',   name: 'Cozy Teal Bed',  cost: 40, colors: { W: '#7a5c42', P: '#f5f0e6', B: '#0d9488', F: '#4a3324' } },
+  { id: 'bed_cloud_white', slot: 'bed',   name: 'Cloud Bed',      cost: 90, colors: { W: '#d7cbb5', P: '#ffffff', B: '#f5f7fb', F: '#a99b7a' } },
+
+  { id: 'rug_starter',     slot: 'rug',   name: 'Plain Rug',      cost: 0,  colors: { R: '#8a9bb0', r: '#c3d1e0' } },
+  { id: 'rug_stripe',      slot: 'rug',   name: 'Striped Rug',    cost: 30, colors: { R: '#e0568c', r: '#f2a6cf' } },
+  { id: 'rug_round_gold',  slot: 'rug',   name: 'Round Gold Rug', cost: 70, colors: { R: '#c99318', r: '#f0b429' } },
+
+  { id: 'plant_starter',   slot: 'plant', name: 'Small Plant',    cost: 0,  colors: { g: '#8fbfa0', P: '#a99b7a' } },
+  { id: 'plant_fern',      slot: 'plant', name: 'Little Fern',    cost: 25, colors: { g: '#5c9a5c', P: '#c98a5a' } },
+  { id: 'plant_cactus',    slot: 'plant', name: 'Potted Cactus',  cost: 60, colors: { g: '#7db87d', P: '#b06a4a' } },
 ];
 
 export const WARDROBE_ITEMS: WardrobeItem[] = [
