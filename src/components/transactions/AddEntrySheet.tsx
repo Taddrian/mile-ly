@@ -177,7 +177,7 @@ export default function AddEntrySheet({ isOpen, onClose, editEntry }: AddEntrySh
 
       {/* Sheet */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto pb-safe sheet-pop-in"
+        className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto pb-safe sheet-pop-in max-h-[90vh] overflow-y-auto overscroll-contain"
         style={{
           background: 'var(--card)',
           borderRadius: '24px 24px 0 0',
