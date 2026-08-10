@@ -537,24 +537,70 @@ body {
   filter: blur(2px);
 }
 
-/* Milo walking (Room scene only) — a faster 2-beat bob + a ground shadow that
-   shrinks/fades in sync (lifted foot), instead of the slow single idle-bob
-   used everywhere else. Combined with .milo-roam's lateral drift, this reads
-   as him stepping across the floor rather than floating/gliding. */
+/* Milo walking (Room scene) — ported from the Claude Design handoff's
+   MILO_ANIMATION.md timing table (durations/eases/offsets copied exactly;
+   only the sprite art itself — the shipped box-shadow pixel grid, split
+   into body/feet/wing layers in MiloFairy.tsx — is ours, not the file's SVG
+   stand-in). Five motions run concurrently: wander (outer), walk bob + foot
+   taps + ground shadow (all synced to one 0.7s beat), and wing flap (its
+   own independent 1.6s loop, unrelated to walking). */
+
+/* 1. Wander — pause at rug (home) → glide to bed-side → pause → glide back
+   through rug → glide to plant-side → pause → glide back → long pause. */
+@keyframes room-milo-wander {
+  0%, 8%    { transform: translate(0, 0); }
+  20%, 30%  { transform: translate(-51px, 5px); }
+  42%       { transform: translate(0, 0); }
+  50%, 62%  { transform: translate(54px, -5px); }
+  74%, 100% { transform: translate(0, 0); }
+}
+.room-milo-wander {
+  animation: room-milo-wander 14s ease-in-out infinite;
+}
+
+/* 2. Walk bob — vertical, 2-beat, linear (deliberately choppier than a lazy
+   idle float so it reads as footsteps). */
 @keyframes room-milo-walk-bob {
   0%, 50%, 100% { transform: translateY(0); }
-  25%, 75%      { transform: translateY(-3px); }
+  25%, 75%      { transform: translateY(-2.5px); }
 }
 .room-milo-walk-bob {
-  animation: room-milo-walk-bob 0.7s ease-in-out infinite;
+  animation: room-milo-walk-bob 0.7s linear infinite;
 }
+
+/* 3. Foot taps — each foot nudges down-forward once per 0.7s beat; the two
+   feet are 0.35s (half a cycle) out of phase, so they alternate. */
+@keyframes room-milo-foot-tap {
+  0%, 50%, 100% { transform: translate(0, 0); }
+  25%           { transform: translate(-1px, 1px); }
+}
+.room-milo-foot-tap {
+  animation: room-milo-foot-tap 0.7s linear infinite;
+}
+.room-milo-foot-still {
+  animation: none;
+}
+
+/* 4. Ground shadow — same 0.7s beat as the bob, shrinks/fades as he lifts. */
 @keyframes room-milo-walk-shadow {
-  0%, 50%, 100% { transform: translateX(-50%) scale(1);    opacity: 0.32; }
-  25%, 75%      { transform: translateX(-50%) scale(0.72); opacity: 0.16; }
+  0%, 50%, 100% { transform: translateX(-50%) scale(1);    opacity: 0.28; }
+  25%, 75%      { transform: translateX(-50%) scale(0.78); opacity: 0.16; }
 }
 .room-milo-walk-shadow {
-  animation: room-milo-walk-shadow 0.7s ease-in-out infinite;
+  animation: room-milo-walk-shadow 0.7s linear infinite;
 }
+
+/* 5. Wing flap — independent of the walk cycle entirely, always running;
+   each wing scales from its own bounding-box center (see
+   buildPixelBoxShadowLayer in pixelSprite.ts), second wing 0.1s out of phase. */
+@keyframes room-milo-wing-flap {
+  0%, 100% { transform: scaleX(1); }
+  50%      { transform: scaleX(0.8); }
+}
+.room-milo-wing-flap {
+  animation: room-milo-wing-flap 1.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .room-milo-walk-bob, .room-milo-walk-shadow { animation: none; }
+  .room-milo-wander, .room-milo-walk-bob, .room-milo-foot-tap, .room-milo-walk-shadow, .room-milo-wing-flap { animation: none; }
 }
