@@ -11,7 +11,7 @@ import EditCardForm from '@/components/cards/EditCardForm';
 import CardRow from '@/components/cards/CardRow';
 import Modal from '@/components/ui/Modal';
 import MiloFairy from '@/components/decor/MiloFairy';
-import FurnitureSprite, { RoomSymbolDefs, FURNITURE_PLACEMENT, SCENE_VIEWBOX, furnitureVars } from '@/components/decor/roomSprites';
+import FurnitureSprite, { RoomSymbolDefs, FURNITURE_PLACEMENT, SCENE_VIEWBOX, SCENE_WIDTH, SCENE_HEIGHT, furnitureVars } from '@/components/decor/roomSprites';
 import {
   FURNITURE_ITEMS, WARDROBE_ITEMS, ROOM_SLOT_LABELS,
   RoomSlot, findFurniture, findWardrobe,
@@ -46,6 +46,15 @@ const EditGlyph = ({ color = '#ffffff' }: { color?: string }) => (
 
 // Glossy-orb accent palette, cycled per category node (see globals.css .orb).
 const ORB_COLORS = ['#5fd6c4', '#f28cc4', '#f4c86e', '#9d8cf0', '#7c8ce0', '#ef8a7a'];
+
+// Milo's wander "home" — standing on the rug, not the scene's (0,0) corner.
+// .room-milo-wander only ever *translates* from wherever it's positioned, so
+// without an explicit anchor here he'd default to the container's top-left
+// and never actually reach the floor.
+const MILO_HOME_PCT = {
+  left: ((FURNITURE_PLACEMENT.rug.x + FURNITURE_PLACEMENT.rug.width / 2 - 40) / SCENE_WIDTH) * 100,
+  top: ((FURNITURE_PLACEMENT.rug.y + 6) / SCENE_HEIGHT) * 100,
+};
 
 export default function RoomScreen() {
   const {
@@ -220,7 +229,7 @@ export default function RoomScreen() {
             handoff's MILO_ANIMATION.md: wander (this wrapper) → walk bob +
             ground shadow (synced) → feet tapping + wings flapping (inside
             MiloFairy itself, walking-only feet vs. always-on wings). */}
-        <div className="room-milo-wander" style={{ position: 'absolute', zIndex: 2 }}>
+        <div className="room-milo-wander" style={{ position: 'absolute', zIndex: 2, left: `${MILO_HOME_PCT.left}%`, top: `${MILO_HOME_PCT.top}%` }}>
           <div style={{ position: 'relative' }}>
             <div className="room-milo-walk-bob">
               <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} walking />
