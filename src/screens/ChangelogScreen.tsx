@@ -22,6 +22,7 @@ const CHANGELOG: Release[] = [
       { type: 'new', text: 'Earn Sparks for every entry you log, plus a bonus once a cycle closes if you stayed on track' },
       { type: 'new', text: 'Decor shop and Wardrobe let you buy and equip items — wardrobe pieces visibly recolor Milo' },
       { type: 'improved', text: 'Room furniture is now real pixel art (matching Milo\'s own sprite style) instead of flat color swatches, and every room starts furnished with free starter pieces instead of blank slots' },
+      { type: 'improved', text: 'Room now has a real wall/floor split with a window and picture frame, and stays a proper room shape instead of stretching thin on wider screens' },
     ],
   },
   {

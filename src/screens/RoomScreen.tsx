@@ -5,7 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { useCountUp } from '@/lib/useCountUp';
 import { CoinsIcon } from '@/components/decor/icons';
 import MiloFairy from '@/components/decor/MiloFairy';
-import FurnitureSprite from '@/components/decor/roomSprites';
+import FurnitureSprite, { StaticSprite, WINDOW_SPRITE, WINDOW_COLORS, FRAME_SPRITE, FRAME_COLORS } from '@/components/decor/roomSprites';
 import AmbientScene from '@/components/decor/AmbientScene';
 import Modal from '@/components/ui/Modal';
 import {
@@ -15,12 +15,14 @@ import {
 
 type ShopKind = 'decor' | 'wardrobe' | 'pet' | null;
 
-// Anchors for the 3 fixed Phase 1 slots within the room diorama (percentage-
-// based, so it scales with the card regardless of viewport width).
+// Anchors for the 3 fixed Phase 1 slots, percentage-based against the whole
+// diorama so they scale with it. Floor starts at WALL_HEIGHT_PCT — furniture
+// sits just below that line, not scattered across the wall.
+const WALL_HEIGHT_PCT = 56;
 const SLOT_POSITIONS: Record<RoomSlot, React.CSSProperties> = {
-  bed: { left: '12%', top: '16%' },
-  plant: { right: '8%', top: '14%' },
-  rug: { left: '50%', bottom: '10%', transform: 'translateX(-50%)' },
+  bed: { left: '6%', top: '60%' },
+  plant: { right: '6%', top: '58%' },
+  rug: { left: '50%', bottom: '6%', transform: 'translateX(-50%)' },
 };
 
 export default function RoomScreen() {
@@ -80,50 +82,69 @@ export default function RoomScreen() {
         </div>
       </div>
 
-      {/* Room diorama */}
-      <div
-        className="mx-4"
-        style={{
-          position: 'relative', height: 260, borderRadius: 22, overflow: 'hidden',
-          border: '2px solid #e8e0cf', boxShadow: '0 3px 0 #ddd2ba',
-          background: 'linear-gradient(180deg, #fdf6ec 0%, #f3ead9 62%, #e8ddc8 100%)',
-        }}
-      >
-        <AmbientScene variant="card" />
+      {/* Room diorama — capped width + aspect-ratio (not a fixed height) so it
+          reads as a room box on any viewport instead of stretching into a
+          shallow strip on wide screens. Wall/floor are two distinct regions
+          with a trim line between them, plus fixed wall dressing (window,
+          picture frame) so it has depth instead of one flat gradient. */}
+      <div className="px-4">
+        <div
+          style={{
+            position: 'relative', maxWidth: 420, margin: '0 auto', aspectRatio: '4 / 4.6',
+            borderRadius: 22, overflow: 'hidden', border: '2px solid #e8e0cf', boxShadow: '0 3px 0 #ddd2ba',
+          }}
+        >
+          {/* Wall */}
+          <div style={{ position: 'absolute', inset: 0, height: `${WALL_HEIGHT_PCT}%`, background: 'linear-gradient(180deg, #f2f0e2 0%, #e9e6d4 100%)' }} />
+          {/* Floor */}
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, top: `${WALL_HEIGHT_PCT}%`, background: 'linear-gradient(180deg, #f3ead9 0%, #e8ddc8 100%)' }} />
+          {/* Baseboard trim */}
+          <div style={{ position: 'absolute', left: 0, right: 0, top: `${WALL_HEIGHT_PCT}%`, height: 3, background: '#d4c7a8' }} />
 
-        {(Object.keys(SLOT_POSITIONS) as RoomSlot[]).map((slot) => {
-          const itemId = roomSlots[slot];
-          const item = itemId ? findFurniture(itemId) : undefined;
-          return (
-            <div key={slot} style={{ position: 'absolute', zIndex: 1, ...SLOT_POSITIONS[slot] }}>
-              {item ? (
-                <button
-                  onClick={() => openShopSheet('decor')}
-                  aria-label={`${item.name} — tap to swap`}
-                  style={{ borderRadius: 16, filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.12))' }}
-                >
-                  <FurnitureSprite slot={slot} colors={item.colors} />
-                </button>
-              ) : (
-                <button
-                  onClick={() => openShopSheet('decor')}
-                  aria-label={`Add ${ROOM_SLOT_LABELS[slot]}`}
-                  style={{
-                    width: 56, height: 56, borderRadius: 16, border: '2px dashed #c9bda0',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#a99b7a', fontSize: 20, fontWeight: 700,
-                  }}
-                >
-                  +
-                </button>
-              )}
+          <AmbientScene variant="card" />
+
+          {/* Fixed wall dressing */}
+          <div style={{ position: 'absolute', top: '9%', right: '10%', zIndex: 1 }}>
+            <StaticSprite sprite={WINDOW_SPRITE} colors={WINDOW_COLORS} pixel={3.4} />
+          </div>
+          <div style={{ position: 'absolute', top: '13%', left: '11%', zIndex: 1 }}>
+            <StaticSprite sprite={FRAME_SPRITE} colors={FRAME_COLORS} pixel={3} />
+          </div>
+
+          {(Object.keys(SLOT_POSITIONS) as RoomSlot[]).map((slot) => {
+            const itemId = roomSlots[slot];
+            const item = itemId ? findFurniture(itemId) : undefined;
+            return (
+              <div key={slot} style={{ position: 'absolute', zIndex: 1, ...SLOT_POSITIONS[slot] }}>
+                {item ? (
+                  <button
+                    onClick={() => openShopSheet('decor')}
+                    aria-label={`${item.name} — tap to swap`}
+                    style={{ borderRadius: 16, filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.12))' }}
+                  >
+                    <FurnitureSprite slot={slot} colors={item.colors} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => openShopSheet('decor')}
+                    aria-label={`Add ${ROOM_SLOT_LABELS[slot]}`}
+                    style={{
+                      width: 56, height: 56, borderRadius: 16, border: '2px dashed #c9bda0',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#a99b7a', fontSize: 20, fontWeight: 700,
+                    }}
+                  >
+                    +
+                  </button>
+                )}
+              </div>
+            );
+          })}
+
+          <div className="milo-roam" style={{ position: 'absolute', zIndex: 2 }}>
+            <div className="milo-idle-bob">
+              <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} />
             </div>
-          );
-        })}
-
-        <div className="milo-roam" style={{ position: 'absolute', zIndex: 2 }}>
-          <div className="milo-idle-bob">
-            <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} />
           </div>
         </div>
       </div>
