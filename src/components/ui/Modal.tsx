@@ -46,7 +46,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
             ×
           </button>
         </div>
-        <div className="px-5 py-5">{children}</div>
+        <div className="px-5 pt-5 pb-24">{children}</div>
       </div>
     </div>
   );
