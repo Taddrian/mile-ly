@@ -5,13 +5,14 @@ import { useRef, useState } from 'react';
 interface SwipeableRowProps {
   children: React.ReactNode;
   onDelete: () => void;
+  onTap?: () => void;
   className?: string;
   style?: React.CSSProperties;
 }
 
 const REVEAL = 76;
 
-export default function SwipeableRow({ children, onDelete, className, style }: SwipeableRowProps) {
+export default function SwipeableRow({ children, onDelete, onTap, className, style }: SwipeableRowProps) {
   const [offset, setOffset] = useState(0);
   const startX = useRef(0);
   const startY = useRef(0);
@@ -69,7 +70,7 @@ export default function SwipeableRow({ children, onDelete, className, style }: S
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        onClick={() => { if (offset !== 0) setOffset(0); }}
+        onClick={() => { if (offset !== 0) setOffset(0); else onTap?.(); }}
       >
         {children}
       </div>

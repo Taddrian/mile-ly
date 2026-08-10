@@ -25,6 +25,7 @@ interface AppContextValue {
   addCategory: (name: string, type: 'income' | 'expense') => Promise<Category | undefined>;
   deleteCategory: (id: string) => Promise<void>;
   addEntry: (data: Omit<Entry, 'id' | 'userId'>) => Promise<void>;
+  updateEntry: (id: string, data: Omit<Entry, 'id' | 'userId'>) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
   updateCardSpent: (cardId: string, newTotal: number, date?: string) => Promise<void>;
 }
@@ -185,6 +186,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (row) setEntries((prev) => [dbToEntry(row), ...prev]);
   }
 
+  async function updateEntry(id: string, data: Omit<Entry, 'id' | 'userId'>) {
+    const { data: row } = await supabase.from('entries').update({
+      month: data.month,
+      date: data.date,
+      amount: data.amount,
+      category_id: data.categoryId ?? null,
+      card_id: data.cardId ?? null,
+      note: data.note,
+    }).eq('id', id).select().single();
+    if (row) setEntries((prev) => prev.map((e) => (e.id === id ? dbToEntry(row) : e)));
+  }
+
   async function deleteEntry(id: string) {
     await supabase.from('entries').delete().eq('id', id);
     setEntries((prev) => prev.filter((e) => e.id !== id));
@@ -248,7 +261,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       cards: cardsWithSpent, transactions, categories, entries, selectedMonth, setSelectedMonth,
       budgetState, currency, setCurrency, cycleStartDay, setCycleStartDay,
       addCard, updateCard, deleteCard, addTransaction, deleteTransaction,
-      addCategory, deleteCategory, addEntry, deleteEntry, updateCardSpent,
+      addCategory, deleteCategory, addEntry, updateEntry, deleteEntry, updateCardSpent,
     }}>
       {children}
     </AppContext.Provider>

@@ -8,6 +8,8 @@ import SwipeableRow from '@/components/transactions/SwipeableRow';
 import Sparkle from '@/components/decor/Sparkle';
 import MiloMascot from '@/components/decor/MiloMascot';
 import { hueVars } from '@/lib/hue';
+import AddEntrySheet from '@/components/transactions/AddEntrySheet';
+import { Entry } from '@/types';
 
 function fmtDate(iso?: string) {
   if (!iso) return '';
@@ -17,6 +19,7 @@ function fmtDate(iso?: string) {
 export default function TransactionsScreen() {
   const { entries, categories, cards, deleteEntry, currency, budgetState } = useApp();
   const [search, setSearch] = useState('');
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
 
   const totalIncome = useMemo(() =>
     entries.filter((e) => categories.find((c) => c.id === e.categoryId)?.type === 'income')
@@ -153,12 +156,13 @@ export default function TransactionsScreen() {
                 <SwipeableRow
                   key={entry.id}
                   onDelete={() => deleteEntry(entry.id)}
+                  onTap={() => setEditingEntry(entry)}
                   className="list-item-in"
                   style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
                 >
                   <div
                     className="card-chunky flex items-center gap-3 p-4"
-                    style={{ cursor: 'default' }}
+                    style={{ cursor: 'pointer' }}
                   >
                     <CategoryChip name={cat?.name ?? '?'} size={40} />
 
@@ -222,6 +226,12 @@ export default function TransactionsScreen() {
           </div>
         )}
       </div>
+
+      <AddEntrySheet
+        isOpen={!!editingEntry}
+        onClose={() => setEditingEntry(null)}
+        editEntry={editingEntry ?? undefined}
+      />
     </div>
   );
 }

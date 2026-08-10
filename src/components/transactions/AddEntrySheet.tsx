@@ -4,16 +4,19 @@ import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { currencySymbol } from '@/lib/currency';
 import { defaultDateForCycle } from '@/lib/cycle';
+import { Entry } from '@/types';
 
 interface AddEntrySheetProps {
   isOpen: boolean;
   onClose: () => void;
+  editEntry?: Entry;
 }
 
 type EntryType = 'income' | 'expense' | 'card';
 
-export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
-  const { categories, cards, addEntry, addCategory, deleteCategory, deleteCard, updateCardSpent, selectedMonth, cycleStartDay, currency } = useApp();
+export default function AddEntrySheet({ isOpen, onClose, editEntry }: AddEntrySheetProps) {
+  const { categories, cards, addEntry, updateEntry, addCategory, deleteCategory, deleteCard, updateCardSpent, selectedMonth, cycleStartDay, currency } = useApp();
+  const isEditing = !!editEntry;
 
   const [type, setType] = useState<EntryType>('expense');
   const [amountStr, setAmountStr] = useState('');
@@ -32,21 +35,31 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
   const filtered = categories.filter((c) => c.type === type);
   const selectedCard = cards.find((c) => c.id === cardId);
 
-  useEffect(() => { setCategoryId(''); }, [type]);
-
   useEffect(() => {
-    if (isOpen) {
-      setAmountStr('');
-      setCategoryId('');
-      setCardId('');
+    if (!isOpen) return;
+    if (editEntry) {
+      const cat = categories.find((c) => c.id === editEntry.categoryId);
+      setType(cat?.type ?? 'expense');
+      setAmountStr(String(editEntry.amount));
+      setCategoryId(editEntry.categoryId ?? '');
+      setCardId(editEntry.cardId ?? '');
       setSpentStr('');
-      setDate(defaultDateForCycle(selectedMonth, cycleStartDay));
-      setRemark('');
-      setType('expense');
+      setDate(editEntry.date);
+      setRemark(editEntry.note ?? '');
       setAddingCat(false);
       setNewCatName('');
+      return;
     }
-  }, [isOpen, selectedMonth, cycleStartDay]);
+    setAmountStr('');
+    setCategoryId('');
+    setCardId('');
+    setSpentStr('');
+    setDate(defaultDateForCycle(selectedMonth, cycleStartDay));
+    setRemark('');
+    setType('expense');
+    setAddingCat(false);
+    setNewCatName('');
+  }, [isOpen, editEntry, selectedMonth, cycleStartDay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When picking a card in "card update" mode, prefill with its current total
   useEffect(() => {
@@ -75,7 +88,12 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
     setSaving(true);
     try {
       const month = date.slice(0, 7) + '-01';
-      await addEntry({ month, date, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined });
+      const payload = { month, date, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined };
+      if (editEntry) {
+        await updateEntry(editEntry.id, payload);
+      } else {
+        await addEntry(payload);
+      }
       setJustSaved(true);
       if (andAnother) {
         setAmountStr('');
@@ -157,7 +175,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
             </svg>
           </button>
           <p style={{ fontSize: 15, fontWeight: 800, color: 'var(--m-ink)', letterSpacing: '-0.01em' }}>
-            {isCardUpdate ? 'Update Card' : 'New Entry'}
+            {isCardUpdate ? 'Update Card' : isEditing ? 'Edit Entry' : 'New Entry'}
           </p>
           <div style={{ width: 34 }} />
         </div>
@@ -194,7 +212,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
 
           {/* Type toggle */}
           <div style={{ display: 'flex', gap: 8 }}>
-            {(cards.length > 0 ? ['income', 'card', 'expense'] : ['income', 'expense']).map((t) => {
+            {(isEditing ? ['income', 'expense'] : cards.length > 0 ? ['income', 'card', 'expense'] : ['income', 'expense']).map((t) => {
               const et = t as EntryType;
               const active = type === et;
               const color = et === 'income' ? '#0D9488' : et === 'card' ? '#2563EB' : '#FF6B5E';
@@ -203,7 +221,7 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
               return (
                 <button
                   key={et}
-                  onClick={() => setType(et)}
+                  onClick={() => { setType(et); setCategoryId(''); }}
                   style={{
                     flex: 1,
                     padding: '12px 0',
@@ -429,11 +447,11 @@ export default function AddEntrySheet({ isOpen, onClose }: AddEntrySheetProps) {
                 </svg>
                 Saved!
               </>
-            ) : saving ? 'Saving…' : isCardUpdate ? 'Update Card' : 'Save Entry'}
+            ) : saving ? 'Saving…' : isCardUpdate ? 'Update Card' : isEditing ? 'Save Changes' : 'Save Entry'}
           </button>
 
-          {/* Secondary: save and add another (not shown in card-update mode) */}
-          {!isCardUpdate && (
+          {/* Secondary: save and add another (not shown in card-update or edit mode) */}
+          {!isCardUpdate && !isEditing && (
             <button
               onClick={() => save(true)}
               disabled={saving || justSaved || !canSave}
