@@ -25,6 +25,7 @@ interface AppContextValue {
   addCategory: (name: string, type: 'income' | 'expense') => Promise<Category | undefined>;
   deleteCategory: (id: string) => Promise<void>;
   addEntry: (data: Omit<Entry, 'id' | 'userId'>) => Promise<void>;
+  addEntries: (dataList: Omit<Entry, 'id' | 'userId'>[]) => Promise<void>;
   updateEntry: (id: string, data: Omit<Entry, 'id' | 'userId'>) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
   updateCardSpent: (cardId: string, newTotal: number, date?: string) => Promise<void>;
@@ -186,6 +187,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (row) setEntries((prev) => [dbToEntry(row), ...prev]);
   }
 
+  // Bulk variant of addEntry — used for pre-creating a recurring entry's future
+  // occurrences in one round-trip instead of N sequential inserts.
+  async function addEntries(dataList: Omit<Entry, 'id' | 'userId'>[]) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || dataList.length === 0) return;
+    const { data: rows } = await supabase.from('entries').insert(
+      dataList.map((data) => ({
+        user_id: user.id,
+        month: data.month,
+        date: data.date,
+        amount: data.amount,
+        category_id: data.categoryId ?? null,
+        card_id: data.cardId ?? null,
+        note: data.note,
+      }))
+    ).select();
+    if (rows) setEntries((prev) => [...rows.map(dbToEntry), ...prev]);
+  }
+
   async function updateEntry(id: string, data: Omit<Entry, 'id' | 'userId'>) {
     const { data: row } = await supabase.from('entries').update({
       month: data.month,
@@ -261,7 +281,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       cards: cardsWithSpent, transactions, categories, entries, selectedMonth, setSelectedMonth,
       budgetState, currency, setCurrency, cycleStartDay, setCycleStartDay,
       addCard, updateCard, deleteCard, addTransaction, deleteTransaction,
-      addCategory, deleteCategory, addEntry, updateEntry, deleteEntry, updateCardSpent,
+      addCategory, deleteCategory, addEntry, addEntries, updateEntry, deleteEntry, updateCardSpent,
     }}>
       {children}
     </AppContext.Provider>

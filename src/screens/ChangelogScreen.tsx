@@ -18,6 +18,7 @@ const CHANGELOG: Release[] = [
     version: 'v0.11.0',
     date: 'Aug 2026',
     changes: [
+      { type: 'new', text: 'Recurring entries — repeat any new entry weekly, monthly, or yearly, and it pre-creates all the future dated entries in one go' },
       { type: 'new', text: 'Tap any transaction to edit its amount, category, card, date, or note — previously the only option was delete' },
       { type: 'new', text: 'Cards can now be deleted right from the "+" entry sheet\'s card picker, same as categories already could' },
       { type: 'fix', text: 'Fixed amounts silently rounding to whole dollars in a few places (Home stat strip, card list) — cents now show correctly everywhere' },

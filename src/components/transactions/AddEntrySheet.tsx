@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { currencySymbol } from '@/lib/currency';
-import { defaultDateForCycle } from '@/lib/cycle';
+import { defaultDateForCycle, addCycle } from '@/lib/cycle';
 import { Entry } from '@/types';
 
 interface AddEntrySheetProps {
@@ -13,9 +13,30 @@ interface AddEntrySheetProps {
 }
 
 type EntryType = 'income' | 'expense' | 'card';
+type RepeatFreq = 'weekly' | 'monthly' | 'yearly';
+
+// Steps an ISO date forward by `n` occurrences of `freq`. Monthly/yearly reuse
+// addCycle's calendar-month math (same day-of-month rollover behavior already
+// used for billing cycles elsewhere in the app); weekly is a flat 7-day step.
+function stepDate(iso: string, freq: RepeatFreq, n: number): string {
+  if (freq === 'weekly') {
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(y, m - 1, d + n * 7);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  }
+  if (freq === 'monthly') return addCycle(iso, n);
+  return addCycle(iso, n * 12);
+}
+
+const REPEAT_COUNT_MIN = 2;
+const REPEAT_COUNT_MAX = 60;
+
+function fmtShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 export default function AddEntrySheet({ isOpen, onClose, editEntry }: AddEntrySheetProps) {
-  const { categories, cards, addEntry, updateEntry, addCategory, deleteCategory, deleteCard, updateCardSpent, selectedMonth, cycleStartDay, currency } = useApp();
+  const { categories, cards, addEntry, addEntries, updateEntry, addCategory, deleteCategory, deleteCard, updateCardSpent, selectedMonth, cycleStartDay, currency } = useApp();
   const isEditing = !!editEntry;
 
   const [type, setType] = useState<EntryType>('expense');
@@ -31,6 +52,9 @@ export default function AddEntrySheet({ isOpen, onClose, editEntry }: AddEntrySh
   const [justSaved, setJustSaved] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [pendingDeleteCardId, setPendingDeleteCardId] = useState<string | null>(null);
+  const [repeat, setRepeat] = useState(false);
+  const [repeatFreq, setRepeatFreq] = useState<RepeatFreq>('monthly');
+  const [repeatCount, setRepeatCount] = useState(12);
 
   const filtered = categories.filter((c) => c.type === type);
   const selectedCard = cards.find((c) => c.id === cardId);
@@ -48,6 +72,7 @@ export default function AddEntrySheet({ isOpen, onClose, editEntry }: AddEntrySh
       setRemark(editEntry.note ?? '');
       setAddingCat(false);
       setNewCatName('');
+      setRepeat(false);
       return;
     }
     setAmountStr('');
@@ -59,6 +84,9 @@ export default function AddEntrySheet({ isOpen, onClose, editEntry }: AddEntrySh
     setType('expense');
     setAddingCat(false);
     setNewCatName('');
+    setRepeat(false);
+    setRepeatFreq('monthly');
+    setRepeatCount(12);
   }, [isOpen, editEntry, selectedMonth, cycleStartDay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When picking a card in "card update" mode, prefill with its current total
@@ -87,12 +115,14 @@ export default function AddEntrySheet({ isOpen, onClose, editEntry }: AddEntrySh
     if (!amount || amount <= 0 || (!categoryId && !cardId)) return;
     setSaving(true);
     try {
-      const month = date.slice(0, 7) + '-01';
-      const payload = { month, date, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined };
+      const makePayload = (d: string) => ({ month: d.slice(0, 7) + '-01', date: d, amount, categoryId: categoryId || undefined, cardId: cardId || undefined, note: remark || undefined });
       if (editEntry) {
-        await updateEntry(editEntry.id, payload);
+        await updateEntry(editEntry.id, makePayload(date));
+      } else if (repeat) {
+        const dates = Array.from({ length: repeatCount }, (_, i) => stepDate(date, repeatFreq, i));
+        await addEntries(dates.map(makePayload));
       } else {
-        await addEntry(payload);
+        await addEntry(makePayload(date));
       }
       setJustSaved(true);
       if (andAnother) {
@@ -412,6 +442,101 @@ export default function AddEntrySheet({ isOpen, onClose, editEntry }: AddEntrySh
                 placeholder="Optional"
                 style={inputStyle}
               />
+            </div>
+          )}
+
+          {/* Repeat (new entries only — not while editing or updating a card balance) */}
+          {!isCardUpdate && !isEditing && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--m-ink)' }}>Repeat this entry</p>
+                  <p style={{ fontSize: 11, color: 'var(--m-slate)', marginTop: 1 }}>Creates the future entries now</p>
+                </div>
+                <button
+                  role="switch"
+                  aria-checked={repeat}
+                  onClick={() => setRepeat((r) => !r)}
+                  style={{
+                    position: 'relative',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    height: 28,
+                    width: 48,
+                    borderRadius: 999,
+                    background: repeat ? accentColor : 'var(--m-border, #E5E5E5)',
+                    transition: 'background 0.2s ease',
+                    flexShrink: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'block',
+                      height: 20,
+                      width: 20,
+                      borderRadius: '50%',
+                      background: '#fff',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+                      transform: `translateX(${repeat ? 24 : 4}px)`,
+                      transition: 'transform 0.2s ease',
+                    }}
+                  />
+                </button>
+              </div>
+
+              {repeat && (
+                <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {(['weekly', 'monthly', 'yearly'] as const).map((f) => {
+                      const active = repeatFreq === f;
+                      return (
+                        <button
+                          key={f}
+                          onClick={() => setRepeatFreq(f)}
+                          className="font-display"
+                          style={{
+                            flex: 1,
+                            padding: '8px 0',
+                            borderRadius: 12,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            textTransform: 'capitalize',
+                            border: active ? `2px solid ${accentColor}` : '2px solid var(--m-border)',
+                            background: active ? accentColor : 'var(--card)',
+                            color: active ? '#fff' : 'var(--m-slate)',
+                            transition: 'all 0.12s',
+                          }}
+                        >
+                          {f}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 12, color: 'var(--m-slate)' }}>Occurrences</span>
+                    <button
+                      onClick={() => setRepeatCount((c) => Math.max(REPEAT_COUNT_MIN, c - 1))}
+                      style={{ width: 28, height: 28, borderRadius: 8, border: '2px solid var(--m-border)', color: 'var(--m-slate)', fontWeight: 800 }}
+                    >
+                      −
+                    </button>
+                    <span className="font-display" style={{ fontSize: 14, fontWeight: 800, color: 'var(--m-ink)', minWidth: 20, textAlign: 'center' }}>
+                      {repeatCount}
+                    </span>
+                    <button
+                      onClick={() => setRepeatCount((c) => Math.min(REPEAT_COUNT_MAX, c + 1))}
+                      style={{ width: 28, height: 28, borderRadius: 8, border: '2px solid var(--m-border)', color: 'var(--m-slate)', fontWeight: 800 }}
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <p style={{ fontSize: 11, color: 'var(--m-slate)' }}>
+                    Creates {repeatCount} entries: {fmtShortDate(date)} → {fmtShortDate(stepDate(date, repeatFreq, repeatCount - 1))}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
