@@ -65,6 +65,31 @@ export default function RoomScreen() {
     purchaseItem, equipItem, unequipSlot,
   } = useApp();
 
+  // Lock page scroll while Room is mounted (i.e. Home tab is active) — plain
+  // overflow:hidden on <main> stops that element scrolling, but mobile
+  // Safari's own rubber-band drag can still scroll the whole document if it
+  // thinks anything sits below the fold (its address-bar resize is the usual
+  // trigger). Pinning the body itself is the standard fix for that class of
+  // bug. Restores the exact scroll position on unmount (leaving Home).
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    const { body, documentElement: html } = document;
+    const prev = { bodyPosition: body.style.position, bodyTop: body.style.top, bodyWidth: body.style.width, bodyOverflow: body.style.overflow, htmlOverflow: html.style.overflow };
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+    html.style.overflow = 'hidden';
+    return () => {
+      body.style.position = prev.bodyPosition;
+      body.style.top = prev.bodyTop;
+      body.style.width = prev.bodyWidth;
+      body.style.overflow = prev.bodyOverflow;
+      html.style.overflow = prev.htmlOverflow;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   // ── Budget overlay + trail notes (ported from the old Home dashboard) ──
   const [showAddCard, setShowAddCard] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
