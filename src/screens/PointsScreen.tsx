@@ -554,6 +554,12 @@ export default function PointsScreen() {
             background: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #0D9488 100%)',
             padding: '52px 20px 52px',
             position: 'relative',
+            // Explicit z-index (not just position:relative) is what actually
+            // gives this its own stacking context — without it, the wave's
+            // position:absolute below escapes straight to the root stacking
+            // context and paints over the card below regardless of DOM
+            // order, instead of staying tucked behind it inside the header.
+            zIndex: 0,
             overflow: 'hidden',
           }}
         >
@@ -578,7 +584,7 @@ export default function PointsScreen() {
           </div>
         </div>
 
-        <div className="px-4 space-y-5 -mt-6">
+        <div className="px-4 space-y-5 -mt-6" style={{ position: 'relative', zIndex: 1 }}>
           {/* Total miles card */}
           <div className="card-chunky overflow-hidden">
             {/* Card top — green band */}
