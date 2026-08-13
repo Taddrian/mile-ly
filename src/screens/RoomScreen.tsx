@@ -29,12 +29,6 @@ const HangerIcon = () => (
 const PawIcon = () => (
   <svg viewBox="0 0 24 24" width="13" height="13" fill="#fff"><ellipse cx="12" cy="16" rx="6" ry="4.5" /><circle cx="5" cy="9" r="2.6" /><circle cx="10.5" cy="6" r="2.6" /><circle cx="15.5" cy="6" r="2.6" /><circle cx="19" cy="9" r="2.6" /></svg>
 );
-const ChartIcon = () => (
-  <svg viewBox="0 0 24 24" width="13" height="13" fill="#fff"><rect x="4" y="13" width="4" height="8" rx="1" /><rect x="10" y="8" width="4" height="13" rx="1" /><rect x="16" y="3" width="4" height="18" rx="1" /></svg>
-);
-const CloseIcon = () => (
-  <svg viewBox="0 0 24 24" width="8" height="8" fill="none" stroke="#cfd0e6" strokeWidth={3}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-);
 const CheckIcon = () => (
   <svg viewBox="0 0 24 24" width="7" height="7" fill="none" stroke="#2e2145" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round"><polyline points="5,13 10,18 19,7" /></svg>
 );
@@ -97,7 +91,6 @@ export default function RoomScreen() {
   const [remark, setRemark] = useState('');
   const [editingRemark, setEditingRemark] = useState(false);
   const [remarkInput, setRemarkInput] = useState('');
-  const [showBudget, setShowBudget] = useState(false);
 
   // ── Room shop state ──
   const [openShop, setOpenShop] = useState<ShopKind>(null);
@@ -219,7 +212,6 @@ export default function RoomScreen() {
     { key: 'decor' as const, label: 'Decor', Icon: CouchIcon, onClick: () => openShopSheet('decor') },
     { key: 'wardrobe' as const, label: 'Wardrobe', Icon: HangerIcon, onClick: () => openShopSheet('wardrobe') },
     { key: 'pet' as const, label: 'Pet', Icon: PawIcon, onClick: () => setOpenShop('pet') },
-    { key: 'budget' as const, label: 'Budget', Icon: ChartIcon, onClick: () => setShowBudget((v) => !v) },
   ];
 
   return (
@@ -350,64 +342,56 @@ export default function RoomScreen() {
           </div>
         )}
 
-        {/* ── Budget card — now just the cycle headline (the stats/orbs
-            above are always on the floor, not tucked behind this anymore). ── */}
-        {showBudget && (
-          <div style={{ position: 'absolute', top: 74, left: 14, width: 238, maxWidth: 'calc(100% - 82px)', zIndex: 4, background: 'linear-gradient(160deg, #2e2145, #1c1430)', border: '1px solid rgba(214,168,255,0.22)', borderRadius: 20, padding: '14px 16px 16px', boxShadow: '0 8px 22px rgba(20,10,35,0.4)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
-              <span className="font-display" style={{ fontSize: 12, fontWeight: 800, color: '#f0eef7' }}>Budget</span>
-              <button onClick={() => setShowBudget(false)} aria-label="Close" style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CloseIcon />
-              </button>
-            </div>
-
-            {!hasAnyData ? (
-              <p style={{ fontSize: 11, fontWeight: 600, color: '#c9b8f2', lineHeight: 1.5, padding: '4px 0 2px' }}>
-                Nothing tracked yet this cycle — tap the + button to add your first entry.
-              </p>
-            ) : (
-              <div style={{ background: 'rgba(255,255,255,0.045)', borderRadius: 14, padding: '10px 12px 11px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span className="font-display" style={{ fontSize: 8.5, fontWeight: 800, color: '#e8c9ff', letterSpacing: '0.06em', background: 'rgba(157,140,240,0.22)', borderRadius: 999, padding: '2px 7px' }}>
-                    {week ? `WEEK ${week} OF 4` : 'THIS CYCLE'}
-                  </span>
-                  <button
-                    onClick={() => { setRemarkInput(remark); setEditingRemark((v) => !v); }}
-                    aria-label="Trail notes"
-                    style={{ position: 'relative', width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <EditGlyph color="#cfd0e6" />
-                    {remark && <span style={{ position: 'absolute', top: -1, right: -1, width: 6, height: 6, borderRadius: '50%', background: '#f4c86e', border: '1px solid #1c1430' }} />}
-                  </button>
-                </div>
-                <div style={{ marginTop: 6, color: '#cfc3e6' }}>
-                  <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
-                </div>
-                <div className="font-display" style={{ fontSize: 21, fontWeight: 800, color: '#f6f5fb', marginTop: 5, letterSpacing: '-0.01em' }}>
-                  {fmtCurrency(animatedSaved, currency)} <span style={{ fontSize: 10.5, fontWeight: 700, color: '#c9b8f2' }}>left to spend</span>
-                </div>
-
-                {editingRemark && (
-                  <div style={{ marginTop: 10 }}>
-                    <textarea
-                      value={remarkInput}
-                      onChange={(e) => setRemarkInput(e.target.value)}
-                      autoFocus
-                      placeholder="e.g. Splurged on flights ✈️, birthday dinner 🎂..."
-                      rows={3}
-                      className="w-full outline-none resize-none font-display"
-                      style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.5, color: '#f0eef7', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '8px 10px' }}
-                    />
-                    <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                      <button onClick={saveRemark} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#1c1430', background: '#8fe0cf' }}>Save</button>
-                      <button onClick={() => setEditingRemark(false)} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#cfc3e6', border: '1px solid rgba(255,255,255,0.18)' }}>Cancel</button>
-                    </div>
-                  </div>
-                )}
+        {/* ── Cycle headline — permanently visible, no tap needed (the
+            "Budget" dock button is gone entirely now that nothing's hidden
+            behind it; the stats/orbs live on the floor below). ── */}
+        <div style={{ position: 'absolute', top: 74, left: 14, width: 238, maxWidth: 'calc(100% - 82px)', zIndex: 4, background: 'linear-gradient(160deg, #2e2145, #1c1430)', border: '1px solid rgba(214,168,255,0.22)', borderRadius: 20, padding: '14px 16px 16px', boxShadow: '0 8px 22px rgba(20,10,35,0.4)' }}>
+          {!hasAnyData ? (
+            <p style={{ fontSize: 11, fontWeight: 600, color: '#c9b8f2', lineHeight: 1.5 }}>
+              Nothing tracked yet this cycle — tap the + button to add your first entry.
+            </p>
+          ) : (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="font-display" style={{ fontSize: 8.5, fontWeight: 800, color: '#e8c9ff', letterSpacing: '0.06em', background: 'rgba(157,140,240,0.22)', borderRadius: 999, padding: '2px 7px' }}>
+                  {week ? `WEEK ${week} OF 4` : 'THIS CYCLE'}
+                </span>
+                <button
+                  onClick={() => { setRemarkInput(remark); setEditingRemark((v) => !v); }}
+                  aria-label="Trail notes"
+                  style={{ position: 'relative', width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <EditGlyph color="#cfd0e6" />
+                  {remark && <span style={{ position: 'absolute', top: -1, right: -1, width: 6, height: 6, borderRadius: '50%', background: '#f4c86e', border: '1px solid #1c1430' }} />}
+                </button>
               </div>
-            )}
-          </div>
-        )}
+              <div style={{ marginTop: 6, color: '#cfc3e6' }}>
+                <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
+              </div>
+              <div className="font-display" style={{ fontSize: 21, fontWeight: 800, color: '#f6f5fb', marginTop: 5, letterSpacing: '-0.01em' }}>
+                {fmtCurrency(animatedSaved, currency)} <span style={{ fontSize: 10.5, fontWeight: 700, color: '#c9b8f2' }}>left to spend</span>
+              </div>
+
+              {editingRemark && (
+                <div style={{ marginTop: 10 }}>
+                  <textarea
+                    value={remarkInput}
+                    onChange={(e) => setRemarkInput(e.target.value)}
+                    autoFocus
+                    placeholder="e.g. Splurged on flights ✈️, birthday dinner 🎂..."
+                    rows={3}
+                    className="w-full outline-none resize-none font-display"
+                    style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.5, color: '#f0eef7', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '8px 10px' }}
+                  />
+                  <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                    <button onClick={saveRemark} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#1c1430', background: '#8fe0cf' }}>Save</button>
+                    <button onClick={() => setEditingRemark(false)} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#cfc3e6', border: '1px solid rgba(255,255,255,0.18)' }}>Cancel</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Decor / Wardrobe shop sheet */}
