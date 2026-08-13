@@ -291,12 +291,69 @@ export default function RoomScreen() {
           ))}
         </div>
 
-        {/* ── Budget overlay card — everything the old Home dashboard showed
-            (income/saved/%/days-left, the cycle headline, category spend,
-            cards) lives here now, consolidated into one panel with the node
-            shelf scrolling inside it rather than floating separately. ── */}
+        {/* ── Floor stats — permanently visible (not tap-to-open), sitting
+            near the front of the floor instead of tucked inside a card, per
+            feedback. Bottom-anchored rather than top-percentage so it stays
+            clear of the vertical dock (which lives in the upper-middle-right)
+            regardless of device height, and reads directly against the room
+            art the same way the original Claude Design concept intended
+            before the two got merged into one card. ── */}
+        {hasAnyData && (
+          <div style={{ position: 'absolute', left: 14, right: 14, bottom: 100, zIndex: 3, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {budgetPills.map((p, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'var(--room-hud-bg)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid var(--room-hud-border)', borderRadius: 999, padding: '4px 9px 4px 4px', boxShadow: 'var(--room-hud-shadow)' }}>
+                  <span style={{ width: 16, height: 16, borderRadius: 6, background: p.color, flexShrink: 0 }} />
+                  <span className="font-display" style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>{p.value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 2 }}>
+              {shelfNodes.map((node) => (
+                <button
+                  key={node.key}
+                  onClick={node.key === '__cards' ? () => setShowAllCards(true) : undefined}
+                  style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative', paddingTop: node.isHere ? 12 : 0 }}
+                >
+                  <div style={{ position: 'relative', width: 46, height: 46 }}>
+                    <div className="orb" style={{ '--c': node.color, width: 46, height: 46 } as React.CSSProperties} />
+                    {node.fraction !== undefined && (
+                      <div style={{
+                        position: 'absolute', inset: -5, borderRadius: '50%',
+                        background: `conic-gradient(${node.color} calc(1% * ${Math.round(node.fraction * 100)}), rgba(255,255,255,0.14) 0)`,
+                        WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
+                        mask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
+                      }} />
+                    )}
+                    {node.showCheck && (
+                      <span style={{ position: 'absolute', top: -2, right: -2, width: 15, height: 15, borderRadius: '50%', background: '#f4c86e', border: '2px solid #241a3a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon />
+                      </span>
+                    )}
+                    {node.isHere && (
+                      <>
+                        <span className="font-display" style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 7.5, fontWeight: 800, color: '#2e2145', letterSpacing: '0.03em', background: '#9d8cf0', borderRadius: 999, padding: '2px 6px', zIndex: 2 }}>
+                          YOU ARE HERE
+                        </span>
+                        <div style={{ position: 'absolute', left: -14, top: 4, animation: 'room-float-bob 2.4s ease-in-out infinite', transform: 'scale(0.42)', transformOrigin: 'top left' }}>
+                          <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <span className="font-display" style={{ fontSize: 10, fontWeight: 800, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.35)', maxWidth: 68, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{node.label}</span>
+                  <span className="font-display" style={{ fontSize: 9, fontWeight: 700, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.35)' }}>{fmtCurrency(node.amount, currency)}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Budget card — now just the cycle headline (the stats/orbs
+            above are always on the floor, not tucked behind this anymore). ── */}
         {showBudget && (
-          <div style={{ position: 'absolute', top: 74, left: 14, width: 238, maxWidth: 'calc(100% - 82px)', maxHeight: 'calc(100dvh - 170px)', overflowY: 'auto', zIndex: 4, background: 'linear-gradient(160deg, #2e2145, #1c1430)', border: '1px solid rgba(214,168,255,0.22)', borderRadius: 20, padding: '14px 16px 16px', boxShadow: '0 8px 22px rgba(20,10,35,0.4)' }}>
+          <div style={{ position: 'absolute', top: 74, left: 14, width: 238, maxWidth: 'calc(100% - 82px)', zIndex: 4, background: 'linear-gradient(160deg, #2e2145, #1c1430)', border: '1px solid rgba(214,168,255,0.22)', borderRadius: 20, padding: '14px 16px 16px', boxShadow: '0 8px 22px rgba(20,10,35,0.4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
               <span className="font-display" style={{ fontSize: 12, fontWeight: 800, color: '#f0eef7' }}>Budget</span>
               <button onClick={() => setShowBudget(false)} aria-label="Close" style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -309,99 +366,45 @@ export default function RoomScreen() {
                 Nothing tracked yet this cycle — tap the + button to add your first entry.
               </p>
             ) : (
-              <>
-                <div style={{ display: 'flex', gap: 6, marginBottom: 11, flexWrap: 'wrap' }}>
-                  {budgetPills.map((p, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.07)', borderRadius: 999, padding: '4px 8px 4px 4px' }}>
-                      <span style={{ width: 16, height: 16, borderRadius: 6, background: p.color, flexShrink: 0 }} />
-                      <span className="font-display" style={{ fontSize: 9.5, fontWeight: 800, color: '#f0eef7' }}>{p.value}</span>
+              <div style={{ background: 'rgba(255,255,255,0.045)', borderRadius: 14, padding: '10px 12px 11px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span className="font-display" style={{ fontSize: 8.5, fontWeight: 800, color: '#e8c9ff', letterSpacing: '0.06em', background: 'rgba(157,140,240,0.22)', borderRadius: 999, padding: '2px 7px' }}>
+                    {week ? `WEEK ${week} OF 4` : 'THIS CYCLE'}
+                  </span>
+                  <button
+                    onClick={() => { setRemarkInput(remark); setEditingRemark((v) => !v); }}
+                    aria-label="Trail notes"
+                    style={{ position: 'relative', width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <EditGlyph color="#cfd0e6" />
+                    {remark && <span style={{ position: 'absolute', top: -1, right: -1, width: 6, height: 6, borderRadius: '50%', background: '#f4c86e', border: '1px solid #1c1430' }} />}
+                  </button>
+                </div>
+                <div style={{ marginTop: 6, color: '#cfc3e6' }}>
+                  <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
+                </div>
+                <div className="font-display" style={{ fontSize: 21, fontWeight: 800, color: '#f6f5fb', marginTop: 5, letterSpacing: '-0.01em' }}>
+                  {fmtCurrency(animatedSaved, currency)} <span style={{ fontSize: 10.5, fontWeight: 700, color: '#c9b8f2' }}>left to spend</span>
+                </div>
+
+                {editingRemark && (
+                  <div style={{ marginTop: 10 }}>
+                    <textarea
+                      value={remarkInput}
+                      onChange={(e) => setRemarkInput(e.target.value)}
+                      autoFocus
+                      placeholder="e.g. Splurged on flights ✈️, birthday dinner 🎂..."
+                      rows={3}
+                      className="w-full outline-none resize-none font-display"
+                      style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.5, color: '#f0eef7', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '8px 10px' }}
+                    />
+                    <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                      <button onClick={saveRemark} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#1c1430', background: '#8fe0cf' }}>Save</button>
+                      <button onClick={() => setEditingRemark(false)} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#cfc3e6', border: '1px solid rgba(255,255,255,0.18)' }}>Cancel</button>
                     </div>
-                  ))}
-                </div>
-
-                <div style={{ background: 'rgba(255,255,255,0.045)', borderRadius: 14, padding: '10px 12px 11px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span className="font-display" style={{ fontSize: 8.5, fontWeight: 800, color: '#e8c9ff', letterSpacing: '0.06em', background: 'rgba(157,140,240,0.22)', borderRadius: 999, padding: '2px 7px' }}>
-                      {week ? `WEEK ${week} OF 4` : 'THIS CYCLE'}
-                    </span>
-                    <button
-                      onClick={() => { setRemarkInput(remark); setEditingRemark((v) => !v); }}
-                      aria-label="Trail notes"
-                      style={{ position: 'relative', width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                      <EditGlyph color="#cfd0e6" />
-                      {remark && <span style={{ position: 'absolute', top: -1, right: -1, width: 6, height: 6, borderRadius: '50%', background: '#f4c86e', border: '1px solid #1c1430' }} />}
-                    </button>
                   </div>
-                  <div style={{ marginTop: 6, color: '#cfc3e6' }}>
-                    <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
-                  </div>
-                  <div className="font-display" style={{ fontSize: 21, fontWeight: 800, color: '#f6f5fb', marginTop: 5, letterSpacing: '-0.01em' }}>
-                    {fmtCurrency(animatedSaved, currency)} <span style={{ fontSize: 10.5, fontWeight: 700, color: '#c9b8f2' }}>left to spend</span>
-                  </div>
-
-                  {editingRemark && (
-                    <div style={{ marginTop: 10 }}>
-                      <textarea
-                        value={remarkInput}
-                        onChange={(e) => setRemarkInput(e.target.value)}
-                        autoFocus
-                        placeholder="e.g. Splurged on flights ✈️, birthday dinner 🎂..."
-                        rows={3}
-                        className="w-full outline-none resize-none font-display"
-                        style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.5, color: '#f0eef7', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '8px 10px' }}
-                      />
-                      <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                        <button onClick={saveRemark} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#1c1430', background: '#8fe0cf' }}>Save</button>
-                        <button onClick={() => setEditingRemark(false)} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#cfc3e6', border: '1px solid rgba(255,255,255,0.18)' }}>Cancel</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Node shelf — scrolls horizontally so it works for any
-                    number of categories, folded inside the card (not a
-                    separately floating shelf) to keep one visual material
-                    instead of two clashing ones. */}
-                <div style={{ display: 'flex', gap: 14, marginTop: 12, overflowX: 'auto', paddingBottom: 2 }}>
-                  {shelfNodes.map((node) => (
-                    <button
-                      key={node.key}
-                      onClick={node.key === '__cards' ? () => setShowAllCards(true) : undefined}
-                      style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative', paddingTop: node.isHere ? 12 : 0 }}
-                    >
-                      <div style={{ position: 'relative', width: 46, height: 46 }}>
-                        <div className="orb" style={{ '--c': node.color, width: 46, height: 46 } as React.CSSProperties} />
-                        {node.fraction !== undefined && (
-                          <div style={{
-                            position: 'absolute', inset: -5, borderRadius: '50%',
-                            background: `conic-gradient(${node.color} calc(1% * ${Math.round(node.fraction * 100)}), rgba(255,255,255,0.14) 0)`,
-                            WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
-                            mask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
-                          }} />
-                        )}
-                        {node.showCheck && (
-                          <span style={{ position: 'absolute', top: -2, right: -2, width: 15, height: 15, borderRadius: '50%', background: '#f4c86e', border: '2px solid #241a3a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <CheckIcon />
-                          </span>
-                        )}
-                        {node.isHere && (
-                          <>
-                            <span className="font-display" style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 7.5, fontWeight: 800, color: '#2e2145', letterSpacing: '0.03em', background: '#9d8cf0', borderRadius: 999, padding: '2px 6px', zIndex: 2 }}>
-                              YOU ARE HERE
-                            </span>
-                            <div style={{ position: 'absolute', left: -14, top: 4, animation: 'room-float-bob 2.4s ease-in-out infinite', transform: 'scale(0.42)', transformOrigin: 'top left' }}>
-                              <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} />
-                            </div>
-                          </>
-                        )}
-                      </div>
-                      <span className="font-display" style={{ fontSize: 10, fontWeight: 800, color: '#f0eef7', maxWidth: 68, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{node.label}</span>
-                      <span className="font-display" style={{ fontSize: 9, fontWeight: 700, color: '#c9b8f2' }}>{fmtCurrency(node.amount, currency)}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
+                )}
+              </div>
             )}
           </div>
         )}
