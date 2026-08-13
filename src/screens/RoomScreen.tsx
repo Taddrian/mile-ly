@@ -345,31 +345,31 @@ export default function RoomScreen() {
         {/* ── Cycle headline — permanently visible, no tap needed (the
             "Budget" dock button is gone entirely now that nothing's hidden
             behind it; the stats/orbs live on the floor below). ── */}
-        <div style={{ position: 'absolute', top: 74, left: 14, width: 238, maxWidth: 'calc(100% - 82px)', zIndex: 4, background: 'linear-gradient(160deg, #2e2145, #1c1430)', border: '1px solid rgba(214,168,255,0.22)', borderRadius: 20, padding: '14px 16px 16px', boxShadow: '0 8px 22px rgba(20,10,35,0.4)' }}>
+        <div style={{ position: 'absolute', top: 74, left: 14, width: 238, maxWidth: 'calc(100% - 82px)', zIndex: 4, background: 'linear-gradient(160deg, #fdfbf5, #f3ecdd)', border: '1px solid rgba(140,110,200,0.18)', borderRadius: 20, padding: '14px 16px 16px', boxShadow: '0 8px 22px rgba(70,50,110,0.16)' }}>
           {!hasAnyData ? (
-            <p style={{ fontSize: 11, fontWeight: 600, color: '#c9b8f2', lineHeight: 1.5 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: '#6b5a94', lineHeight: 1.5 }}>
               Nothing tracked yet this cycle — tap the + button to add your first entry.
             </p>
           ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span className="font-display" style={{ fontSize: 8.5, fontWeight: 800, color: '#e8c9ff', letterSpacing: '0.06em', background: 'rgba(157,140,240,0.22)', borderRadius: 999, padding: '2px 7px' }}>
+                <span className="font-display" style={{ fontSize: 8.5, fontWeight: 800, color: '#fff', letterSpacing: '0.06em', background: '#a48ce8', borderRadius: 999, padding: '2px 7px' }}>
                   {week ? `WEEK ${week} OF 4` : 'THIS CYCLE'}
                 </span>
                 <button
                   onClick={() => { setRemarkInput(remark); setEditingRemark((v) => !v); }}
                   aria-label="Trail notes"
-                  style={{ position: 'relative', width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ position: 'relative', width: 18, height: 18, borderRadius: '50%', background: 'rgba(60,40,90,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <EditGlyph color="#cfd0e6" />
-                  {remark && <span style={{ position: 'absolute', top: -1, right: -1, width: 6, height: 6, borderRadius: '50%', background: '#f4c86e', border: '1px solid #1c1430' }} />}
+                  <EditGlyph color="#6b5a94" />
+                  {remark && <span style={{ position: 'absolute', top: -1, right: -1, width: 6, height: 6, borderRadius: '50%', background: '#f4c86e', border: '1px solid #fdfbf5' }} />}
                 </button>
               </div>
-              <div style={{ marginTop: 6, color: '#cfc3e6' }}>
-                <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} />
+              <div style={{ marginTop: 6, color: '#2b2145' }}>
+                <MonthPicker value={selectedMonth} onChange={setSelectedMonth} cycleStartDay={cycleStartDay} buttonBg="rgba(60,40,90,0.07)" />
               </div>
-              <div className="font-display" style={{ fontSize: 21, fontWeight: 800, color: '#f6f5fb', marginTop: 5, letterSpacing: '-0.01em' }}>
-                {fmtCurrency(animatedSaved, currency)} <span style={{ fontSize: 10.5, fontWeight: 700, color: '#c9b8f2' }}>left to spend</span>
+              <div className="font-display" style={{ fontSize: 21, fontWeight: 800, color: '#241c3d', marginTop: 5, letterSpacing: '-0.01em' }}>
+                {fmtCurrency(animatedSaved, currency)} <span style={{ fontSize: 10.5, fontWeight: 700, color: '#7c5fc7' }}>left to spend</span>
               </div>
 
               {editingRemark && (
@@ -381,11 +381,11 @@ export default function RoomScreen() {
                     placeholder="e.g. Splurged on flights ✈️, birthday dinner 🎂..."
                     rows={3}
                     className="w-full outline-none resize-none font-display"
-                    style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.5, color: '#f0eef7', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '8px 10px' }}
+                    style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.5, color: '#2b2145', background: 'rgba(60,40,90,0.04)', border: '1px solid rgba(60,40,90,0.14)', borderRadius: 10, padding: '8px 10px' }}
                   />
                   <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
                     <button onClick={saveRemark} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#1c1430', background: '#8fe0cf' }}>Save</button>
-                    <button onClick={() => setEditingRemark(false)} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#cfc3e6', border: '1px solid rgba(255,255,255,0.18)' }}>Cancel</button>
+                    <button onClick={() => setEditingRemark(false)} className="font-display" style={{ padding: '5px 12px', borderRadius: 8, fontSize: 10.5, fontWeight: 700, color: '#6b5a94', border: '1px solid rgba(60,40,90,0.18)' }}>Cancel</button>
                   </div>
                 </div>
               )}
