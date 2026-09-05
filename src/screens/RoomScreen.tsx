@@ -324,14 +324,9 @@ export default function RoomScreen() {
                       </span>
                     )}
                     {node.isHere && (
-                      <>
-                        <span className="font-display" style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 7.5, fontWeight: 800, color: '#2e2145', letterSpacing: '0.03em', background: '#9d8cf0', borderRadius: 999, padding: '2px 6px', zIndex: 2 }}>
-                          YOU ARE HERE
-                        </span>
-                        <div style={{ position: 'absolute', left: -14, top: 4, animation: 'room-float-bob 2.4s ease-in-out infinite', transform: 'scale(0.42)', transformOrigin: 'top left' }}>
-                          <MiloFairy colorOverrides={equippedOutfit?.colorOverrides} />
-                        </div>
-                      </>
+                      <span className="font-display" style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 7.5, fontWeight: 800, color: '#2e2145', letterSpacing: '0.03em', background: '#9d8cf0', borderRadius: 999, padding: '2px 6px', zIndex: 2 }}>
+                        YOU ARE HERE
+                      </span>
                     )}
                   </div>
                   <span className="font-display" style={{ fontSize: 10, fontWeight: 800, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.35)', maxWidth: 68, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{node.label}</span>
