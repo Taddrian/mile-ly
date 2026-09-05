@@ -132,11 +132,11 @@ export default function RoomScreen() {
     entries.forEach((e) => {
       const cat = categories.find((c) => c.id === e.categoryId);
       if (!cat || cat.type !== 'expense') return;
-      if (e.cardId) {
-        if (!map['__card_total']) map['__card_total'] = { name: 'Credit Card', amount: 0 };
-        map['__card_total'].amount += e.amount;
-        return;
-      }
+      // Card-tied entries are skipped here, not bucketed into their own
+      // "Credit Card" pseudo-category — the Cards orb (cardsTotal, from
+      // cards[].currentSpent) already represents that spend on its own;
+      // showing both was just the same number in two bubbles.
+      if (e.cardId) return;
       if (!map[cat.id]) map[cat.id] = { name: cat.name, amount: 0 };
       map[cat.id].amount += e.amount;
     });
