@@ -18,7 +18,18 @@ export default function LoginPage() {
     setMessage('');
 
     if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password });
+      // Without this, the confirmation email links back to whatever
+      // "Site URL" is configured in the Supabase project (still the
+      // localhost dev default) regardless of where someone actually
+      // signed up — breaking the link for every real user. Pointing it at
+      // wherever this page is actually running fixes that for both dev
+      // and production, as long as that origin is also added to the
+      // project's allowed Redirect URLs in the Supabase dashboard.
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/login` },
+      });
       if (error) setError(error.message);
       else setMessage('Check your email to confirm your account.');
     } else {
